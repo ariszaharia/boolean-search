@@ -1,0 +1,2 @@
+That's nonsense!!  You can use ISA cards in an EISA-system without problem
+and at the same speed as in an ISA system!!

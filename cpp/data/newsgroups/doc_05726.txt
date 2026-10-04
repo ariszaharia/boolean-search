@@ -1,0 +1,2 @@
+I wouldn't think so.  Asking people to trust a secret algorithm seems
+unsound to me.

@@ -1,0 +1,2 @@
+Forgot to mention that the above mentioned Quantum is a SCSI
+drive.
