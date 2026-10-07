@@ -5,10 +5,7 @@
 #include <filesystem>
 #include <sstream>
 
-void InvertedIndex::add_document(int doc_id, const std::string& text){
-    // intersect() relies on every term's postings vector staying sorted by doc_id.
-    // Postings are appended in insertion order, so that only holds if callers add
-    // documents with strictly increasing doc_id. Enforce that contract here.
+void InvertedIndex::add_document(int doc_id, const std::string& text) {
     if (has_documents && doc_id <= last_doc_id) {
         throw std::invalid_argument("InvertedIndex::add_document: doc_id must be strictly increasing (got " + std::to_string(doc_id) + " after " + std::to_string(last_doc_id) + ")");
     }
@@ -19,20 +16,20 @@ void InvertedIndex::add_document(int doc_id, const std::string& text){
 
     std::vector<std::string> tokens = tokenizer.tokenize(text);
 
-    std::unordered_map<std::string, int> word_counts;
+    std::unordered_map<std::string, std::vector<int>> word_positions;
 
-    for(const std::string& token : tokens){
-        word_counts[token]++;
+    for (int pos = 0; pos < tokens.size(); ++pos) {
+        word_positions[tokens[pos]].push_back(pos);
     }
 
-    for(const auto& pair : word_counts){
+    for (const auto& pair : word_positions) {
         const std::string& word = pair.first;
-        int freq = pair.second;
+        const std::vector<int>& positions = pair.second;
+        
+        int freq = positions.size();
 
-        index[word].push_back({doc_id, freq});
+        index[word].push_back({doc_id, freq, positions});
     }
-
-    //for bm25 ranking
 
     doc_lengths[doc_id] = tokens.size();
     total_length += tokens.size();
@@ -152,10 +149,10 @@ int InvertedIndex::get_term_frequency(const std::string& term, int doc_id) const
 
 
 namespace {
-    constexpr uint32_t INDEX_FORMAT_VERSION = 2;
+    constexpr uint32_t INDEX_FORMAT_VERSION = 3;
 }
 
-void InvertedIndex::save(const std::string& path) const{
+void InvertedIndex::save(const std::string& path) const {
     std::ofstream out(path, std::ios::binary);
     if(!out.is_open()){
         throw std::runtime_error("File open");
@@ -195,6 +192,12 @@ void InvertedIndex::save(const std::string& path) const{
             const Posting& posting = postings[i];
             out.write(reinterpret_cast<const char*>(&posting.doc_id), sizeof(posting.doc_id));
             out.write(reinterpret_cast<const char*>(&posting.frequency), sizeof(posting.frequency));
+            
+            size_t pos_size = posting.positions.size();
+            out.write(reinterpret_cast<const char*>(&pos_size), sizeof(pos_size));
+            if (pos_size > 0) {
+                out.write(reinterpret_cast<const char*>(posting.positions.data()), pos_size * sizeof(int));
+            }
         }
     }
 
@@ -262,6 +265,14 @@ void InvertedIndex::load(const std::string& path) {
             Posting p;
             in.read(reinterpret_cast<char*>(&p.doc_id), sizeof(p.doc_id));
             in.read(reinterpret_cast<char*>(&p.frequency), sizeof(p.frequency));
+            
+            size_t pos_size;
+            in.read(reinterpret_cast<char*>(&pos_size), sizeof(pos_size));
+            p.positions.resize(pos_size);
+            if (pos_size > 0) {
+                in.read(reinterpret_cast<char*>(p.positions.data()), pos_size * sizeof(int));
+            }
+
             postings.push_back(p);
         }
 
