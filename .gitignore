@@ -1,0 +1,48 @@
+# Compiled binaries and build output
+*.exe
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.out
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Serialized index files (rebuildable from the corpus)
+*.idx
+*.bin
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Pyserini / Lucene indexes and caches
+indexes/
+*.cache
+.cache/
+
+# Experiment outputs: keep configs and summaries, ignore bulky raw runs
+results/raw/
+*.run
+*.log
+
+# Secrets (LLM API keys)
+.env
+*.key
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
