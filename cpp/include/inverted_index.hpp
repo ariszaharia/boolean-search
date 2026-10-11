@@ -7,6 +7,17 @@
 #include "types.hpp"
 
 
+enum class QueryOperator { AND, OR, TERM, PHRASE };
+
+struct QueryNode {
+    QueryOperator op;
+    std::string term; 
+    std::vector<QueryNode> children; 
+
+    QueryNode(QueryOperator o) : op(o) {}
+    QueryNode(QueryOperator o, const std::string& t) : op(o), term(t) {}
+};
+
 class InvertedIndex {
 private:
     std::unordered_map<std::string, std::vector<Posting>> index;
@@ -14,7 +25,6 @@ private:
     
     Tokenizer tokenizer; 
 
-    std::vector<int> intersect(const std::vector<int>& doc_ids, const std::vector<Posting>& postings) const;
 
     std::unordered_map<int, int> doc_lengths;
     double total_length = 0.0; //sum of all documents length
@@ -22,6 +32,14 @@ private:
 
     int last_doc_id = 0;
     bool has_documents = false; 
+
+    QueryNode parse_query(const std::string& query, size_t& pos) const;
+    std::vector<int> evaluate_ast(const QueryNode& node) const;
+
+
+    std::vector<int> unite(const std::vector<int>& a, const std::vector<int>& b) const;
+    std::vector<int> intersect(const std::vector<int>& a, const std::vector<int>& b) const;
+    
 
 public:
     void add_document(int doc_id, const std::string& text);
@@ -38,5 +56,7 @@ public:
 
     void save(const std::string& path) const;
     void load(const std::string& path);
+
+
 
 };

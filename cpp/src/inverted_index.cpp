@@ -4,6 +4,7 @@
 #include <fstream>
 #include <filesystem>
 #include <sstream>
+#include <cctype>
 
 void InvertedIndex::add_document(int doc_id, const std::string& text) {
     if (has_documents && doc_id <= last_doc_id) {
@@ -36,61 +37,144 @@ void InvertedIndex::add_document(int doc_id, const std::string& text) {
     total_docs++;
 }
 
-std::vector<int> InvertedIndex::intersect(const std::vector<int>& doc_ids, const std::vector<Posting>& postings) const {
+
+// Set Union (OR) - Keeps all unique document IDs from both lists
+std::vector<int> InvertedIndex::unite(const std::vector<int>& a, const std::vector<int>& b) const {
+    std::vector<int> result;
+    result.reserve(a.size() + b.size());
+    size_t i = 0, j = 0;
+
+    while (i < a.size() && j < b.size()) {
+        if (a[i] == b[j]) {
+            result.push_back(a[i]);
+            i++; j++;
+        } else if (a[i] < b[j]) {
+            result.push_back(a[i++]);
+        } else {
+            result.push_back(b[j++]);
+        }
+    }
+    while (i < a.size()) result.push_back(a[i++]);
+    while (j < b.size()) result.push_back(b[j++]);
+
+    return result;
+}
+
+std::vector<int> InvertedIndex::intersect(const std::vector<int>& a, const std::vector<int>& b) const {
     std::vector<int> result;
     size_t i = 0, j = 0;
 
-    while (i < doc_ids.size() && j < postings.size()) {
-        int a = doc_ids[i];
-        int b = postings[j].doc_id;
-
-        if (a == b) {
-            result.push_back(a);
-            i++;
-            j++;
-        } else if (a < b) {
+    while (i < a.size() && j < b.size()) {
+        if (a[i] == b[j]) {
+            result.push_back(a[i]);
+            i++; j++;
+        } else if (a[i] < b[j]) {
             i++;
         } else {
             j++;
         }
     }
-
     return result;
 }
 
-std::vector<int> InvertedIndex::search(const std::string& query) const {
-    std::vector<std::string> query_tokens = tokenizer.tokenize(query);
 
-    if(query_tokens.empty()){
-        return {};
-    }
 
-    auto it = index.find(query_tokens[0]);
-    if(it == index.end()){
-        return {};
-    }
 
-    std::vector<int> doc_ids;
-    doc_ids.reserve(it->second.size());
-    for(const Posting& p : it->second){
-        doc_ids.push_back(p.doc_id);
-    }
+QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos) const {
+    // Skip leading whitespace
+    while (pos < query.length() && std::isspace(query[pos])) pos++;
+    if (pos >= query.length()) return QueryNode(QueryOperator::TERM, "");
 
-    for(size_t t = 1 ; t < query_tokens.size() ; t++){
-        auto term_it = index.find(query_tokens[t]);
-        if(term_it == index.end()){
-            return {};
+    // Handle nested operators: (^ ...) or (+ ...)
+    if (query[pos] == '(') {
+        pos++; 
+        while (pos < query.length() && std::isspace(query[pos])) pos++;
+        
+        QueryOperator op = QueryOperator::AND;
+        if (query[pos] == '^') { op = QueryOperator::AND; pos++; }
+        else if (query[pos] == '+') { op = QueryOperator::OR; pos++; }
+        
+        QueryNode node(op);
+        
+        // Parse children until closing parenthesis
+        while (pos < query.length()) {
+            while (pos < query.length() && std::isspace(query[pos])) pos++;
+            if (pos < query.length() && query[pos] == ')') {
+                pos++; 
+                break;
+            }
+            node.children.push_back(parse_query(query, pos));
         }
-
-        doc_ids = intersect(doc_ids, term_it->second);
-
-        if(doc_ids.empty()){
-            return {};
-        }
+        return node;
+    } 
+    // Handle exact phrases: "goth rock"
+    else if (query[pos] == '"') {
+        pos++; 
+        size_t start = pos;
+        while (pos < query.length() && query[pos] != '"') pos++;
+        std::string phrase = query.substr(start, pos - start);
+        if (pos < query.length()) pos++; 
+        return QueryNode(QueryOperator::PHRASE, phrase);
+    } 
+    // Handle single terms: society
+    else {
+        size_t start = pos;
+        while (pos < query.length() && !std::isspace(query[pos]) && query[pos] != ')') pos++;
+        return QueryNode(QueryOperator::TERM, query.substr(start, pos - start));
     }
-
-    return doc_ids;
 }
+
+
+std::vector<int> InvertedIndex::evaluate_ast(const QueryNode& node) const {
+    if (node.op == QueryOperator::TERM) {
+        auto it = index.find(node.term);
+        if (it == index.end()) return {};
+        
+        std::vector<int> doc_ids;
+        doc_ids.reserve(it->second.size());
+        for (const Posting& p : it->second) {
+            doc_ids.push_back(p.doc_id);
+        }
+        return doc_ids;
+    } 
+    else if (node.op == QueryOperator::PHRASE) {
+        // Placeholder: Currently degrades phrases to a standard AND search.
+        // We will upgrade this to check token positions next.
+        std::vector<std::string> phrase_tokens = tokenizer.tokenize(node.term);
+        if (phrase_tokens.empty()) return {};
+        
+        QueryNode temp_and(QueryOperator::AND);
+        for (const auto& pt : phrase_tokens) {
+            temp_and.children.push_back(QueryNode(QueryOperator::TERM, pt));
+        }
+        return evaluate_ast(temp_and);
+    }
+    else if (node.op == QueryOperator::OR) {
+        if (node.children.empty()) return {};
+        std::vector<int> result = evaluate_ast(node.children[0]);
+        for (size_t i = 1; i < node.children.size(); i++) {
+            result = unite(result, evaluate_ast(node.children[i]));
+        }
+        return result;
+    }
+    else if (node.op == QueryOperator::AND) {
+        if (node.children.empty()) return {};
+        std::vector<int> result = evaluate_ast(node.children[0]);
+        for (size_t i = 1; i < node.children.size(); i++) {
+            if (result.empty()) break; // Early exit optimization
+            result = intersect(result, evaluate_ast(node.children[i]));
+        }
+        return result;
+    }
+    return {};
+}
+
+std::vector<int> InvertedIndex::search(const std::string& query) const {
+    size_t pos = 0;
+    QueryNode ast = parse_query(query, pos);
+    return evaluate_ast(ast);
+}
+
 
 const std::string& InvertedIndex::get_document(int doc_id) const {
     auto it = documents.find(doc_id);
@@ -295,3 +379,5 @@ void InvertedIndex::load(const std::string& path) {
         documents[doc_id] = std::move(text);
     }
 }
+
+
