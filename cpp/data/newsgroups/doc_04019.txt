@@ -1,2 +1,0 @@
-Other than getting a 32-bit clean ROM, what other features would a IIci
-ROM in a IIx provide, if any?

@@ -1,3 +1,0 @@
-Does anyone know the pin-outs for the 27C512 EPROM??  I have bought
-several of them, none of which has come with the pin-outs!  Any info would be
-appreciated....

@@ -1,4 +1,0 @@
-Excerpts from misc: 27-Apr-93 Re: X Toolkits Sivesh Pradhaan@rebels.b (423)
-
-
-You can use telnet:

@@ -1,2 +1,0 @@
-bosox-request@world.std.com
-to mail to the list: bosox@world.std.com

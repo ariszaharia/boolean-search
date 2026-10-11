@@ -1,6 +1,0 @@
-Where can I get documentation about the X-Server-Internals?
-BTW, I'm also interested in documentation about TIGA.
-
-Any hints welcome.
-
-Thanks, rainer.

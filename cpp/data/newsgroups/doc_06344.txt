@@ -1,2 +1,0 @@
-Yup.  We're using both and they work just fine.  Hopefully, someday WFWG
-will communicate over LWP TCPIP.  Right now we have to load NetBeui.

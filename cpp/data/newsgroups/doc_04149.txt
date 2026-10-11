@@ -1,3 +1,0 @@
-Ncd has an excellent document titled "Host Loading Considerations in the X 
-  environment". I received my copy by emailing support@ncd.com. This may
-  help out.

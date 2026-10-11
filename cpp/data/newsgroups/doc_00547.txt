@@ -1,1 +1,0 @@
-It's quite simple; the code is the week and year of manufacture.

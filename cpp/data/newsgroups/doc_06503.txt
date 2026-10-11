@@ -1,2 +1,0 @@
-Of course you should be able to write a DD 720Kb disk without
-making any holes.

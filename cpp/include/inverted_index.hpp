@@ -35,6 +35,7 @@ private:
 
     QueryNode parse_query(const std::string& query, size_t& pos) const;
     std::vector<int> evaluate_ast(const QueryNode& node) const;
+    std::vector<int> evaluate_phrase(const std::vector<std::string>& tokens) const;
 
 
     std::vector<int> unite(const std::vector<int>& a, const std::vector<int>& b) const;

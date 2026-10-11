@@ -1,2 +1,0 @@
->a real RNG ? This turns those S1,S2 in a kind of bottleneck for system-
- >security.

@@ -1,1 +1,0 @@
-Or use a SunOS 4.1.1 ld.

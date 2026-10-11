@@ -1,3 +1,0 @@
-The information in the packets isn't necessarily
-distinctive -- you need to know that it is an X11 connection.
-	-- Ethan

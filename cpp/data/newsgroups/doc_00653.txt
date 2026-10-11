@@ -1,3 +1,0 @@
--- 
-
-Try MetaCard - a HyperCard-like programming environment on X.

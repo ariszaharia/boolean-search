@@ -1,5 +1,0 @@
-As long as we're bashing typography...
-
-
-
-Yes, UNIX is case-dependent. :-)

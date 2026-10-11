@@ -1,2 +1,0 @@
-Have you gotten an answer yet?  Using your variables, this is what I would do:
-	xterm -T "$HOST - $LOGNAME" -n "$HOST"

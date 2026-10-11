@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <sstream>
 #include <cctype>
+#include <algorithm>
 
 void InvertedIndex::add_document(int doc_id, const std::string& text) {
     if (has_documents && doc_id <= last_doc_id) {
@@ -124,6 +125,68 @@ QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos) cons
     }
 }
 
+std::vector<int> InvertedIndex::evaluate_phrase(const std::vector<std::string>& tokens) const {
+    if (tokens.empty()) return {};
+
+    // 1. Luăm pozițiile pentru primul cuvânt din frază
+    auto it = index.find(tokens[0]);
+    if (it == index.end()) return {};
+
+    // Mapăm doc_id -> listă de poziții valide pentru fraza "de până acum"
+    std::unordered_map<int, std::vector<int>> candidate_docs;
+    for (const Posting& p : it->second) {
+        candidate_docs[p.doc_id] = p.positions;
+    }
+
+    // 2. Iterăm prin restul cuvintelor din frază ("rock", "music", etc.)
+    for (size_t i = 1; i < tokens.size(); ++i) {
+        auto next_it = index.find(tokens[i]);
+        if (next_it == index.end()) return {}; // Un cuvânt lipsește cu totul
+
+        std::unordered_map<int, std::vector<int>> next_candidates;
+
+        for (const Posting& p : next_it->second) {
+            auto cand_it = candidate_docs.find(p.doc_id);
+            if (cand_it != candidate_docs.end()) {
+                // Documentul are ambele cuvinte. Acum verificăm adiacența pozițiilor.
+                const std::vector<int>& prev_positions = cand_it->second;
+                const std::vector<int>& curr_positions = p.positions;
+                
+                std::vector<int> valid_positions;
+                size_t p1 = 0, p2 = 0;
+
+                // Căutare cu doi pointeri: prev_pos + 1 == curr_pos
+                while (p1 < prev_positions.size() && p2 < curr_positions.size()) {
+                    if (prev_positions[p1] + 1 == curr_positions[p2]) {
+                        valid_positions.push_back(curr_positions[p2]);
+                        p1++; p2++;
+                    } else if (prev_positions[p1] + 1 < curr_positions[p2]) {
+                        p1++;
+                    } else {
+                        p2++;
+                    }
+                }
+
+                // Dacă s-a găsit măcar o secvență validă, documentul trece mai departe
+                if (!valid_positions.empty()) {
+                    next_candidates[p.doc_id] = valid_positions;
+                }
+            }
+        }
+        candidate_docs = std::move(next_candidates);
+        if (candidate_docs.empty()) return {}; // Ieșire rapidă
+    }
+
+    // 3. Extragem doar ID-urile documentelor rămase și le sortăm (pentru unite/intersect)
+    std::vector<int> result;
+    result.reserve(candidate_docs.size());
+    for (const auto& pair : candidate_docs) {
+        result.push_back(pair.first);
+    }
+    std::sort(result.begin(), result.end());
+
+    return result;
+}
 
 std::vector<int> InvertedIndex::evaluate_ast(const QueryNode& node) const {
     if (node.op == QueryOperator::TERM) {
@@ -138,16 +201,8 @@ std::vector<int> InvertedIndex::evaluate_ast(const QueryNode& node) const {
         return doc_ids;
     } 
     else if (node.op == QueryOperator::PHRASE) {
-        // Placeholder: Currently degrades phrases to a standard AND search.
-        // We will upgrade this to check token positions next.
         std::vector<std::string> phrase_tokens = tokenizer.tokenize(node.term);
-        if (phrase_tokens.empty()) return {};
-        
-        QueryNode temp_and(QueryOperator::AND);
-        for (const auto& pt : phrase_tokens) {
-            temp_and.children.push_back(QueryNode(QueryOperator::TERM, pt));
-        }
-        return evaluate_ast(temp_and);
+        return evaluate_phrase(phrase_tokens);
     }
     else if (node.op == QueryOperator::OR) {
         if (node.children.empty()) return {};

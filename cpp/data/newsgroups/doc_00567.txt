@@ -1,2 +1,0 @@
-The RISC processor made by Fairchild, sold to Intergraph, much the same
-story as the R4000.
