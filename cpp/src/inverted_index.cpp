@@ -39,7 +39,6 @@ void InvertedIndex::add_document(int doc_id, const std::string& text) {
 }
 
 
-// Set Union (OR) - Keeps all unique document IDs from both lists
 std::vector<int> InvertedIndex::unite(const std::vector<int>& a, const std::vector<int>& b) const {
     std::vector<int> result;
     result.reserve(a.size() + b.size());
@@ -79,50 +78,86 @@ std::vector<int> InvertedIndex::intersect(const std::vector<int>& a, const std::
 }
 
 
+std::vector<int> InvertedIndex::difference(const std::vector<int>& a, const std::vector<int>&b) const {
+    std::vector<int>result;
+    size_t i = 0, j = 0;
 
+
+    while (i < a.size() && j < b.size()){
+        if (a[i] == b[j]){
+            i++;
+            j++;
+        }
+        else if (a[i] < b[j]){
+            result.push_back(a[i]);
+            i++;
+        }
+        else{
+            j++;
+        }
+    }
+    while (i < a.size()){
+        result.push_back(a[i]);
+        i++;
+    }
+    return result;
+}
 
 QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos) const {
-    // Skip leading whitespace
     while (pos < query.length() && std::isspace(query[pos])) pos++;
-    if (pos >= query.length()) return QueryNode(QueryOperator::TERM, "");
+    if (pos >= query.length()) throw ParseError("unexpected end of query", pos);
 
-    // Handle nested operators: (^ ...) or (+ ...)
     if (query[pos] == '(') {
-        pos++; 
+        size_t open_pos = pos;
+        pos++;
         while (pos < query.length() && std::isspace(query[pos])) pos++;
-        
-        QueryOperator op = QueryOperator::AND;
-        if (query[pos] == '^') { op = QueryOperator::AND; pos++; }
-        else if (query[pos] == '+') { op = QueryOperator::OR; pos++; }
-        
+        if (pos >= query.length()) throw ParseError("expected an operator after '('", pos);
+
+        QueryOperator op;
+        if (query[pos] == '^')      op = QueryOperator::AND;
+        else if (query[pos] == '+') op = QueryOperator::OR;
+        else if (query[pos] == '-') op = QueryOperator::NOT;
+        else throw ParseError("expected operator ^, + or - after '('", pos);
+        pos++;
+
         QueryNode node(op);
-        
-        // Parse children until closing parenthesis
-        while (pos < query.length()) {
+        while (true) {
             while (pos < query.length() && std::isspace(query[pos])) pos++;
-            if (pos < query.length() && query[pos] == ')') {
-                pos++; 
-                break;
-            }
+            if (pos >= query.length()) throw ParseError("missing ')' for the '(' opened", open_pos);
+            if (query[pos] == ')') { pos++; break; }
             node.children.push_back(parse_query(query, pos));
         }
+        if (node.children.empty()) throw ParseError("operator with no operands", open_pos);
         return node;
-    } 
-    // Handle exact phrases: "goth rock"
-    else if (query[pos] == '"') {
-        pos++; 
+    }
+
+    if (query[pos] == ')') throw ParseError("unexpected ')'", pos);
+
+    if (query[pos] == '"') {
+        size_t open_pos = pos;
+        pos++;
         size_t start = pos;
         while (pos < query.length() && query[pos] != '"') pos++;
+        if (pos >= query.length()) throw ParseError("unterminated quote", open_pos);
         std::string phrase = query.substr(start, pos - start);
-        if (pos < query.length()) pos++; 
+        pos++;
+        if (tokenizer.tokenize(phrase).empty()) throw ParseError("empty phrase", open_pos);
         return QueryNode(QueryOperator::PHRASE, phrase);
-    } 
-    // Handle single terms: society
-    else {
-        size_t start = pos;
-        while (pos < query.length() && !std::isspace(query[pos]) && query[pos] != ')') pos++;
-        return QueryNode(QueryOperator::TERM, query.substr(start, pos - start));
     }
+
+    size_t start = pos;
+    while (pos < query.length() && !std::isspace(query[pos]) && query[pos] != ')') pos++;
+    std::string term = query.substr(start, pos - start);
+    if (tokenizer.tokenize(term).empty()) throw ParseError("term has no searchable characters", start);
+    return QueryNode(QueryOperator::TERM, term);
+}
+
+std::vector<int> InvertedIndex::search(const std::string& query) const {
+    size_t pos = 0;
+    QueryNode ast = parse_query(query, pos);
+    while (pos < query.length() && std::isspace(query[pos])) pos++;
+    if (pos < query.length()) throw ParseError("unexpected text after the query", pos);
+    return evaluate_ast(ast);
 }
 
 std::vector<int> InvertedIndex::evaluate_phrase(const std::vector<std::string>& tokens) const {
@@ -205,15 +240,18 @@ std::vector<int> InvertedIndex::evaluate_ast(const QueryNode& node) const {
         return evaluate_phrase(phrase_tokens);
     }
     else if (node.op == QueryOperator::OR) {
-        if (node.children.empty()) return {};
+        if (node.children.empty())
+             return {};
         std::vector<int> result = evaluate_ast(node.children[0]);
+
         for (size_t i = 1; i < node.children.size(); i++) {
             result = unite(result, evaluate_ast(node.children[i]));
         }
         return result;
     }
     else if (node.op == QueryOperator::AND) {
-        if (node.children.empty()) return {};
+        if (node.children.empty())
+             return {};
         std::vector<int> result = evaluate_ast(node.children[0]);
         for (size_t i = 1; i < node.children.size(); i++) {
             if (result.empty()) break; // Early exit optimization
@@ -221,14 +259,23 @@ std::vector<int> InvertedIndex::evaluate_ast(const QueryNode& node) const {
         }
         return result;
     }
+    else if (node.op == QueryOperator::NOT){
+        if (node.children.empty()){
+            return {};
+        }
+        std::vector<int> result = evaluate_ast(node.children[0]);
+
+        for (size_t i = 1; i < node.children.size(); i++){
+            if(result.empty()){
+                break;
+            }
+            result = difference(result, evaluate_ast(node.children[i]));
+        }
+        return result;
+    }
     return {};
 }
 
-std::vector<int> InvertedIndex::search(const std::string& query) const {
-    size_t pos = 0;
-    QueryNode ast = parse_query(query, pos);
-    return evaluate_ast(ast);
-}
 
 
 const std::string& InvertedIndex::get_document(int doc_id) const {

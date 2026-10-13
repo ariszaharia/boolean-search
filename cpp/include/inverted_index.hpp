@@ -6,8 +6,18 @@
 #include "tokenizer.hpp"
 #include "types.hpp"
 
+#include <stdexcept>
 
-enum class QueryOperator { AND, OR, TERM, PHRASE };
+class ParseError : public std::runtime_error {
+public:
+    size_t position;
+    ParseError(const std::string& msg, size_t pos)
+        : std::runtime_error(msg + " (at position " + std::to_string(pos) + ")"),
+          position(pos) {}
+};
+
+
+enum class QueryOperator { AND, OR, TERM, PHRASE, NOT};
 
 struct QueryNode {
     QueryOperator op;
@@ -40,6 +50,7 @@ private:
 
     std::vector<int> unite(const std::vector<int>& a, const std::vector<int>& b) const;
     std::vector<int> intersect(const std::vector<int>& a, const std::vector<int>& b) const;
+    std::vector<int> difference(const std::vector<int>& a, const std::vector<int>& b) const;
     
 
 public:
