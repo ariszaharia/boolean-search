@@ -351,10 +351,12 @@ int InvertedIndex::get_term_frequency(const std::string& term, int doc_id) const
         return 0;
     }
 
-    for(const Posting& p: it->second){
-        if(p.doc_id == doc_id){
-            return p.frequency;
-        } 
+    // The list is sorted by doc_id, so a binary search is enough.
+    const std::vector<Posting>& postings = it->second;
+    auto p = std::lower_bound(postings.begin(), postings.end(), doc_id,
+                              [](const Posting& x, int id) { return x.doc_id < id; });
+    if (p != postings.end() && p->doc_id == doc_id) {
+        return p->frequency;
     }
 
     return 0;
