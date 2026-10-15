@@ -6,11 +6,9 @@
 #include "inverted_index.hpp"
 #include "bm25scorer.hpp"
 
-// Helper function that runs both retrieval and scoring, then prints the top K results
 void print_scored_results(const std::string& query, const InvertedIndex& index, const BM25Scorer& scorer, int top_k = 3) {
     std::cout << "Query: " << query << "\n";
     
-    // 1. Get exact boolean matches (The C++ AST Engine)
     std::vector<int> matched_docs = index.search(query);
     
     if (matched_docs.empty()) {
@@ -18,7 +16,6 @@ void print_scored_results(const std::string& query, const InvertedIndex& index, 
         return;
     }
 
-    // 2. Score and rank the exact matches (BM25)
     std::vector<SearchResult> ranked_results = scorer.score(matched_docs, query);
 
     std::cout << "Found " << ranked_results.size() << " matching documents. Showing top " << top_k << ":\n";
@@ -27,7 +24,6 @@ void print_scored_results(const std::string& query, const InvertedIndex& index, 
     for (const auto& res : ranked_results) {
         if (count >= top_k) break;
         
-        // Extract a short snippet of the text to keep the terminal readable
         std::string full_text = index.get_document(res.doc_id);
         std::string snippet = full_text.length() > 100 ? full_text.substr(0, 100) + "..." : full_text;
         

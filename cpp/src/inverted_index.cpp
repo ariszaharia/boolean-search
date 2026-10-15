@@ -103,11 +103,12 @@ std::vector<int> InvertedIndex::difference(const std::vector<int>& a, const std:
     return result;
 }
 
-QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos) const {
+QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos, int depth) const {
     while (pos < query.length() && std::isspace(query[pos])) pos++;
     if (pos >= query.length()) throw ParseError("unexpected end of query", pos);
 
     if (query[pos] == '(') {
+        if (depth >= 500) throw ParseError("query nested too deeply", pos);
         size_t open_pos = pos;
         pos++;
         while (pos < query.length() && std::isspace(query[pos])) pos++;
@@ -125,7 +126,7 @@ QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos) cons
             while (pos < query.length() && std::isspace(query[pos])) pos++;
             if (pos >= query.length()) throw ParseError("missing ')' for the '(' opened", open_pos);
             if (query[pos] == ')') { pos++; break; }
-            node.children.push_back(parse_query(query, pos));
+            node.children.push_back(parse_query(query, pos, depth + 1));
         }
         if (node.children.empty()) throw ParseError("operator with no operands", open_pos);
         return node;
@@ -152,45 +153,72 @@ QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos) cons
     return QueryNode(QueryOperator::TERM, term);
 }
 
-std::vector<int> InvertedIndex::search(const std::string& query) const {
+QueryNode InvertedIndex::parse(const std::string& query) const {
     size_t pos = 0;
     QueryNode ast = parse_query(query, pos);
     while (pos < query.length() && std::isspace(query[pos])) pos++;
     if (pos < query.length()) throw ParseError("unexpected text after the query", pos);
-    return evaluate_ast(ast);
+    return ast;
+}
+
+std::vector<int> InvertedIndex::search(const std::string& query) const {
+    return evaluate_ast(parse(query));
+}
+
+int InvertedIndex::phrase_frequency(const std::vector<std::string>& tokens, int doc_id) const {
+    if (tokens.empty()) return 0;
+
+    // For every word of the phrase, find its positions inside this document.
+    std::vector<const std::vector<int>*> positions;
+    for (const std::string& token : tokens) {
+        auto it = index.find(token);
+        if (it == index.end()) return 0;
+        const std::vector<Posting>& postings = it->second;   // sorted by doc_id
+        auto p = std::lower_bound(postings.begin(), postings.end(), doc_id,
+                                  [](const Posting& x, int id) { return x.doc_id < id; });
+        if (p == postings.end() || p->doc_id != doc_id) return 0;
+        positions.push_back(&p->positions);
+    }
+
+    // The phrase starts at every position of the first word where word i
+    // appears exactly i positions later.
+    int count = 0;
+    for (int start : *positions[0]) {
+        bool all_found = true;
+        for (size_t i = 1; i < positions.size() && all_found; ++i) {
+            all_found = std::binary_search(positions[i]->begin(), positions[i]->end(), start + static_cast<int>(i));
+        }
+        if (all_found) count++;
+    }
+    return count;
 }
 
 std::vector<int> InvertedIndex::evaluate_phrase(const std::vector<std::string>& tokens) const {
     if (tokens.empty()) return {};
 
-    // 1. Luăm pozițiile pentru primul cuvânt din frază
     auto it = index.find(tokens[0]);
     if (it == index.end()) return {};
 
-    // Mapăm doc_id -> listă de poziții valide pentru fraza "de până acum"
     std::unordered_map<int, std::vector<int>> candidate_docs;
     for (const Posting& p : it->second) {
         candidate_docs[p.doc_id] = p.positions;
     }
 
-    // 2. Iterăm prin restul cuvintelor din frază ("rock", "music", etc.)
     for (size_t i = 1; i < tokens.size(); ++i) {
         auto next_it = index.find(tokens[i]);
-        if (next_it == index.end()) return {}; // Un cuvânt lipsește cu totul
+        if (next_it == index.end()) return {}; 
 
         std::unordered_map<int, std::vector<int>> next_candidates;
 
         for (const Posting& p : next_it->second) {
             auto cand_it = candidate_docs.find(p.doc_id);
             if (cand_it != candidate_docs.end()) {
-                // Documentul are ambele cuvinte. Acum verificăm adiacența pozițiilor.
                 const std::vector<int>& prev_positions = cand_it->second;
                 const std::vector<int>& curr_positions = p.positions;
                 
                 std::vector<int> valid_positions;
                 size_t p1 = 0, p2 = 0;
 
-                // Căutare cu doi pointeri: prev_pos + 1 == curr_pos
                 while (p1 < prev_positions.size() && p2 < curr_positions.size()) {
                     if (prev_positions[p1] + 1 == curr_positions[p2]) {
                         valid_positions.push_back(curr_positions[p2]);
@@ -202,17 +230,15 @@ std::vector<int> InvertedIndex::evaluate_phrase(const std::vector<std::string>& 
                     }
                 }
 
-                // Dacă s-a găsit măcar o secvență validă, documentul trece mai departe
                 if (!valid_positions.empty()) {
                     next_candidates[p.doc_id] = valid_positions;
                 }
             }
         }
         candidate_docs = std::move(next_candidates);
-        if (candidate_docs.empty()) return {}; // Ieșire rapidă
+        if (candidate_docs.empty()) return {}; 
     }
 
-    // 3. Extragem doar ID-urile documentelor rămase și le sortăm (pentru unite/intersect)
     std::vector<int> result;
     result.reserve(candidate_docs.size());
     for (const auto& pair : candidate_docs) {
@@ -225,7 +251,9 @@ std::vector<int> InvertedIndex::evaluate_phrase(const std::vector<std::string>& 
 
 std::vector<int> InvertedIndex::evaluate_ast(const QueryNode& node) const {
     if (node.op == QueryOperator::TERM) {
-        auto it = index.find(node.term);
+        std::vector<std::string> term_tokens = tokenizer.tokenize(node.term);
+        if (term_tokens.size() != 1) return evaluate_phrase(term_tokens);
+        auto it = index.find(term_tokens[0]);
         if (it == index.end()) return {};
         
         std::vector<int> doc_ids;

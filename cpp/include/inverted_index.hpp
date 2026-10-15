@@ -43,7 +43,7 @@ private:
     int last_doc_id = 0;
     bool has_documents = false; 
 
-    QueryNode parse_query(const std::string& query, size_t& pos) const;
+    QueryNode parse_query(const std::string& query, size_t& pos, int depth = 0) const;
     std::vector<int> evaluate_ast(const QueryNode& node) const;
     std::vector<int> evaluate_phrase(const std::vector<std::string>& tokens) const;
 
@@ -56,6 +56,12 @@ private:
 public:
     void add_document(int doc_id, const std::string& text);
     std::vector<int> search(const std::string& query) const;
+
+    // Parses a query into its syntax tree (throws ParseError). The scorer uses it.
+    QueryNode parse(const std::string& query) const;
+
+    // How many times the words appear one after another in a document.
+    int phrase_frequency(const std::vector<std::string>& tokens, int doc_id) const;
 
     const std::string& get_document(int doc_id) const;
 
