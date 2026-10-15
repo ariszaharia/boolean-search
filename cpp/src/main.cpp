@@ -46,7 +46,6 @@ void load_tsv_corpus(const std::string& filepath, InvertedIndex& index) {
     std::string line;
     int count = 0;
     
-    std::cout << "Loading SciFact corpus into C++ engine...\n";
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         std::string id_str, text;
