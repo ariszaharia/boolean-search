@@ -147,7 +147,8 @@ test runs NOT made yet, they come at the end with the final runs):
    B3 run and scored on train. Left: the Holm script (needs the experiments).
 3. Planner: an OpenAI model with a pinned version, temperature 0, prompt with grammar and examples, everything
    logged and cached; retries on `ParseError`; relaxation loop for zero results (E0, E1, E2).
-4. Reranker (Jev and an open cross-encoder) on the same top-N pool for every system.
+4. Reranker on the same top-N pool for every system: MedCPT (fixed in hypotheses.md, 2026-10-28; see f. below).
+   Jev, if added later, is exploratory only.
 5. Targeted constraint query set (about 100 queries in 4 categories, written before any system runs) and the
    engine's `why-not(doc, query)` function.
    Keep in mind: SciFact has about 1 relevant document per query, and precision at k = 100 can be at most
@@ -303,6 +304,10 @@ test runs NOT made yet, they come at the end with the final runs):
       To note in the thesis: MedCPT was trained on PubMed search logs, and SciFact's documents are PubMed
       abstracts. That is training on the domain (SciFact's claims and qrels are not PubMed logs), not on the
       test labels, but it should be stated. Three rerankers were compared on the same 200 claims; also stated.
+      DECIDED 2026-10-28 (Aris): MedCPT is the reranker of H3 and H7, written into hypotheses.md as a
+      clarification before any reranked run on the targeted set or test. B3 without reranking is reported next
+      to every reranked comparison. Jev, if added later, is exploratory (same rule, same 200 claims, not in the
+      Holm correction). rerank.py now lets medcpt rerank the targeted set and test.
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.

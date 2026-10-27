@@ -234,6 +234,31 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
     cannot be identified reliably from the query, so for them only the instruction applies.
   - E2's result is the last accepted query (it may still be empty). The number of rounds used and every attempt are
     recorded for each request. Everything else is as in E1 (model, prompt, settings, BM25 ranking in the set).
+- 2026-10-28, the reranker (H3 and H7 say "the same reranker" without naming it; fixed before any reranked run on
+  the targeted set or on test; recommendation drafted by Claude, adopted by Aris):
+  - Reranker = ncbi/MedCPT-Cross-Encoder (Jin et al., 2023) at Hugging Face revision
+    71caf65d4927987813984f54c284405a13fcca49, 32-bit, code api/rerank.py (entry medcpt).
+  - Input: the request as written (for the targeted set: the claim plus its constraint sentence) and the document
+    (title and text from data/scifact.tsv), at most 512 tokens; a longer pair has the document cut, never the
+    request. The reranker never sees a system's Boolean query. Score = the model's single output (logit).
+  - Every system's top N (N = 30 and 100, as in the Setting) is reordered by that score; equal scores keep the
+    first-stage order. The output is exactly those N documents. Every system gets the same reranker on the same N.
+  - How it was chosen (development on train only; never a base claim of the targeted set, never test): three local
+    rerankers were tried on the same 200 development claims (api/dev_sample.py), against a pass rule written in
+    PROGRESS.md before any of their scores existed: at N = 100, (1) B3 reranked is not worse than B3 alone in mean
+    nDCG@10, (2) B1 reranked is better than B1 alone. cross-encoder/ms-marco-MiniLM-L6-v2 failed (1) (B3 -0.068);
+    BAAI/bge-reranker-v2-m3 failed (1) (B3 -0.030); MedCPT passed both (B3 +0.037 [+0.001, +0.074], B1 +0.102
+    [+0.065, +0.141]). Details in PROGRESS.md.
+  - Reported with every reranked comparison: B3 without reranking, as a reference line. Why: a reranker pulls all
+    pools toward its own quality, so differences between systems shrink after it; for H7 in particular, a small
+    difference after reranking is partly the reranker's doing.
+  - Known limitation, stated with the results: MedCPT was trained on PubMed search logs and SciFact's documents are
+    PubMed abstracts. That is training on the domain, not on SciFact's claims or qrels.
+  - Each run records its device (GPU or CPU). For this model the two differ by at most 0.00002 in score (60 pairs
+    scored on both), far below any difference that changes a ranking in practice; the device is still reported.
+  - Jev (TypeSafe AI) or any other reranker is not part of the confirmatory tests. If one is added later, it is
+    exploratory: judged by the same rule on the same 200 claims, reported next to MedCPT, not in the Holm
+    correction. Replacing MedCPT as the reranker of H3 and H7 would be a Deviation.
 
 ## Deviations
 Format: date, what changed, why, what the original text said.

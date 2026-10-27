@@ -379,10 +379,12 @@ Built (2026-10-28): `api/rerank.py` reranks the top N (30 or 100) of any run fil
 the request as written (constraint sentence included), never the Boolean query. The rerankers are entries in
 `RERANKERS`, all free local cross-encoders for development, revisions pinned: `ce-minilm`
 (`cross-encoder/ms-marco-MiniLM-L6-v2`; on train it makes B3 worse, see PROGRESS.md), `bge-m3`
-(`BAAI/bge-reranker-v2-m3`, much bigger) and `medcpt` (`ncbi/MedCPT-Cross-Encoder`, trained on PubMed searches). `--sample 200` reranks only 200 development claims
-(`api/dev_sample.py`, never a base claim of the targeted set) into `results/dev/`, to try a reranker quickly
-against the pass rule in PROGRESS.md. Which reranker the confirmatory runs use (Jev and/or a cross-encoder) is not decided; until an
-entry is marked as fixed in hypotheses.md, the script reranks train runs only. Scores are cached in
+(`BAAI/bge-reranker-v2-m3`, much bigger) and `medcpt` (`ncbi/MedCPT-Cross-Encoder`, trained on PubMed
+searches). `--sample 200` reranks only 200 development claims (`api/dev_sample.py`, never a base claim of the
+targeted set) into `results/dev/`, to try a reranker quickly against the pass rule in PROGRESS.md.
+**The reranker of H3 and H7 is `medcpt`**, the only one that passed the rule (fixed in hypotheses.md,
+clarification of 2026-10-28). Only an entry marked as fixed there may rerank the targeted set or test; the others
+rerank train only. Jev, if added later, is exploratory. Scores are cached in
 `results/work/rerank_cache/`, one file per device. On this laptop's CPU it scores about 19 pairs a second (809
 train queries at N = 100 take over an hour per system), so long runs go to a free Colab GPU: open
 `colab/rerank.ipynb` in Colab (push first; it clones the repository), run all, unzip the downloaded

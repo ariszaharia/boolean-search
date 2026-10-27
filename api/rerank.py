@@ -6,11 +6,10 @@ document (title and text, as in data/scifact.tsv). It never sees the Boolean que
 exactly the same treatment; only the pool differs. The output has exactly the N reranked documents (fewer if
 the pool had fewer): the Setting cuts every system to the same top N, so documents below N are not added back.
 
-Which reranker the confirmatory runs use is NOT decided yet (PROGRESS.md, 2026-10-28: Jev and/or a cross-encoder;
-it is written into hypotheses.md before any reranked run on the targeted set or on test). For now RERANKERS has
-free local cross-encoders, used for development; until an entry has fixed_in_hypotheses set, the script reranks
-train runs only. An API reranker such as Jev becomes one more entry (with its own scoring function) once there is
-a key; nothing else changes.
+The reranker of the confirmatory runs (H3, H7) is medcpt, fixed in hypotheses.md (clarification of 2026-10-28).
+Only an entry with fixed_in_hypotheses set may rerank the targeted set or test; the others rerank train only. An
+API reranker such as Jev becomes one more entry (with its own scoring function) once there is a key; it would be
+exploratory, not part of the confirmatory tests.
 
 --sample N reranks only N claims of the development sample (api/dev_sample.py: train claims, never a base claim
 of the targeted set) and writes to results/dev/: for trying a reranker without running all of train.
@@ -65,7 +64,7 @@ RERANKERS = {
     'medcpt': {'kind': 'cross-encoder', 'model': 'ncbi/MedCPT-Cross-Encoder',
                'revision': '71caf65d4927987813984f54c284405a13fcca49',   # Hugging Face commit, pinned 2026-10-28
                'max_tokens': 512, 'half_on_gpu': False,
-               'fixed_in_hypotheses': None,
+               'fixed_in_hypotheses': '2026-10-28',   # the reranker of H3 and H7 (clarification of that date)
                'description': 'MedCPT cross-encoder (NCBI; Jin et al., 2023), PubMedBERT trained on PubMed search '
                               'logs. Local, free, public domain; tried on a development sample of train'},
 }
