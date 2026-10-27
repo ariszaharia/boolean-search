@@ -150,7 +150,12 @@ test runs NOT made yet, they come at the end with the final runs):
 4. Reranker on the same top-N pool for every system: MedCPT (fixed in hypotheses.md, 2026-10-28; see f. below).
    Jev, if added later, is exploratory only.
 5. Targeted constraint query set (about 100 queries in 4 categories, written before any system runs) and the
-   engine's `why-not(doc, query)` function.
+   engine's `why-not(doc, query)` function. why-not BUILT 2026-10-28: InvertedIndex::explain / render and
+   cpp/build/why_not_cli (verdicts not_in_set / below_top_k / in_top_k, a [yes]/[no] tree for every part of the
+   query). Tests: tests/test_why_not.cpp (explain = search on 120 pairs, plus the evidence texts); on 1,416 real
+   pairs from the dev E1/E2 queries every verdict, set size and rank matched boolean_cli. Left for H5: the
+   tooling that samples 50 failures per system and makes the annotation sheet (query + why-not for Boolean,
+   ranked list for dense).
    Keep in mind: SciFact has about 1 relevant document per query, and precision at k = 100 can be at most
    (number of relevant documents) / 100 for every system. If the targeted set's relevant sets are this small,
    large precision gaps (H1 predicts about +20 points) are only possible on queries with small Boolean sets.

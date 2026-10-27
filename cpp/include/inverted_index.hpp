@@ -28,6 +28,15 @@ struct QueryNode {
     QueryNode(QueryOperator o, const std::string& t) : op(o), term(t) {}
 };
 
+// why-not: one part of a query, whether one document satisfies it, and the evidence.
+// The children are the parts inside an operator, in the order they were written.
+struct Explanation {
+    std::string part;      // the part of the query, e.g.  tb   "vitamin d"   (^ ... 3 parts)
+    bool holds = false;    // true = the document satisfies this part
+    std::string reason;    // the evidence, e.g. "occurs 4 times in the document"
+    std::vector<Explanation> children;
+};
+
 class InvertedIndex {
 private:
     std::unordered_map<std::string, std::vector<Posting>> index;
@@ -46,6 +55,8 @@ private:
     QueryNode parse_query(const std::string& query, size_t& pos, int depth = 0) const;
     std::vector<int> evaluate_ast(const QueryNode& node) const;
     std::vector<int> evaluate_phrase(const std::vector<std::string>& tokens) const;
+    Explanation explain_node(const QueryNode& node, int doc_id) const;
+    Explanation explain_phrase(const std::string& part, const std::vector<std::string>& tokens, int doc_id) const;
 
 
     std::vector<int> unite(const std::vector<int>& a, const std::vector<int>& b) const;
@@ -62,6 +73,13 @@ public:
 
     // How many times the words appear one after another in a document.
     int phrase_frequency(const std::vector<std::string>& tokens, int doc_id) const;
+
+    // why-not(doc, query): evaluates the query for one document only, and records for every part of the query
+    // whether the document satisfies it and why. The top's holds is true exactly when search(query) contains
+    // the document. Throws ParseError for a bad query, std::out_of_range for a document not in the index.
+    Explanation explain(const std::string& query, int doc_id) const;
+    // The explanation as indented text, one line per part:  [yes] or [no], the part, the evidence.
+    static std::string render(const Explanation& explanation);
 
     const std::string& get_document(int doc_id) const;
 

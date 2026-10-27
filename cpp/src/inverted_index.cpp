@@ -318,6 +318,119 @@ std::vector<int> InvertedIndex::evaluate_ast(const QueryNode& node) const {
 }
 
 
+// --- why-not ---
+// explain_node follows evaluate_ast exactly, but for one document: every part of the query is checked (no early
+// exit), so the explanation shows all of them, not only the first that failed.
+
+namespace {
+    std::string times(int n) { return std::to_string(n) + (n == 1 ? " time" : " times"); }
+    std::string documents_count(int n) { return std::to_string(n) + (n == 1 ? " document" : " documents"); }
+
+    void render_into(const Explanation& e, int depth, std::string& out) {
+        out += std::string(2 * depth, ' ') + (e.holds ? "[yes] " : "[no]  ") + e.part + "  --  " + e.reason + "\n";
+        for (const Explanation& child : e.children) render_into(child, depth + 1, out);
+    }
+}
+
+Explanation InvertedIndex::explain(const std::string& query, int doc_id) const {
+    QueryNode ast = parse(query);
+    if (documents.find(doc_id) == documents.end()) {
+        throw std::out_of_range("InvertedIndex::explain: no document with id " + std::to_string(doc_id));
+    }
+    return explain_node(ast, doc_id);
+}
+
+std::string InvertedIndex::render(const Explanation& explanation) {
+    std::string out;
+    render_into(explanation, 0, out);
+    return out;
+}
+
+Explanation InvertedIndex::explain_phrase(const std::string& part, const std::vector<std::string>& tokens,
+                                          int doc_id) const {
+    Explanation e;
+    e.part = part;
+    int found = phrase_frequency(tokens, doc_id);
+    e.holds = found > 0;
+
+    // How often each word of the phrase occurs in the document on its own, e.g. "vitamin 3x, d 0x".
+    std::string words;
+    bool every_word = true;
+    for (const std::string& token : tokens) {
+        int tf = get_term_frequency(token, doc_id);
+        if (tf == 0) every_word = false;
+        words += (words.empty() ? "" : ", ") + token + " " + std::to_string(tf) + "x";
+    }
+
+    if (e.holds) e.reason = "the phrase occurs " + times(found) + " in the document";
+    else if (every_word) e.reason = "every word occurs, but never next to each other in this order (" + words + ")";
+    else e.reason = "a word of the phrase is not in the document (" + words + ")";
+    int corpus = static_cast<int>(evaluate_phrase(tokens).size());
+    e.reason += "; the phrase is in " + documents_count(corpus) + " of the corpus";
+    return e;
+}
+
+Explanation InvertedIndex::explain_node(const QueryNode& node, int doc_id) const {
+    if (node.op == QueryOperator::TERM) {
+        std::vector<std::string> tokens = tokenizer.tokenize(node.term);
+        if (tokens.size() != 1) {
+            // As in evaluate_ast: a term the tokenizer splits into several words (T-cell) is searched as a phrase.
+            std::string as_phrase;
+            for (const std::string& token : tokens) as_phrase += (as_phrase.empty() ? "" : " ") + token;
+            Explanation e = explain_phrase(node.term, tokens, doc_id);
+            e.reason = "searched as the phrase \"" + as_phrase + "\": " + e.reason;
+            return e;
+        }
+        Explanation e;
+        e.part = node.term;
+        int tf = get_term_frequency(tokens[0], doc_id);
+        int df = get_doc_frequency(tokens[0]);
+        e.holds = tf > 0;
+        if (e.holds) e.reason = "occurs " + times(tf) + " in the document";
+        else if (df == 0) e.reason = "not in the document, and not in any document of the corpus";
+        else e.reason = "not in the document (it is in " + documents_count(df) + " of the corpus)";
+        return e;
+    }
+    if (node.op == QueryOperator::PHRASE) {
+        return explain_phrase("\"" + node.term + "\"", tokenizer.tokenize(node.term), doc_id);
+    }
+
+    Explanation e;
+    int held = 0;
+    for (const QueryNode& child : node.children) {
+        e.children.push_back(explain_node(child, doc_id));
+        if (e.children.back().holds) held++;
+    }
+    const int n = static_cast<int>(node.children.size());
+    const std::string counts = std::to_string(held) + " of " + std::to_string(n) + " hold";
+
+    if (node.op == QueryOperator::AND) {
+        e.part = "(^ ... " + std::to_string(n) + " parts)";
+        e.holds = (held == n);
+        e.reason = "every part must hold; " + counts;
+    } else if (node.op == QueryOperator::OR) {
+        e.part = "(+ ... " + std::to_string(n) + " parts)";
+        e.holds = (held > 0);
+        e.reason = "at least one part must hold; " + counts;
+    } else {
+        // (- A B C ...): A, without the documents of B, C, ... (as difference() in evaluate_ast).
+        e.part = "(- ... " + std::to_string(n) + " parts)";
+        const bool kept = e.children[0].holds;
+        std::string excluded_by;
+        for (int i = 1; i < n; i++) {
+            if (e.children[i].holds) excluded_by += (excluded_by.empty() ? "" : ", ") + e.children[i].part;
+        }
+        e.holds = kept && excluded_by.empty();
+        if (!kept) e.reason = "the first part (the one kept) does not hold";
+        else if (!excluded_by.empty()) e.reason = "the first part holds, but the document is excluded by: " + excluded_by;
+        else e.reason = "the first part holds and none of the excluded parts does";
+        e.children[0].part = "keep: " + e.children[0].part;
+        for (int i = 1; i < n; i++) e.children[i].part = "without: " + e.children[i].part;
+    }
+    return e;
+}
+
+
 
 const std::string& InvertedIndex::get_document(int doc_id) const {
     auto it = documents.find(doc_id);

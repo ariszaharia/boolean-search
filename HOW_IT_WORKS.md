@@ -46,6 +46,7 @@ evaluated the same way, as long as it writes that file.
 | `api/prep_qrels.py` | Downloads the SciFact answer key and writes `data/scifact_qrels_{train,test}.tsv` | BUILT |
 | `api/baseline_pyserini.py` | Pyserini side of the engine check (unstemmed BM25) | BUILT |
 | `cpp/src/search_cli.cpp` | Runs the engine on a file of queries and writes a run file | BUILT |
+| `cpp/src/why_not_cli.cpp` | `why-not(doc, query)`: why a document is or is not in a query's result (H5) | BUILT |
 | `api/compare_runs.py` | Engine-versus-Pyserini check (agreement of rankings) | BUILT |
 | `harness/` | Scoring and statistics for every experiment | BUILT (partly) |
 | `hypotheses.md` | The pre-registration: what is tested and how, written before any experiment | BUILT, predictions still blank |
@@ -410,6 +411,28 @@ may, without meaning to, write queries that your prompt already handles well.
 Given a document and a Boolean query, it explains why the document was not returned: for example, "the
 AND failed because the document says 'fractures', not 'fracture'". This is the auditability claim of the
 thesis (H5): a Boolean failure can be traced, a dense failure cannot.
+
+Built (2026-10-28). `InvertedIndex::explain(query, doc)` evaluates the query for that one document, following
+exactly the rules `search` uses, and returns a tree: every part of the query with `[yes]` or `[no]` and the
+evidence (how often a word occurs, which word of a phrase is missing or whether its words are only not adjacent,
+which exclusion removed the document, how many documents of the corpus have the word or phrase). Every part is
+checked, not only the first that fails. `InvertedIndex::render` prints the tree as indented text.
+`cpp/build/why_not_cli` does many requests at once (`request_id <TAB> doc_id <TAB> query`) and also gives the
+verdict: `not_in_set` (a filtering failure: the tree says which part), `below_top_k` (in the set, but ranked
+after the top 100 by BM25, so cut before the reranker: a ranking failure), or `in_top_k`. Checked: the tests
+compare `explain` with `search` on 120 pairs, and on 1,416 real pairs (the dev E1/E2 queries) every verdict, set
+size and rank matched `boolean_cli`. A real example (dev E1, claim 43):
+
+```
+[no]  (^ ... 3 parts)  --  every part must hold; 2 of 3 hold
+  [yes] (+ ... 2 parts)  --  at least one part must hold; 1 of 2 hold
+    [yes] "hematopoietic progenitor cells"  --  the phrase occurs 1 time in the document; ...
+    [no]  hpc  --  not in the document, and not in any document of the corpus
+  [yes] (+ ... 2 parts)  --  ...
+  [no]  (+ ... 2 parts)  --  at least one part must hold; 0 of 2 hold
+    [no]  susceptibility  --  not in the document (it is in 105 documents of the corpus)
+    [no]  infectivity  --  not in the document (it is in 12 documents of the corpus)
+```
 
 ### 9.6 Stretch items (cut from the bottom if time runs short)
 SSR ranking (E3, H9), TREC-COVID (a larger dataset, for latency and size), the multi-call agent (E4, H8),
