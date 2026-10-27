@@ -380,8 +380,10 @@ the request as written (constraint sentence included), never the Boolean query. 
 `RERANKERS`; the only one now is a free local cross-encoder (`cross-encoder/ms-marco-MiniLM-L6-v2`, revision pinned),
 for development. Which reranker the confirmatory runs use (Jev and/or a cross-encoder) is not decided; until an
 entry is marked as fixed in hypotheses.md, the script reranks train runs only. Scores are cached in
-`results/work/rerank_cache/`. On this laptop's CPU it scores about 19 pairs a second, so 809 train queries at
-N = 100 take a bit over an hour; N = 30 afterwards comes from the cache.
+`results/work/rerank_cache/`, one file per device. On this laptop's CPU it scores about 19 pairs a second (809
+train queries at N = 100 take over an hour per system), so long runs go to a free Colab GPU: open
+`colab/rerank.ipynb` in Colab (push first; it clones the repository), run all, unzip the downloaded
+`rerank_results.zip` into the project folder. The run's `.json` records the device.
 
 ### 9.4 The targeted constraint query set
 SciFact's own queries rarely contain exclusions or exact identifiers, which are exactly where Boolean should

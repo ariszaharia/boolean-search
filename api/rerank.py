@@ -12,8 +12,10 @@ entry in RERANKERS, a free local cross-encoder, used for development; until an e
 the script reranks train runs only. An API reranker such as Jev becomes one
 more entry (with its own scoring function) once there is a key; nothing else changes.
 
-Every score is cached (results/work/rerank_cache/, one file per reranker and revision), keyed by the exact
-request and document text, so a rerun or N = 30 after N = 100 costs nothing.
+Every score is cached (results/work/rerank_cache/, one file per reranker, revision and device), keyed by the
+exact request and document text, so a rerun or N = 30 after N = 100 costs nothing.
+Uses the GPU when there is one. The laptop's CPU does about 19 pairs a second (all of train at N = 100 is over an
+hour per system), so long runs go to Google Colab: colab/rerank.ipynb.
 
 Writes  results/runs/<run>-rr<N>-<reranker>_<split>.tsv    query_id <TAB> rank <TAB> doc_id <TAB> score
         results/runs/<run>-rr<N>-<reranker>_<split>.json   the settings, and the run that was reranked
@@ -45,9 +47,11 @@ RERANKERS = {
                   'description': 'MiniLM-L6 cross-encoder trained on MS MARCO; the reranker of the BEIR paper '
                                  '(Thakur et al., 2021). Local, free; development only for now'},
 }
-# One pair at a time: on this CPU it is the fastest (about 19 pairs a second against 13 for batches of 32, since
-# nothing is padded), and a pair's score then never depends on which other pairs shared its batch.
-BATCH = 1
+# Pairs per forward pass. On the laptop's CPU one pair at a time is the fastest (about 19 pairs a second against
+# 13 for batches of 32, since nothing is padded). On a GPU (Google Colab) batches are much faster. A score can
+# differ in about the 6th decimal between devices and batch sizes, so each device has its own cache file and the
+# run's .json records the device.
+BATCH = {'cpu': 1, 'cuda': 64}
 CACHE_DIR = os.path.join(WORK, 'rerank_cache')
 
 
@@ -63,8 +67,11 @@ class CrossEncoder:
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
         self.setting = setting
         self.tokenizer = AutoTokenizer.from_pretrained(setting['model'], revision=setting['revision'])
-        self.model = AutoModelForSequenceClassification.from_pretrained(setting['model'],
-                                                                        revision=setting['revision']).eval()
+        import torch
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device_name = torch.cuda.get_device_name(0) if self.device == 'cuda' else 'cpu'
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            setting['model'], revision=setting['revision']).eval().to(self.device)
 
     def n_truncated(self, pairs):
         """How many (request, document) pairs are longer than max_tokens (their document gets cut)."""
@@ -77,21 +84,21 @@ class CrossEncoder:
         import torch
         scores = []
         with torch.no_grad():
-            for start in range(0, len(pairs), BATCH):
-                batch = pairs[start:start + BATCH]
+            for start in range(0, len(pairs), BATCH[self.device]):
+                batch = pairs[start:start + BATCH[self.device]]
                 requests, documents = [p[0] for p in batch], [p[1] for p in batch]
                 inputs = self.tokenizer(requests, documents, padding=True, truncation='only_second',
-                                        max_length=self.setting['max_tokens'], return_tensors='pt')
+                                        max_length=self.setting['max_tokens'], return_tensors='pt').to(self.device)
                 scores.extend(self.model(**inputs).logits[:, 0].tolist())
         return scores
 
 
 class Cache:
-    """Scores already computed, one file per reranker and revision: key <TAB> score, one line per pair."""
+    """Scores already computed, one file per reranker, revision and device: key <TAB> score, one line per pair."""
 
-    def __init__(self, alias, setting):
+    def __init__(self, alias, setting, device):
         os.makedirs(CACHE_DIR, exist_ok=True)
-        self.path = os.path.join(CACHE_DIR, f'{alias}_{setting["revision"][:12]}.tsv')
+        self.path = os.path.join(CACHE_DIR, f'{alias}_{setting["revision"][:12]}_{device}.tsv')
         self.scores = {}
         if os.path.isfile(self.path):
             with open(self.path, encoding='utf-8') as f:
@@ -157,9 +164,9 @@ def main():
     documents = dict(zip(ids, texts))
 
     reranker = CrossEncoder(setting)
-    cache = Cache(args.reranker, setting)
-    print(f'Reranking the top {args.n} of {len(run)} queries from {args.run} with {args.reranker} '
-          f'({len(cache.scores)} scores in the cache)')
+    cache = Cache(args.reranker, setting, reranker.device)
+    print(f'Reranking the top {args.n} of {len(run)} queries from {args.run} with {args.reranker} on '
+          f'{reranker.device_name} ({len(cache.scores)} scores in the cache)')
     reranked, hits = rerank(run, requests, documents, args.n, reranker, cache)
     with open(out_path, 'w', encoding='utf-8') as out:
         for qid, items in reranked.items():
@@ -185,6 +192,8 @@ def main():
             'reranker_input': 'request text as in the split (constraint sentence included) + document title and '
                               f'text; pairs over {setting["max_tokens"]} tokens have the document cut, never the '
                               'request',
+            'device': reranker.device, 'device_name': reranker.device_name,
+            'batch_size': BATCH[reranker.device], 'cache_file': os.path.relpath(cache.path, ROOT),
             'pairs_scored': n_pairs, 'pairs_from_cache': hits, 'pairs_truncated': n_truncated,
             'corpus': 'data/scifact.tsv', 'corpus_sha256': corpus_sha256(),
             'queries_sha256': file_sha256(queries_path(args.split)),

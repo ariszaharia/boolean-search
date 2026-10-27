@@ -259,7 +259,8 @@ test runs NOT made yet, they come at the end with the final runs):
       Jev because it is unusual. The choice is written into hypotheses.md before any reranked run on the
       targeted set or test. The reranking step is built so that the reranker is one setting.
       Built 2026-10-28: api/rerank.py (cross-encoder/ms-marco-MiniLM-L6-v2, revision 233902d2, pinned). It
-      refuses targeted and test until a RERANKERS entry is marked as fixed in hypotheses.md.
+      refuses targeted and test until a RERANKERS entry is marked as fixed in hypotheses.md. Uses the GPU when
+      there is one; long runs go to Google Colab (colab/rerank.ipynb), since the laptop's CPU does ~19 pairs/s.
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.
