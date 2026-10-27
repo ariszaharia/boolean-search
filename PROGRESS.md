@@ -238,8 +238,20 @@ test runs NOT made yet, they come at the end with the final runs):
       - What is left is mostly vocabulary, not the prompt: e.g. the relevant document says "macrolides" where
         the claim says "erythromycin"; abstracts write "proinflammatory" more often than "pro-inflammatory".
         A strict AND cannot recover from that by itself: this is what relaxation (E2) is for.
-      - NEXT: decide E2's relaxation trigger (clarification in hypotheses.md before any E2 run), build E2, then
-        decide whether a 7B model is enough (E1 + E2 on the parts, compared with a stronger model if available).
+      - E2 BUILT 2026-10-27 (rule fixed first, in hypotheses.md, commit 913e246: relax only when E1's valid
+        query finds nothing; the model rewrites in the same conversation; at most 2 rounds; every word E1
+        excluded must stay excluded, checked mechanically). `run_planner.py --system E2` runs E1 (from the cache)
+        and then `planner.relax`. Development, same prompt v4:
+        | | E1 empty | E2 empty | E1 relevant in top 10 | E2 relevant in top 10 |
+        |---|---|---|---|---|
+        | part a | 20 / 30 | 10 / 30 | 6 | 12 |
+        | part b | 18 / 30 | 13 / 30 | 6 | 10 |
+        Relaxation drops a part, adds variants, or shortens phrases; sometimes it turns the AND into an OR (one
+        set of 783 documents): the precision cost H4 expects. Side effect of the exclusion check: it cannot tell
+        a requested exclusion from a false one, so E1's false NOTs (from "no relation" claims) are kept; on
+        part b 3 relaxed queries were rejected for that. It protects the targeted set's real exclusions.
+      - NEXT: decide whether a 7B model is enough: compare Sol and Astra on parts a and b (E1 and E2, about $1
+        with Astra) when the API key exists; then fix the model and prompt before any confirmatory run.
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.

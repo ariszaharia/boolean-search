@@ -24,7 +24,7 @@ import re
 import subprocess
 import urllib.request
 
-from baseline_pyserini import ROOT, WORK
+from baseline_pyserini import CORPUS, ROOT, WORK, words_of
 from greek import greek_to_names
 
 # Each model the planner can use. version pins the exact weights: for Ollama, the digest of the model files,
@@ -189,12 +189,13 @@ def retry_hint(error):
     return ''
 
 
-def plan(requests, llm, boolean_cli, max_retries=MAX_RETRIES):
-    """requests: [(query_id, text)]. Returns {query_id: {'query': the last query written, 'ok': whether it parses,
-    'attempts': [{'answer', 'query', 'error'}]}}. A rejected query is sent back with the engine's message."""
-    conversations = {qid: base_messages() + [{'role': 'user', 'content': text}] for qid, text in requests}
-    result = {qid: {'query': '', 'ok': False, 'attempts': []} for qid, _ in requests}
-    pending = [qid for qid, _ in requests]
+def write_queries(conversations, llm, boolean_cli, max_retries=MAX_RETRIES):
+    """The core loop: asks the model for a query at the end of each conversation ({query_id: messages}, each ending
+    with a user turn) and sends a rejected query back with the engine's message, at most max_retries times.
+    Returns {query_id: {'query', 'ok', 'attempts': [{'answer', 'query', 'error'}]}}; each conversation is extended
+    in place with the rejected answers and messages, but not with the last answer."""
+    result = {qid: {'query': '', 'ok': False, 'attempts': []} for qid in conversations}
+    pending = list(conversations)
     for attempt in range(1 + max_retries):
         if not pending:
             break
@@ -218,5 +219,120 @@ def plan(requests, llm, boolean_cli, max_retries=MAX_RETRIES):
                 next_pending.append(qid)
             else:
                 result[qid]['ok'] = True
+        pending = next_pending
+    return result
+
+
+def plan(requests, llm, boolean_cli, max_retries=MAX_RETRIES):
+    """E1. requests: [(query_id, text)]. Returns (result, conversations): result as in write_queries, and the
+    conversations (without the last answer), which E2 continues."""
+    conversations = {qid: base_messages() + [{'role': 'user', 'content': text}] for qid, text in requests}
+    return write_queries(conversations, llm, boolean_cli, max_retries), conversations
+
+
+# --- E2: relaxation (hypotheses.md, clarification of 2026-10-27) ---
+
+MAX_RELAX_ROUNDS = 2
+RELAX_MESSAGE = ('This query is valid but matched no documents. Write a broader query: fewer AND parts, more '
+                 'variants and synonyms, shorter phrases. Keep every exclusion (- ...) and every term the request '
+                 'requires. Answer again in the same three lines.')
+QUERY_TOKEN = re.compile(r'\(|\)|"[^"]*"|[^\s()"]+')
+
+
+def parse_tree(query):
+    """A query as nested lists: (- (^ a "b c") d) -> ['-', ['^', 'a', '"b c"'], 'd']. Only for queries the engine
+    has already accepted, so it does not check the syntax again."""
+    tokens = QUERY_TOKEN.findall(query)
+
+    def node(i):
+        if tokens[i] != '(':
+            return tokens[i], i + 1
+        operator, children, i = tokens[i + 1], [], i + 2
+        while tokens[i] != ')':
+            child, i = node(i)
+            children.append(child)
+        return [operator] + children, i + 1
+
+    return node(0)[0]
+
+
+def excluded_words(query):
+    """Every word inside the excluded operands (all but the first) of every (- ...) in the query, as the engine
+    splits them (lowercase, alphanumeric runs)."""
+    found = set()
+
+    def leaves(n):
+        return [n] if isinstance(n, str) else [leaf for child in n[1:] for leaf in leaves(child)]
+
+    def walk(n):
+        if isinstance(n, str):
+            return
+        if n[0] == '-':
+            for operand in n[2:]:
+                for leaf in leaves(operand):
+                    found.update(words_of(leaf.strip('"')))
+        for child in n[1:]:
+            walk(child)
+
+    walk(parse_tree(query))
+    return found
+
+
+def set_sizes(pairs, boolean_cli):
+    """{query_id: size of the Boolean set on the corpus} for queries the engine accepts."""
+    os.makedirs(WORK, exist_ok=True)
+    paths = {name: os.path.join(WORK, f'relax_{name}.tsv') for name in ('queries', 'run', 'sizes', 'failures')}
+    with open(paths['queries'], 'w', encoding='utf-8') as f:
+        for qid, query in pairs:
+            f.write(f'{qid}\t{query}\n')
+    subprocess.run([boolean_cli, CORPUS, paths['queries'], paths['run'], paths['sizes'], paths['failures'], '1'],
+                   check=True, capture_output=True)
+    with open(paths['sizes'], encoding='utf-8') as f:
+        return {line.split('\t')[0]: int(line.split('\t')[1]) for line in f if line.strip()}
+
+
+def relax(first, conversations, llm, boolean_cli, rounds=MAX_RELAX_ROUNDS):
+    """E2 from E1's result and conversations (plan). For each valid E1 query with an empty set: up to `rounds`
+    rounds in which the model is asked for a broader query; the first non-empty set ends them. A relaxed query that
+    drops a word E1 excluded is rejected. Returns {query_id: {'query' (E2's), 'ok', 'e1_query', 'e1_size',
+    'rounds': [{'attempts', 'query', 'ok', 'rejected', 'size'}]}}."""
+    valid = [qid for qid in first if first[qid]['ok']]
+    e1_sizes = set_sizes([(qid, first[qid]['query']) for qid in valid], boolean_cli)
+    result = {qid: {'query': first[qid]['query'], 'ok': first[qid]['ok'], 'e1_query': first[qid]['query'],
+                    'e1_size': e1_sizes.get(qid), 'rounds': []} for qid in first}
+    pending = [qid for qid in valid if e1_sizes[qid] == 0]
+    note = {qid: '' for qid in pending}
+    last_answer = {qid: first[qid]['attempts'][-1]['answer'] for qid in pending}
+    for r in range(rounds):
+        if not pending:
+            break
+        print(f'  relaxation round {r + 1}: {len(pending)} empty queries', flush=True)
+        for qid in pending:
+            conversations[qid] += [{'role': 'assistant', 'content': last_answer[qid]},
+                                   {'role': 'user', 'content': note[qid] + RELAX_MESSAGE}]
+        written = write_queries({qid: conversations[qid] for qid in pending}, llm, boolean_cli)
+        accepted = []
+        for qid in pending:
+            w = written[qid]
+            last_answer[qid] = w['attempts'][-1]['answer']
+            entry = {'attempts': w['attempts'], 'query': w['query'], 'ok': w['ok'], 'rejected': None, 'size': None}
+            if w['ok']:
+                dropped = sorted(excluded_words(result[qid]['e1_query']) - excluded_words(w['query']))
+                if dropped:
+                    entry['rejected'] = f'dropped the exclusion of: {" ".join(dropped)}'
+                    note[qid] = f'Your last query dropped the exclusion of {" ".join(dropped)}; keep it. '
+                else:
+                    note[qid] = ''
+                    accepted.append(qid)
+            result[qid]['rounds'].append(entry)
+        sizes = set_sizes([(qid, written[qid]['query']) for qid in accepted], boolean_cli)
+        next_pending = []
+        for qid in pending:
+            entry = result[qid]['rounds'][-1]
+            if qid in sizes:
+                entry['size'] = sizes[qid]
+                result[qid]['query'] = written[qid]['query']
+            if sizes.get(qid, 0) == 0:
+                next_pending.append(qid)
         pending = next_pending
     return result
