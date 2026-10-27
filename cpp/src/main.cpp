@@ -69,7 +69,7 @@ int main() {
     // 1. Load the real SciFact data. 
     // Assuming you compile in the root 'licenta' folder and run as ./test_engine
     // or compile in 'src' and run. Adjust path if necessary.
-    load_tsv_corpus("../data/scifact_5k.tsv", index);
+    load_tsv_corpus("../data/scifact.tsv", index);
 
     // If no documents loaded, we shouldn't continue
     if (index.get_total_docs() == 0) {
@@ -78,7 +78,7 @@ int main() {
     }
 
     // 2. Initialize the Scorer
-    BM25Scorer scorer(index);
+    BM25Scorer scorer(index, 1.2, 0.75);
 
     std::cout << "=== SCIFACT EVALUATION ===\n\n";
 

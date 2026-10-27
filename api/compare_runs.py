@@ -16,6 +16,9 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 RESULTS = os.path.join(ROOT, 'results')
 
+sys.path.insert(0, ROOT)   # so that "harness" can be imported when this file is run directly
+from harness.run_io import read_run as load_run   # noqa: E402
+
 THRESHOLDS = {
     'mean_top10_overlap': 0.95,
     'share_queries_overlap_at_least_0.8': 0.90,
@@ -28,15 +31,6 @@ THRESHOLDS = {
 # The amended metric 4 divides the engine score by it before comparing.
 K1 = 1.2
 
-
-def load_run(path):
-    """{query_id: [(doc_id, score), ...]} in rank order."""
-    rows = {}
-    with open(path, encoding='utf-8') as f:
-        for line in f:
-            qid, rank, doc_id, score = line.rstrip('\r\n').split('\t')
-            rows.setdefault(qid, []).append((int(rank), int(doc_id), float(score)))
-    return {q: [(d, s) for _, d, s in sorted(v)] for q, v in rows.items()}
 
 
 def pearson(x, y):

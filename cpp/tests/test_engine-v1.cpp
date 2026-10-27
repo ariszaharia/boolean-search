@@ -1,3 +1,5 @@
+// These tests use assert, which a Release build (NDEBUG) turns off. Keep it on.
+#undef NDEBUG
 #include <iostream>
 #include <vector>
 #include <cmath>

@@ -7,6 +7,11 @@
 #include <cctype>
 #include <algorithm>
 
+namespace {
+    // isspace on a negative char (a UTF-8 byte) is undefined, so convert to unsigned first.
+    bool is_space(char c) { return std::isspace(static_cast<unsigned char>(c)) != 0; }
+}
+
 void InvertedIndex::add_document(int doc_id, const std::string& text) {
     if (has_documents && doc_id <= last_doc_id) {
         throw std::invalid_argument("InvertedIndex::add_document: doc_id must be strictly increasing (got " + std::to_string(doc_id) + " after " + std::to_string(last_doc_id) + ")");
@@ -20,7 +25,7 @@ void InvertedIndex::add_document(int doc_id, const std::string& text) {
 
     std::unordered_map<std::string, std::vector<int>> word_positions;
 
-    for (int pos = 0; pos < tokens.size(); ++pos) {
+    for (int pos = 0; pos < static_cast<int>(tokens.size()); ++pos) {
         word_positions[tokens[pos]].push_back(pos);
     }
 
@@ -104,14 +109,14 @@ std::vector<int> InvertedIndex::difference(const std::vector<int>& a, const std:
 }
 
 QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos, int depth) const {
-    while (pos < query.length() && std::isspace(query[pos])) pos++;
+    while (pos < query.length() && is_space(query[pos])) pos++;
     if (pos >= query.length()) throw ParseError("unexpected end of query", pos);
 
     if (query[pos] == '(') {
         if (depth >= 500) throw ParseError("query nested too deeply", pos);
         size_t open_pos = pos;
         pos++;
-        while (pos < query.length() && std::isspace(query[pos])) pos++;
+        while (pos < query.length() && is_space(query[pos])) pos++;
         if (pos >= query.length()) throw ParseError("expected an operator after '('", pos);
 
         QueryOperator op;
@@ -123,7 +128,7 @@ QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos, int 
 
         QueryNode node(op);
         while (true) {
-            while (pos < query.length() && std::isspace(query[pos])) pos++;
+            while (pos < query.length() && is_space(query[pos])) pos++;
             if (pos >= query.length()) throw ParseError("missing ')' for the '(' opened", open_pos);
             if (query[pos] == ')') { pos++; break; }
             node.children.push_back(parse_query(query, pos, depth + 1));
@@ -147,7 +152,12 @@ QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos, int 
     }
 
     size_t start = pos;
-    while (pos < query.length() && !std::isspace(query[pos]) && query[pos] != ')') pos++;
+    while (pos < query.length() && !is_space(query[pos]) && query[pos] != ')') {
+        // foo"bar" or a(b would otherwise be read as one term; reject them instead.
+        if (query[pos] == '(' || query[pos] == '"')
+            throw ParseError("'(' or '\"' inside a term (a space is missing before it)", pos);
+        pos++;
+    }
     std::string term = query.substr(start, pos - start);
     if (tokenizer.tokenize(term).empty()) throw ParseError("term has no searchable characters", start);
     return QueryNode(QueryOperator::TERM, term);
@@ -156,7 +166,7 @@ QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos, int 
 QueryNode InvertedIndex::parse(const std::string& query) const {
     size_t pos = 0;
     QueryNode ast = parse_query(query, pos);
-    while (pos < query.length() && std::isspace(query[pos])) pos++;
+    while (pos < query.length() && is_space(query[pos])) pos++;
     if (pos < query.length()) throw ParseError("unexpected text after the query", pos);
     return ast;
 }
@@ -366,6 +376,22 @@ int InvertedIndex::get_term_frequency(const std::string& term, int doc_id) const
 
 namespace {
     constexpr uint32_t INDEX_FORMAT_VERSION = 3;
+
+    [[noreturn]] void throw_truncated() {
+        throw std::runtime_error("InvertedIndex::load: file ended too early (truncated or corrupt index)");
+    }
+
+    // Reads one count (a length or a number of items). Every item takes at least one byte, so a
+    // count bigger than the bytes left in the file means the file is bad. Checking it before
+    // allocating avoids reserving gigabytes for a garbage number.
+    size_t read_count(std::ifstream& in, std::uintmax_t file_size) {
+        size_t n = 0;
+        in.read(reinterpret_cast<char*>(&n), sizeof(n));
+        if (!in) throw_truncated();
+        std::uintmax_t position = static_cast<std::uintmax_t>(in.tellg());
+        if (n > file_size - position) throw_truncated();
+        return n;
+    }
 }
 
 void InvertedIndex::save(const std::string& path) const {
@@ -440,7 +466,7 @@ void InvertedIndex::load(const std::string& path) {
         throw std::runtime_error("Could not open file for reading");
     }
 
-    uint32_t format_version;
+    uint32_t format_version = 0;
     in.read(reinterpret_cast<char*>(&format_version), sizeof(format_version));
     if (format_version != INDEX_FORMAT_VERSION) {
         throw std::runtime_error("InvertedIndex::load: unsupported index format version " +
@@ -448,67 +474,79 @@ void InvertedIndex::load(const std::string& path) {
             "). Rebuild the index.");
     }
 
-    in.read(reinterpret_cast<char*>(&total_docs), sizeof(total_docs));
-    in.read(reinterpret_cast<char*>(&total_length), sizeof(total_length));
+    // Loading replaces whatever this index held before. If the file turns out to be bad,
+    // the index is left empty rather than half loaded.
+    *this = InvertedIndex();
+    try {
+        const std::uintmax_t file_size = std::filesystem::file_size(path);
 
-    size_t doc_lengths_count;
-    in.read(reinterpret_cast<char*>(&doc_lengths_count), sizeof(doc_lengths_count));
+        in.read(reinterpret_cast<char*>(&total_docs), sizeof(total_docs));
+        in.read(reinterpret_cast<char*>(&total_length), sizeof(total_length));
 
-    for (size_t i = 0; i < doc_lengths_count; i++) {
-        int doc_id, length;
-        in.read(reinterpret_cast<char*>(&doc_id), sizeof(doc_id));
-        in.read(reinterpret_cast<char*>(&length), sizeof(length));
-        doc_lengths[doc_id] = length;
-    }
+        size_t doc_lengths_count = read_count(in, file_size);
 
-    size_t index_count;
-    in.read(reinterpret_cast<char*>(&index_count), sizeof(index_count));
-
-    for (size_t i = 0; i < index_count; i++) {
-        size_t term_len;
-        in.read(reinterpret_cast<char*>(&term_len), sizeof(term_len));
-
-        std::string word(term_len, '\0');
-        in.read(&word[0], term_len);
-
-        size_t posting_size;
-        in.read(reinterpret_cast<char*>(&posting_size), sizeof(posting_size));
-
-        std::vector<Posting> postings;
-        postings.reserve(posting_size);
-
-        for (size_t j = 0; j < posting_size; j++) {
-            Posting p;
-            in.read(reinterpret_cast<char*>(&p.doc_id), sizeof(p.doc_id));
-            in.read(reinterpret_cast<char*>(&p.frequency), sizeof(p.frequency));
-            
-            size_t pos_size;
-            in.read(reinterpret_cast<char*>(&pos_size), sizeof(pos_size));
-            p.positions.resize(pos_size);
-            if (pos_size > 0) {
-                in.read(reinterpret_cast<char*>(p.positions.data()), pos_size * sizeof(int));
-            }
-
-            postings.push_back(p);
+        for (size_t i = 0; i < doc_lengths_count; i++) {
+            int doc_id, length;
+            in.read(reinterpret_cast<char*>(&doc_id), sizeof(doc_id));
+            in.read(reinterpret_cast<char*>(&length), sizeof(length));
+            doc_lengths[doc_id] = length;
         }
 
-        index[word] = postings;
+        size_t index_count = read_count(in, file_size);
+
+        for (size_t i = 0; i < index_count; i++) {
+            size_t term_len = read_count(in, file_size);
+
+            std::string word(term_len, '\0');
+            in.read(&word[0], term_len);
+
+            size_t posting_size = read_count(in, file_size);
+
+            std::vector<Posting> postings;
+            postings.reserve(posting_size);
+
+            for (size_t j = 0; j < posting_size; j++) {
+                Posting p;
+                in.read(reinterpret_cast<char*>(&p.doc_id), sizeof(p.doc_id));
+                in.read(reinterpret_cast<char*>(&p.frequency), sizeof(p.frequency));
+                
+                size_t pos_size = read_count(in, file_size);
+                p.positions.resize(pos_size);
+                if (pos_size > 0) {
+                    in.read(reinterpret_cast<char*>(p.positions.data()), pos_size * sizeof(int));
+                }
+
+                postings.push_back(p);
+            }
+
+            index[word] = postings;
+        }
+
+        size_t documents_count = read_count(in, file_size);
+
+        for (size_t i = 0; i < documents_count; i++) {
+            int doc_id;
+            in.read(reinterpret_cast<char*>(&doc_id), sizeof(doc_id));
+
+            size_t text_len = read_count(in, file_size);
+
+            std::string text(text_len, '\0');
+            in.read(&text[0], text_len);
+
+            documents[doc_id] = std::move(text);
+        }
+
+        if (!in) throw_truncated();
+    } catch (...) {
+        *this = InvertedIndex();
+        throw;
     }
 
-    size_t documents_count;
-    in.read(reinterpret_cast<char*>(&documents_count), sizeof(documents_count));
-
-    for (size_t i = 0; i < documents_count; i++) {
-        int doc_id;
-        in.read(reinterpret_cast<char*>(&doc_id), sizeof(doc_id));
-
-        size_t text_len;
-        in.read(reinterpret_cast<char*>(&text_len), sizeof(text_len));
-
-        std::string text(text_len, '\0');
-        in.read(&text[0], text_len);
-
-        documents[doc_id] = std::move(text);
+    // add_document after a load must still continue after the highest loaded id.
+    has_documents = !doc_lengths.empty();
+    last_doc_id = 0;
+    for (const auto& pair : doc_lengths) {
+        last_doc_id = std::max(last_doc_id, pair.first);
     }
 }
 

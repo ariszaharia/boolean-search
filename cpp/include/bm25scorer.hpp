@@ -23,7 +23,7 @@ private:
     double score_node(const QueryNode& node, int doc_id, int N, double avgdl) const;
 
 public:
-    BM25Scorer(const InvertedIndex& idx, double k1_val = 1.5, double b_val = 0.75);
+    BM25Scorer(const InvertedIndex& idx, double k1_val = 1.2, double b_val = 0.75);
     
     std::vector<SearchResult> score(const std::vector<int>& matched_docs, const std::string& query) const;
 };

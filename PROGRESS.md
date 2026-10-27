@@ -19,7 +19,14 @@ Query language: `(^ a b)` AND, `(+ a b)` OR, `(- A B)` NOT (A minus the rest), `
 - BM25 scored from the parsed query: a phrase is one unit (phrase frequency, summed idf); NOT scores only its first
   operand; ties are broken by doc id, so results are always in the same order. Term lookup is a binary search.
 - Textbook BM25 including the (k1+1) factor, k1 = 1.2, b = 0.75 (tests pass these explicitly).
-- Tests (run from `cpp/`): `test_engine-v1.cpp` (6), `test_phrase.cpp` (25), `test_scoring.cpp` (12). All pass.
+- Tests: `test_engine-v1.cpp` (6), `test_phrase.cpp` (25), `test_scoring.cpp` (12), `test_index_io.cpp` (12:
+  UTF-8 text, terms glued to `(`/`"`, save/load). All pass. Build and run them with CMake (from `cpp/`):
+  `cmake -S . -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release`, `cmake --build build`,
+  `ctest --test-dir build --output-on-failure`. Executables are linked statically, because otherwise another
+  program's libstdc++ DLL on PATH makes them stop at start (exit code 0xc0000139).
+- Tokenizer: non-ASCII (UTF-8) bytes separate words, so "α-synuclein" is indexed as "synuclein". Fixed on
+  2026-10-27 to pass bytes as unsigned char (it was undefined behaviour); SciFact results are byte-for-byte
+  the same as before. Whether to keep Greek letters etc. as part of words is still open (matters for H3).
 - Full SciFact corpus: `python api/prep_scifact.py` -> `data/scifact.tsv`, 5,183 documents, ids increasing.
 - Pyserini comparison (300 SciFact test queries, Pyserini built without stemming/stopwords, same k1/b):
   top-10 overlap 0.959, same #1 document 96.7%, Spearman 0.985. Scores differ by exactly the factor (k1+1) = 2.2,
@@ -28,8 +35,8 @@ Query language: `(^ a b)` AND, `(+ a b)` OR, `(- A B)` NOT (A minus the rest), `
   splits them (checked by hand on one query only).
 
 How to rerun the comparison (from the project folder):
-`python api/baseline_pyserini.py`, then build and run `cpp/src/search_cli.cpp`
-(`search_cli ..\data\scifact.tsv ..\results\queries_words.tsv ..\results\engine_top100.tsv 100`), then
+`python api/baseline_pyserini.py`, then build with CMake (above) and run
+`cpp\build\search_cli data\scifact.tsv results\queries_words.tsv results\engine_top100.tsv 100`, then
 `python api/compare_runs.py`.
 
 ## Decisions taken
@@ -39,11 +46,11 @@ How to rerun the comparison (from the project folder):
 - Work step by step; Aris reads every diff and must be able to explain every line.
 
 ## Things to remember / unresolved
-- `bm25scorer.hpp` still defaults to k1 = 1.5. Experiments must pass 1.2 explicitly (or the default should change).
+- `bm25scorer.hpp` now defaults to k1 = 1.2 (was 1.5 until 2026-10-27); experiments still pass it explicitly.
 - `_phase0_reference/` holds an older, bigger version of the engine (Porter stemmer, stopwords, positions with gaps,
   save format v4, 139 tests). Not part of the build. Use it only if stemming/stopwords are wanted later.
 - Something outside Claude removed comments from `inverted_index.hpp/.cpp` while editing. Cause unknown (editor
-  plugin or formatter?). Check before the next editing session.
+  plugin or formatter?). Happened again before 2026-10-27 (comments put back by hand). Still unexplained.
 - `.git` contains harmless leftover files named `stale-index-lock-claude*` (can be deleted).
 - Check whether the university requires disclosing AI-written code, before submitting.
 - The tokenizer difference (decimals) is only verified on one query.

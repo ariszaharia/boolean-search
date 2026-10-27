@@ -1,33 +1,36 @@
-"""Scores a run against qrels with ir_measures (never hand-written metrics).
+"""Scores a run against qrels with ir_measures (the metrics are never written by hand).
 
 Rules that keep every system comparable:
-  * The query set is the set of qrels queries that have at least one relevant document.
-  * A query for which the system returned nothing scores 0 (an empty Boolean result is a failure,
-    not a missing value).
-  * Ties never matter: the rank in the run file is turned into the score, so the order the
-    system wrote is the order that is scored.
+  * The scored queries are the ones with at least one relevant document (see data.scorable_queries).
+  * A scored query for which the system returned nothing gets 0. An empty Boolean result is a
+    failure of that system, not a missing value.
+  * The order written in the run file is the order that is scored. The rank is turned into a
+    strictly decreasing score, so ties in the original scores can never change the ranking.
 """
-from .data import queries_with_relevant_docs
+from .data import scorable_queries
 
-MEASURES = ['nDCG@10', 'R@100', 'Judged@10']
+MEASURES = ['nDCG@10', 'R@100']
 
 
 def evaluate_run(run, qrels, measures=MEASURES):
-    """run: {qid: [(doc_id, score), ...]} in rank order. Returns {measure: {qid: value}}."""
+    """run: {qid: [(doc_id, score), ...]} in rank order.
+    Returns {measure: {qid: value}} with one value for every scored query."""
     import ir_measures
 
-    queries = queries_with_relevant_docs(qrels)
-    qrels = {q: qrels[q] for q in queries}
-    parsed = {m: ir_measures.parse_measure(m) for m in measures}
+    queries = scorable_queries(qrels)
+    judged = {q: qrels[q] for q in queries}
+    parsed = {str(ir_measures.parse_measure(m)): m for m in measures}
 
-    ranked = {q: {d: float(1_000_000 - i) for i, (d, _) in enumerate(items)}
-              for q, items in run.items() if q in qrels}
+    ranked = {}
+    for qid, items in run.items():
+        if qid in judged:
+            ranked[qid] = {doc_id: float(len(items) - i) for i, (doc_id, _) in enumerate(items)}
 
     per_query = {m: {q: 0.0 for q in queries} for m in measures}
-    for result in ir_measures.iter_calc(list(parsed.values()), qrels, ranked):
-        per_query[str(result.measure)][result.query_id] = float(result.value)
+    for result in ir_measures.iter_calc(list(ir_measures.parse_measure(m) for m in measures), judged, ranked):
+        per_query[parsed[str(result.measure)]][result.query_id] = float(result.value)
     return per_query
 
 
 def means(per_query):
-    return {m: sum(v.values()) / len(v) for m, v in per_query.items()}
+    return {m: sum(values.values()) / len(values) for m, values in per_query.items()}
