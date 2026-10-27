@@ -33,6 +33,26 @@ def evaluate_run(run, qrels, measures=MEASURES):
     return per_query
 
 
+def set_cutoffs(sizes, qrels, pool_n):
+    """H1's cutoff for every scored query (hypotheses.md, H1 precision clarification): k = min(set size, N).
+    A query whose set is empty, or that failed (no line in the set-size file), gets k = N: there the Boolean
+    system scores 0 and the other system is scored at N."""
+    return {q: min(sizes[q], pool_n) if sizes.get(q, 0) > 0 else pool_n for q in scorable_queries(qrels)}
+
+
+def precision_at(run, qrels, cutoffs):
+    """Precision with its own cutoff for each query: {qid: P@cutoffs[qid]}. P@k always divides by k, so ranks the
+    run does not fill count as not relevant. ir_measures is called once per distinct cutoff."""
+    by_cutoff = {}
+    for q, k in cutoffs.items():
+        by_cutoff.setdefault(k, []).append(q)
+    values = {}
+    for k, queries in by_cutoff.items():
+        measure = f'P@{k}'
+        values.update(evaluate_run(run, {q: qrels[q] for q in queries}, [measure])[measure])
+    return values
+
+
 def empty_queries(run, qrels):
     """Scored queries for which the system returned no document (the query is missing from its run file)."""
     return [q for q in scorable_queries(qrels) if not run.get(q)]

@@ -8,6 +8,10 @@ the queries where both systems returned something.
 
     python -m harness.compare --a results/E1.tsv --b results/B1.tsv --split train
 
+With --sizes (A's set-size file, query_id <TAB> set_size) it also compares H1's precision at
+k = min(set size, N), N = --pool-n (default 100). A query that failed has no line in that file; it counts
+like an empty set in both analyses and is also listed on its own (failed_queries_a).
+
 Holm correction is not applied here: it is done once over all confirmatory tests (stats.holm).
 """
 import argparse
@@ -15,17 +19,27 @@ import json
 import os
 
 from .data import ROOT, load_qrels, scorable_queries
-from .metrics import MEASURES, empty_queries, evaluate_run, restrict
-from .run_io import read_run, run_name
+from .metrics import MEASURES, empty_queries, evaluate_run, precision_at, restrict, set_cutoffs
+from .run_io import check_set_sizes, read_run, read_set_sizes, run_name
 from .stats import N_RESAMPLES, SEED, paired_bootstrap
 
 
-def compare_runs(run_a, run_b, qrels, nonempty_from='a', measures=MEASURES):
-    """Returns the comparison as a dict (see main for what is printed)."""
+def compare_runs(run_a, run_b, qrels, nonempty_from='a', measures=MEASURES, sizes_a=None, pool_n=100):
+    """Returns the comparison as a dict (see main for what is printed).
+    sizes_a: {qid: set size} of A (read_set_sizes); adds H1's precision at k = min(set size, pool_n)."""
     if nonempty_from not in ('a', 'both'):
         raise ValueError(f"nonempty_from must be 'a' or 'both', got {nonempty_from!r}")
     queries = scorable_queries(qrels)
     per_a, per_b = evaluate_run(run_a, qrels, measures), evaluate_run(run_b, qrels, measures)
+    measures = list(measures)
+    if sizes_a is not None:
+        check_set_sizes(run_a, sizes_a, pool_n)
+        cutoffs = set_cutoffs(sizes_a, qrels, pool_n)
+        p_name = f'P@min(|S|,{pool_n})'
+        per_a[p_name], per_b[p_name] = precision_at(run_a, qrels, cutoffs), precision_at(run_b, qrels, cutoffs)
+        measures.append(p_name)
+    # With sizes_a, A's empty queries are its empty sets plus its failed queries (check_set_sizes made sure
+    # that neither has results).
     empty_a, empty_b = empty_queries(run_a, qrels), empty_queries(run_b, qrels)
 
     excluded = set(empty_a) | (set(empty_b) if nonempty_from == 'both' else set())
@@ -36,6 +50,9 @@ def compare_runs(run_a, run_b, qrels, nonempty_from='a', measures=MEASURES):
            'zero_result_rate_b': len(empty_b) / len(queries),
            'empty_queries_a': empty_a, 'empty_queries_b': empty_b,
            'n_resamples': N_RESAMPLES, 'seed': SEED, 'measures': {}}
+    if sizes_a is not None:
+        out['pool_n'] = pool_n
+        out['failed_queries_a'] = [q for q in queries if q not in sizes_a]
     for m in measures:
         result = {'empty_as_zero': paired_bootstrap(per_a[m], per_b[m])}
         if nonempty:
@@ -52,27 +69,39 @@ def main():
     ap.add_argument('--b', required=True, help='run file of system B')
     ap.add_argument('--split', required=True, choices=['train', 'test'])
     ap.add_argument('--nonempty-from', default='a', choices=['a', 'both'])
+    ap.add_argument('--sizes', help="A's set-size file (query_id <TAB> set_size); adds H1's precision")
+    ap.add_argument('--pool-n', type=int, default=100, help='N in k = min(set size, N) (default 100)')
     ap.add_argument('--name', help='name for the output file, before _<split> (default: A_vs_B, the run file '
-                                   'names without _<split>, so B3_train.tsv and B1_train.tsv give B3_vs_B1_train.json)')
+                                   'names without _<split>, so B3_train.tsv and B1_train.tsv give B3_vs_B1_train.json; '
+                                   'with --sizes, _N<pool-n> is added: E1_vs_B1_N100_test.json)')
     args = ap.parse_args()
 
     qrels = load_qrels(args.split)
-    out = compare_runs(read_run(args.a), read_run(args.b), qrels, args.nonempty_from)
+    sizes_a = read_set_sizes(args.sizes) if args.sizes else None
+    out = compare_runs(read_run(args.a), read_run(args.b), qrels, args.nonempty_from,
+                       sizes_a=sizes_a, pool_n=args.pool_n)
     out.update({'run_a': args.a, 'run_b': args.b, 'split': args.split})
+    if args.sizes:
+        out['sizes_a'] = args.sizes
 
     print(f'A: {args.a}\nB: {args.b}\nSplit "{args.split}", {out["n_queries"]} scored queries. '
           f'Zero results: A {out["zero_result_rate_a"]:.1%}, B {out["zero_result_rate_b"]:.1%}.')
+    if sizes_a is not None:
+        print(f'Failed queries of A (no set size; counted as empty): {len(out["failed_queries_a"])}. '
+              f'N = {args.pool_n}.')
     for m, result in out['measures'].items():
         for analysis in ('nonempty', 'empty_as_zero'):
             r = result[analysis]
             if r is None:
-                print(f'  {m:8s} {analysis:13s} no query left')
+                print(f'  {m:15s} {analysis:13s} no query left')
                 continue
-            print(f'  {m:8s} {analysis:13s} n={r["n"]:4d}  A {r["mean_a"]:.4f}  B {r["mean_b"]:.4f}  '
+            print(f'  {m:15s} {analysis:13s} n={r["n"]:4d}  A {r["mean_a"]:.4f}  B {r["mean_b"]:.4f}  '
                   f'A-B {r["mean_diff"]:+.4f}  95% CI [{r["ci_low"]:+.4f}, {r["ci_high"]:+.4f}]  '
                   f'p {r["p_value"]:.4f}')
 
     name = args.name or f'{run_name(args.a, args.split)}_vs_{run_name(args.b, args.split)}'
+    if args.sizes and not args.name:
+        name += f'_N{args.pool_n}'
     out_dir = os.path.join(ROOT, 'results', 'comparisons')
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, f'{name}_{args.split}.json')

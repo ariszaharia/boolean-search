@@ -38,3 +38,44 @@ def read_run(path):
             raise ValueError(f'{path}: query {qid} lists the same document twice')
         run[qid] = [(doc_id, score) for _, doc_id, score in items]
     return run
+
+
+def read_set_sizes(path):
+    """Reads an E run's set-size file into {query_id: size}. One line per query that ran:
+
+        query_id <TAB> set_size
+
+    Size 0 = the query matched nothing. A query that failed (for example ParseError after the retries) has no line.
+    """
+    sizes = {}
+    with open(path, encoding='utf-8') as f:
+        for line_no, line in enumerate(f, start=1):
+            line = line.rstrip('\r\n')
+            if not line:
+                continue
+            parts = line.split('\t')
+            if len(parts) != 2:
+                raise ValueError(f'{path}:{line_no}: expected 2 tab-separated columns, got {len(parts)}')
+            qid, size = parts
+            if qid in sizes:
+                raise ValueError(f'{path}:{line_no}: query {qid} appears twice')
+            if not size.isdigit():
+                raise ValueError(f'{path}:{line_no}: the set size must be a whole number >= 0, got {size!r}')
+            sizes[qid] = int(size)
+    return sizes
+
+
+def check_set_sizes(run, sizes, pool_n):
+    """Checks that a run file and its set-size file agree, so that empty sets, failed queries and the cutoff
+    k = min(set size, N) cannot be mixed up. Raises ValueError at the first disagreement."""
+    for qid, items in run.items():
+        if qid not in sizes:
+            raise ValueError(f'query {qid} has results but no set size (a failed query has neither)')
+        if len(items) > sizes[qid]:
+            raise ValueError(f'query {qid}: {len(items)} results, but its set has only {sizes[qid]} documents')
+        if len(items) < min(sizes[qid], pool_n):
+            raise ValueError(f'query {qid}: {len(items)} results, fewer than min(set size {sizes[qid]}, '
+                             f'N = {pool_n})')
+    for qid, size in sizes.items():
+        if size > 0 and qid not in run:
+            raise ValueError(f'query {qid}: set size {size}, but no results in the run file')

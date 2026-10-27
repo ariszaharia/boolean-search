@@ -235,18 +235,32 @@ plus each system's zero-result rate. It saves everything to `results/comparisons
 - `--nonempty-from both` keeps only the queries where both are non-empty.
 - Holm is **not** applied here (it needs all tests at once, see 6.5).
 
+**H1's precision (`--sizes`, `--pool-n`).** An E run writes, next to its run file, a set-size file with one line
+per query: `query_id <TAB> set_size`. Size 0 = the query matched nothing; a query that failed (for example a
+ParseError after the retries) has no line. With
+```
+venv\Scripts\python.exe -m harness.compare --a E1_test.tsv --b B1_test.tsv --split test --sizes E1_test_sizes.tsv
+```
+the comparison gets one more measure, `P@min(|S|,100)`: for each query, k = min(set size, N) with N = 100
+(`--pool-n 30` for the reported N = 30), and both systems are scored by precision at that k. Ranks a system does
+not fill count as not relevant. An empty set or a failed query gets k = N: A scores 0 and B is scored at N. Both
+count as empty in the two analyses (6.7), and the failed ones are also listed on their own (`failed_queries_a`).
+Before scoring, the set-size file is checked against the run file (no results for an empty set or a failed
+query, never more results than the set has, at least min(set size, N) results), so the three cases cannot be
+mixed up. The output is saved as `E1_vs_B1_N100_test.json`. The rule itself is the H1 precision clarification
+in `hypotheses.md`.
+
 ### 6.9 `harness/selftest.py`: checks of the harness itself
 ```
 venv\Scripts\python.exe -m harness.selftest
 ```
-36 small cases whose answers were worked out by hand: file parsing, nDCG and recall on tiny examples, the
-bootstrap on cases where the interval is known, Holm on a textbook example, and the two empty-result analyses.
+59 small cases whose answers were worked out by hand: file parsing, nDCG and recall on tiny examples, the
+bootstrap on cases where the interval is known, Holm on a textbook example, the two empty-result analyses,
+output file names, and H1's precision with set sizes (including every way a set-size file can disagree with
+its run file).
 Run it after any change to `harness/`.
 
 ### 6.10 Not built yet
-- **Precision of the Boolean set** and of the baselines' top-k with k = that query's set size (needed for H1).
-  Blocked by an open question: run files are cut at the top N, so they lose the true size of the Boolean set
-  (see "Open, decide before building E1" in `PROGRESS.md`).
 - **Results by query category** (needed for H1 to H3 on the targeted set, section 9.4). Waits for the format of
   the targeted set.
 - **The final Holm script**, which collects the p-values of all confirmatory tests. Waits for the experiments.

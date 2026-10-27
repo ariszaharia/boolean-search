@@ -9,8 +9,8 @@ import tempfile
 
 from .compare import compare_runs
 from .data import read_qrels, scorable_queries
-from .metrics import empty_queries, evaluate_run
-from .run_io import read_run, run_name
+from .metrics import empty_queries, evaluate_run, precision_at, set_cutoffs
+from .run_io import check_set_sizes, read_run, read_set_sizes, run_name
 from .stats import equivalent, holm, paired_bootstrap
 
 failures = 0
@@ -176,6 +176,57 @@ def test_empty_results():
           both['measures']['nDCG@10']['nonempty']['n'] == 1)
 
 
+def test_set_precision():
+    sizes = read_set_sizes(write_temp('q1\t2\r\nq2\t5\n\nq3\t0\n'))       # q4 has no line: it failed
+    check('set sizes: parsed, CRLF and blank line tolerated', sizes == {'q1': 2, 'q2': 5, 'q3': 0})
+    check('set sizes: a line with 3 columns is rejected', raises(read_set_sizes, write_temp('q1\t2\t9\n')))
+    check('set sizes: a negative size is rejected', raises(read_set_sizes, write_temp('q1\t-1\n')))
+    check('set sizes: a size that is not a whole number is rejected', raises(read_set_sizes, write_temp('q1\t2.5\n')))
+    check('set sizes: the same query twice is rejected', raises(read_set_sizes, write_temp('q1\t2\nq1\t3\n')))
+
+    # N = 3. q1: set of 2 -> k = 2. q2: set of 5 -> k = N = 3. q3: empty set and q4: failed -> k = N = 3.
+    qrels = {'q1': {'d1': 1, 'd2': 1}, 'q2': {'d3': 1}, 'q3': {'d4': 1}, 'q4': {'d5': 1}}
+    run_a = {'q1': [('d1', 2.0), ('x1', 1.0)], 'q2': [('d3', 3.0), ('x2', 2.0), ('x3', 1.0)]}
+    run_b = {'q1': [('x1', 3.0), ('d2', 2.0), ('d1', 1.0)], 'q2': [('x1', 3.0), ('x2', 2.0), ('x3', 1.0)],
+             'q3': [('d4', 3.0), ('x1', 2.0), ('x2', 1.0)], 'q4': [('d5', 1.0)]}
+    cutoffs = set_cutoffs(sizes, qrels, 3)
+    check('cutoffs: k = min(set size, N); N for an empty set and for a failed query',
+          cutoffs == {'q1': 2, 'q2': 3, 'q3': 3, 'q4': 3})
+    p_a, p_b = precision_at(run_a, qrels, cutoffs), precision_at(run_b, qrels, cutoffs)
+    check('precision: A = 1/2, 1/3, 0, 0 (empty set and failed query score 0)',
+          all(close(p_a[q], v) for q, v in {'q1': 1 / 2, 'q2': 1 / 3, 'q3': 0, 'q4': 0}.items()))
+    check('precision: B is cut at A\'s k (q1 at k = 2 is 1/2, not 2/3 at k = 3)', close(p_b['q1'], 1 / 2))
+    check('precision: ranks B does not fill count as not relevant (q4: 1 document, k = 3 -> 1/3)',
+          close(p_b['q4'], 1 / 3))
+
+    check_set_sizes(run_a, sizes, 3)
+    check('set sizes vs run: a consistent pair passes (no exception above)', True)
+    check('set sizes vs run: results for an empty set are rejected',
+          raises(check_set_sizes, {**run_a, 'q3': [('d4', 1.0)]}, sizes, 3))
+    check('set sizes vs run: results for a query with no set size are rejected',
+          raises(check_set_sizes, {**run_a, 'q4': [('d5', 1.0)]}, sizes, 3))
+    check('set sizes vs run: more results than the set has are rejected',
+          raises(check_set_sizes, {**run_a, 'q1': [('d1', 3.0), ('x1', 2.0), ('x2', 1.0)]}, sizes, 3))
+    check('set sizes vs run: fewer results than min(set size, N) are rejected',
+          raises(check_set_sizes, {**run_a, 'q2': [('d3', 1.0)]}, sizes, 3))
+    check('set sizes vs run: a non-empty set with no results is rejected',
+          raises(check_set_sizes, {'q1': run_a['q1']}, sizes, 3))
+    check('set sizes vs run: a run cut at 100 is fine for N = 2 (H1 at N = 30 uses the N = 100 run)',
+          raises(check_set_sizes, run_a, sizes, 2) is False)
+
+    # A - B per query: 0, +1/3, -1/3, -1/3. Primary (q1, q2): +1/6. Second (all four): -1/12.
+    out = compare_runs(run_a, run_b, qrels, sizes_a=sizes, pool_n=3)
+    p = out['measures']['P@min(|S|,3)']
+    check('compare: the primary analysis keeps q1 and q2 only (n = 2, mean +0.1667)',
+          p['nonempty']['n'] == 2 and close(p['nonempty']['mean_diff'], 1 / 6))
+    check('compare: the second analysis counts the empty set and the failed query as 0 (n = 4, mean -0.0833)',
+          p['empty_as_zero']['n'] == 4 and close(p['empty_as_zero']['mean_diff'], -1 / 12))
+    check('compare: q4 is listed as failed, q3 and q4 as empty',
+          out['failed_queries_a'] == ['q4'] and out['empty_queries_a'] == ['q3', 'q4'])
+    check('compare: an inconsistent set-size file stops the comparison',
+          raises(compare_runs, run_a, run_b, qrels, 'a', ['nDCG@10'], {'q1': 2}, 3))
+
+
 def main():
     test_qrels()
     test_run_io()
@@ -183,6 +234,7 @@ def main():
     test_bootstrap()
     test_holm()
     test_empty_results()
+    test_set_precision()
     print('\nALL SELF-TESTS PASSED' if failures == 0 else f'\n{failures} SELF-TEST(S) FAILED')
     sys.exit(0 if failures == 0 else 1)
 

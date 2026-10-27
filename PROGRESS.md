@@ -41,7 +41,7 @@ How to rerun the comparison (from the project folder):
 Python: use the project venv, `venv\Scripts\python.exe` (it has pyserini, ir_measures, numpy). Plain `python`
 on this machine opens the Microsoft Store shortcut.
 
-Evaluation harness (`harness/`, self-tests: `venv\Scripts\python.exe -m harness.selftest`, 39 checks, all pass):
+Evaluation harness (`harness/`, self-tests: `venv\Scripts\python.exe -m harness.selftest`, 59 checks, all pass):
 - `python -m harness.evaluate --run R.tsv --split train` scores one run (nDCG@10, R@30, R@100; R@30 and R@100
   are the recall of the N = 30 and N = 100 pools).
 - `python -m harness.compare --a A.tsv --b B.tsv --split train` compares two runs, A minus B: paired 95% bootstrap
@@ -89,8 +89,12 @@ test runs NOT made yet, they come at the end with the final runs):
   B3 against B1 -> `results/comparisons/B3_vs_B1_train.json` (`harness.run_io.run_name`). The old
   `B1_train_train.json`, `B2_train_train.json` and `B2_train_vs_B1_train_train.json` were regenerated under the
   new names (contents byte-for-byte the same) and removed.
-- Not built yet: H1's precision at k = min(set size, N) and reading the set-size file, per-category reporting
-  (needs the targeted set's format), the final script that collects all confirmatory p-values for Holm.
+- H1's precision (built 2026-10-27): `harness.compare --sizes E1_test_sizes.tsv [--pool-n 30]` adds
+  `P@min(|S|,N)`, computed by ir_measures once per distinct k, after checking the set-size file against the
+  run file. Checked on real runs: with every set size = the number of results, it equals plain P@100 exactly.
+  On standard SciFact queries P@100 is about 0.01 for B1 and B2 (about 1 relevant document per query).
+- Not built yet: per-category reporting (needs the targeted set's format), the final script that collects all
+  confirmatory p-values for Holm. The E runner must write the set-size file (format in HOW_IT_WORKS.md 6.8).
 - Decided 2026-10-27 (H1 precision clarification in hypotheses.md, before any E1 run): precision at
   k = min(|S|, N), N = 100 primary (N = 30 reported, not tested); E1 = top k of its set by BM25, B1/B3 = their
   own top k. E runs write the usual run file cut at N plus `query_id <TAB> set_size` (0 = matched nothing,
