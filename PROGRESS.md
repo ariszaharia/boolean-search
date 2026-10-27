@@ -50,7 +50,7 @@ How to rerun the comparison (from the project folder):
 Python: use the project venv, `venv\Scripts\python.exe` (it has pyserini, ir_measures, numpy). Plain `python`
 on this machine opens the Microsoft Store shortcut.
 
-Evaluation harness (`harness/`, self-tests: `venv\Scripts\python.exe -m harness.selftest`, 59 checks, all pass):
+Evaluation harness (`harness/`, self-tests: `venv\Scripts\python.exe -m harness.selftest`, 67 checks, all pass):
 - `python -m harness.evaluate --run R.tsv --split train` scores one run (nDCG@10, R@30, R@100; R@30 and R@100
   are the recall of the N = 30 and N = 100 pools).
 - `python -m harness.compare --a A.tsv --b B.tsv --split train` compares two runs, A minus B: paired 95% bootstrap
@@ -112,8 +112,12 @@ test runs NOT made yet, they come at the end with the final runs):
   `P@min(|S|,N)`, computed by ir_measures once per distinct k, after checking the set-size file against the
   run file. Checked on real runs: with every set size = the number of results, it equals plain P@100 exactly.
   On standard SciFact queries P@100 is about 0.01 for B1 and B2 (about 1 relevant document per query).
-- Not built yet: per-category reporting (needs the targeted set's format), the final script that collects all
-  confirmatory p-values for Holm. The E runner must write the set-size file (format in HOW_IT_WORKS.md 6.8).
+- Targeted split (built 2026-10-27): `--split targeted` in evaluate and compare reads `data/targeted/qrels.tsv`
+  and reports every group on its own (constraint = H1, each category, trap/no-trap), saved under `by_group`;
+  HOW_IT_WORKS.md 6.10. Checked: groups match the frozen set (75 / 25 x 4 / 24 + 1), a perfect run scores 1.0
+  in every group, train outputs unchanged.
+- Not built yet: the final script that collects all confirmatory p-values for Holm. The E runner must write the
+  set-size file (format in HOW_IT_WORKS.md 6.8).
 - Decided 2026-10-27 (H1 precision clarification in hypotheses.md, before any E1 run): precision at
   k = min(|S|, N), N = 100 primary (N = 30 reported, not tested); E1 = top k of its set by BM25, B1/B3 = their
   own top k. E runs write the usual run file cut at N plus `query_id <TAB> set_size` (0 = matched nothing,
@@ -139,8 +143,8 @@ test runs NOT made yet, they come at the end with the final runs):
 
 ## What is left, in order
 1. DONE 2026-10-27: hypotheses H1 to H9 committed in 9cf3a80 (16:22), recorded in "Committed on".
-2. Evaluation harness: built (see above). Baselines B1, B2, B3 run and scored on train. Left: precision of the
-   Boolean set (H1), per-category reporting, the Holm script, the set-size decision before E1.
+2. Evaluation harness: built (see above): scoring, statistics, H1 precision, targeted groups. Baselines B1, B2,
+   B3 run and scored on train. Left: the Holm script (needs the experiments).
 3. Planner: an OpenAI model with a pinned version, temperature 0, prompt with grammar and examples, everything
    logged and cached; retries on `ParseError`; relaxation loop for zero results (E0, E1, E2).
 4. Reranker (Jev and an open cross-encoder) on the same top-N pool for every system.
@@ -175,7 +179,7 @@ test runs NOT made yet, they come at the end with the final runs):
       terms are lowercase as extracted ("preventable ades", "enhancer rnas").
       FROZEN 2026-10-27: Aris reviewed all 100 and accepted them without changes (recorded in the Deviation).
       From here on the set is not edited; any change goes under Deviations in hypotheses.md.
-   c. Harness: split "targeted" in load_qrels, per-category results.
+   c. DONE 2026-10-27: harness split "targeted" with results by group (HOW_IT_WORKS.md 6.10).
    d. Then the planner (step 3).
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,

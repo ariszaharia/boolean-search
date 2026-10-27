@@ -12,13 +12,16 @@ With --sizes (A's set-size file, query_id <TAB> set_size) it also compares H1's 
 k = min(set size, N), N = --pool-n (default 100). A query that failed has no line in that file; it counts
 like an empty set in both analyses and is also listed on its own (failed_queries_a).
 
+On the targeted split it also compares every group (data.load_groups: constraint, each category, trap and
+no-trap) on its own queries; those are the results H1 to H3 use, not the pool of all 100.
+
 Holm correction is not applied here: it is done once over all confirmatory tests (stats.holm).
 """
 import argparse
 import json
 import os
 
-from .data import ROOT, load_qrels, scorable_queries
+from .data import ROOT, SPLITS, load_groups, load_qrels, scorable_queries
 from .metrics import MEASURES, empty_queries, evaluate_run, precision_at, restrict, set_cutoffs
 from .run_io import check_set_sizes, read_run, read_set_sizes, run_name
 from .stats import N_RESAMPLES, SEED, paired_bootstrap
@@ -63,32 +66,15 @@ def compare_runs(run_a, run_b, qrels, nonempty_from='a', measures=MEASURES, size
     return out
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('--a', required=True, help='run file of system A (by convention the Boolean one)')
-    ap.add_argument('--b', required=True, help='run file of system B')
-    ap.add_argument('--split', required=True, choices=['train', 'test'])
-    ap.add_argument('--nonempty-from', default='a', choices=['a', 'both'])
-    ap.add_argument('--sizes', help="A's set-size file (query_id <TAB> set_size); adds H1's precision")
-    ap.add_argument('--pool-n', type=int, default=100, help='N in k = min(set size, N) (default 100)')
-    ap.add_argument('--name', help='name for the output file, before _<split> (default: A_vs_B, the run file '
-                                   'names without _<split>, so B3_train.tsv and B1_train.tsv give B3_vs_B1_train.json; '
-                                   'with --sizes, _N<pool-n> is added: E1_vs_B1_N100_test.json)')
-    args = ap.parse_args()
+def compare_by_group(run_a, run_b, qrels, groups, nonempty_from='a', measures=MEASURES, sizes_a=None, pool_n=100):
+    """compare_runs on each group's queries alone: {group: comparison}. Each group gets its own bootstrap
+    interval and p-value, computed only from that group's queries."""
+    return {group: compare_runs(run_a, run_b, {q: qrels[q] for q in qids if q in qrels}, nonempty_from, measures,
+                                sizes_a, pool_n)
+            for group, qids in groups.items()}
 
-    qrels = load_qrels(args.split)
-    sizes_a = read_set_sizes(args.sizes) if args.sizes else None
-    out = compare_runs(read_run(args.a), read_run(args.b), qrels, args.nonempty_from,
-                       sizes_a=sizes_a, pool_n=args.pool_n)
-    out.update({'run_a': args.a, 'run_b': args.b, 'split': args.split})
-    if args.sizes:
-        out['sizes_a'] = args.sizes
 
-    print(f'A: {args.a}\nB: {args.b}\nSplit "{args.split}", {out["n_queries"]} scored queries. '
-          f'Zero results: A {out["zero_result_rate_a"]:.1%}, B {out["zero_result_rate_b"]:.1%}.')
-    if sizes_a is not None:
-        print(f'Failed queries of A (no set size; counted as empty): {len(out["failed_queries_a"])}. '
-              f'N = {args.pool_n}.')
+def print_measures(out):
     for m, result in out['measures'].items():
         for analysis in ('nonempty', 'empty_as_zero'):
             r = result[analysis]
@@ -98,6 +84,45 @@ def main():
             print(f'  {m:15s} {analysis:13s} n={r["n"]:4d}  A {r["mean_a"]:.4f}  B {r["mean_b"]:.4f}  '
                   f'A-B {r["mean_diff"]:+.4f}  95% CI [{r["ci_low"]:+.4f}, {r["ci_high"]:+.4f}]  '
                   f'p {r["p_value"]:.4f}')
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--a', required=True, help='run file of system A (by convention the Boolean one)')
+    ap.add_argument('--b', required=True, help='run file of system B')
+    ap.add_argument('--split', required=True, choices=SPLITS)
+    ap.add_argument('--nonempty-from', default='a', choices=['a', 'both'])
+    ap.add_argument('--sizes', help="A's set-size file (query_id <TAB> set_size); adds H1's precision")
+    ap.add_argument('--pool-n', type=int, default=100, help='N in k = min(set size, N) (default 100)')
+    ap.add_argument('--name', help='name for the output file, before _<split> (default: A_vs_B, the run file '
+                                   'names without _<split>, so B3_train.tsv and B1_train.tsv give B3_vs_B1_train.json; '
+                                   'with --sizes, _N<pool-n> is added: E1_vs_B1_N100_test.json)')
+    args = ap.parse_args()
+
+    qrels = load_qrels(args.split)
+    groups = load_groups(args.split)
+    sizes_a = read_set_sizes(args.sizes) if args.sizes else None
+    run_a, run_b = read_run(args.a), read_run(args.b)
+    out = compare_runs(run_a, run_b, qrels, args.nonempty_from, sizes_a=sizes_a, pool_n=args.pool_n)
+    out.update({'run_a': args.a, 'run_b': args.b, 'split': args.split})
+    if args.sizes:
+        out['sizes_a'] = args.sizes
+
+    print(f'A: {args.a}\nB: {args.b}\nSplit "{args.split}", {out["n_queries"]} scored queries. '
+          f'Zero results: A {out["zero_result_rate_a"]:.1%}, B {out["zero_result_rate_b"]:.1%}.')
+    if sizes_a is not None:
+        print(f'Failed queries of A (no set size; counted as empty): {len(out["failed_queries_a"])}. '
+              f'N = {args.pool_n}.')
+    if groups:
+        print('All queries pooled (not used by any hypothesis; see the groups below):')
+    print_measures(out)
+    if groups:
+        out['by_group'] = compare_by_group(run_a, run_b, qrels, groups, args.nonempty_from,
+                                           sizes_a=sizes_a, pool_n=args.pool_n)
+        for group, result in out['by_group'].items():
+            print(f'\nGroup "{group}": {result["n_queries"]} queries. Zero results: A '
+                  f'{result["zero_result_rate_a"]:.1%}, B {result["zero_result_rate_b"]:.1%}.')
+            print_measures(result)
 
     name = args.name or f'{run_name(args.a, args.split)}_vs_{run_name(args.b, args.split)}'
     if args.sizes and not args.name:

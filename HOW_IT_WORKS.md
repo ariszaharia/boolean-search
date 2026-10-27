@@ -254,15 +254,28 @@ in `hypotheses.md`.
 ```
 venv\Scripts\python.exe -m harness.selftest
 ```
-59 small cases whose answers were worked out by hand: file parsing, nDCG and recall on tiny examples, the
+67 small cases whose answers were worked out by hand: file parsing, nDCG and recall on tiny examples, the
 bootstrap on cases where the interval is known, Holm on a textbook example, the two empty-result analyses,
-output file names, and H1's precision with set sizes (including every way a set-size file can disagree with
-its run file).
+output file names, H1's precision with set sizes (including every way a set-size file can disagree with
+its run file), and the groups of the targeted set.
 Run it after any change to `harness/`.
 
-### 6.10 Not built yet
-- **Results by query category** (needed for H1 to H3 on the targeted set, section 9.4). Waits for the format of
-  the targeted set.
+### 6.10 The targeted set: results by group
+`--split targeted` scores against `data/targeted/qrels.tsv` (the frozen set, section 9.4). Its 100 queries are
+never used as one pool: `evaluate` and `compare` also report every group on its own queries, each with its own
+interval and p-value, and save them under `by_group`:
+
+| group | queries | used by |
+|---|---|---|
+| `constraint` | exclusion + phrase + identifier (75) | H1 ("constraint queries") |
+| `exclusion`, `phrase`, `identifier` | 25 each | H3 (exclusion, identifier) |
+| `paraphrase` | 25 | H2 |
+| `phrase/trap`, `phrase/no-trap`, `identifier/trap`, `identifier/no-trap` | 1, 24, 1, 24 | description only |
+
+The pooled numbers are still printed, labelled "not used by any hypothesis". A trap group with 1 query has no
+meaningful interval; it is there only so the split by kind is visible.
+
+### 6.11 Not built yet
 - **The final Holm script**, which collects the p-values of all confirmatory tests. Waits for the experiments.
 
 ---

@@ -7,8 +7,9 @@ import os
 import sys
 import tempfile
 
-from .compare import compare_runs
-from .data import read_qrels, scorable_queries
+from .compare import compare_by_group, compare_runs
+from .data import groups_from_rows, read_qrels, scorable_queries
+from .evaluate import means_by_group
 from .metrics import empty_queries, evaluate_run, precision_at, set_cutoffs
 from .run_io import check_set_sizes, read_run, read_set_sizes, run_name
 from .stats import equivalent, holm, paired_bootstrap
@@ -227,6 +228,37 @@ def test_set_precision():
           raises(compare_runs, run_a, run_b, qrels, 'a', ['nDCG@10'], {'q1': 2}, 3))
 
 
+def test_groups():
+    rows = [('t1', 'exclusion', 'trap'), ('t2', 'exclusion', 'trap'), ('t3', 'phrase', 'trap'),
+            ('t4', 'phrase', 'no-trap'), ('t5', 'identifier', 'no-trap'), ('t6', 'paraphrase', 'paraphrase')]
+    groups = groups_from_rows(rows)
+    check('groups: constraint = exclusion + phrase + identifier, without paraphrase',
+          groups['constraint'] == ['t1', 't2', 't3', 't4', 't5'])
+    check('groups: each category, then trap/no-trap only where a category has both',
+          list(groups) == ['constraint', 'exclusion', 'phrase', 'identifier', 'paraphrase',
+                           'phrase/no-trap', 'phrase/trap'])
+    check('groups: an unknown category is rejected', raises(groups_from_rows, [('t1', 'animals', 'trap')]))
+
+    # One relevant document per query. A finds it at rank 1 for t1, t2, t5 (nDCG 1), B only for t6.
+    qrels = {f't{i}': {f'd{i}': 1} for i in range(1, 7)}
+    run_a = {f't{i}': [(f'd{i}' if i in (1, 2, 5) else 'x', 1.0)] for i in range(1, 7)}
+    run_b = {f't{i}': [(f'd{i}' if i == 6 else 'x', 1.0)] for i in range(1, 7)}
+    by = compare_by_group(run_a, run_b, qrels, groups, measures=['nDCG@10'])
+
+    def diff(group):
+        r = by[group]['measures']['nDCG@10']['nonempty']
+        return r['n'], round(r['mean_diff'], 4)
+    check('by group: exclusion is t1, t2 only (n = 2, A - B = +1)', diff('exclusion') == (2, 1.0))
+    check('by group: constraint pools t1 to t5 (n = 5, A - B = +0.6)', diff('constraint') == (5, 0.6))
+    check('by group: paraphrase is t6 only (n = 1, A - B = -1)', diff('paraphrase') == (1, -1.0))
+    check('by group: phrase/trap is t3 only (n = 1, A - B = 0)', diff('phrase/trap') == (1, 0.0))
+    per_query = evaluate_run(run_a, qrels, ['nDCG@10'])
+    m = means_by_group(per_query, groups)
+    check('means by group: exclusion 1.0, phrase 0.0, constraint 0.6 (n = 5)',
+          m['exclusion']['nDCG@10'] == 1.0 and m['phrase']['nDCG@10'] == 0.0
+          and close(m['constraint']['nDCG@10'], 0.6) and m['constraint']['n'] == 5)
+
+
 def main():
     test_qrels()
     test_run_io()
@@ -235,6 +267,7 @@ def main():
     test_holm()
     test_empty_results()
     test_set_precision()
+    test_groups()
     print('\nALL SELF-TESTS PASSED' if failures == 0 else f'\n{failures} SELF-TEST(S) FAILED')
     sys.exit(0 if failures == 0 else 1)
 
