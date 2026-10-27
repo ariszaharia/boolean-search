@@ -5,12 +5,15 @@
  "limit": null,
  "k": 100,
  "corpus": "data/scifact.tsv",
+ "corpus_sha256": "7865b98eee15e30e10c32560ebd5840a7778842f4a96c25582ff2204791b66b9",
+ "queries_sha256": "8b575d73d291563d3833b0447c9c72b9b2cdfca54aefb3a68e7b0172710eaea1",
  "k1": 1.2,
  "b": 0.75,
  "query_input": "engine words (lowercase, split on non-alphanumeric)",
  "analyzer": "Pyserini default (Porter stemming, English stopwords removed)",
  "index": "results\\work\\lucene_index_default",
  "pyserini_version": "2.4.0",
- "git_commit": "9cf3a800fc2a5089df42dceb8231fbfb3192a280",
- "run_at": "2026-10-27T16:23:08"
+ "git_commit": "6f7df5be3fd6a1d303d809ca9581026dc47f5b94",
+ "git_dirty": false,
+ "run_at": "2026-10-27T19:46:37"
 }

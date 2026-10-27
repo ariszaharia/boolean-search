@@ -89,12 +89,16 @@ test runs NOT made yet, they come at the end with the final runs):
   whenever they existed, which after D7 would have silently used the old text.)
 - Train results (`results/metrics/`, `results/comparisons/`; train only, before reranking, not a test of any
   hypothesis):
-  | system | nDCG@10 | R@30 | R@100 |
-  |---|---|---|---|
-  | B1 | 0.697 | 0.870 | 0.933 |
-  | B2 | 0.667 | 0.854 | 0.907 |
-  | B3 | 0.771 | 0.938 | 0.972 |
-  B1 minus B2 nDCG@10 +0.030 (95% interval +0.018 to +0.043); B3 minus B1 +0.074 (+0.052 to +0.095).
+  | system | nDCG@10 | R@30 | R@100 | before D7 (nDCG@10) |
+  |---|---|---|---|---|
+  | B1 | 0.699 | 0.869 | 0.933 | 0.697 |
+  | B2 | 0.667 | 0.854 | 0.907 | 0.667 |
+  | B3 | 0.769 | 0.938 | 0.972 | 0.771 |
+  After D7 (rerun 2026-10-27, corpus_sha256 7865b98e...): B1 minus B2 nDCG@10 +0.032 (95% interval +0.020 to
+  +0.044); B3 minus B1 +0.071 (+0.049 to +0.092). D7 moved 9 queries for B1, 12 for B2 and 14 for B3, both ways.
+  It helps BM25 slightly and costs dense slightly: on claim 846 ("IL-1beta") B1 went 0.631 -> 1.0 and B3
+  1.0 -> 0.631 (the embedding model presumably learned the Greek letter itself). Small, but worth one sentence
+  in the thesis: the Greek-letter choice interacts with the system type.
   B1 returns fewer than 100 documents for a few queries (80,827 rows instead of 80,900).
 - Output names (fixed 2026-10-27): the split appears once. evaluate/compare drop a trailing `_<split>` from the
   run file name and add it back once: `results/runs/B1_train.tsv` -> `results/metrics/B1_train.json`, and

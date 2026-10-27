@@ -105,6 +105,10 @@ corpus file all systems stay comparable. Cost: rebuild the corpus and both Lucen
 train (minutes; no hypothesis is tested on train), and a dated clarification, because data/scifact.tsv changes
 after the commit. The Pyserini check of Phase 0 stays valid for the old corpus; rerun it or note this.
 DECISION (Aris, 2026-10-27): the recommendation above, adopted.
+Implemented 2026-10-27 in api/greek.py. Detail fixed with it: each Greek letter becomes a separate word (a space
+is added where the name would touch a letter or digit: "IFNγ" -> "IFN gamma", "TGFβ1" -> "TGF beta 1"), as the
+engine already does at a hyphen; the micro sign µ, which looks the same as μ, is also written "mu". Write the
+rules of the identifier queries against the converted corpus (for example \btnf-alpha\b, not \btnf-α\b).
 
 ## D8. Files and format
 - data/targeted/queries.tsv     query_id, category, base_claim_id, kind (trap / no-trap / paraphrase), text
