@@ -222,4 +222,22 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
     (only on zero results, or also on few) is fixed with the planner design, before any E2 run.
 
 ## Deviations
-(None yet. Format: date, what changed, why, what the original text said.)
+Format: date, what changed, why, what the original text said.
+
+- 2026-10-27, authorship of the targeted set (decision D5). What changed: the 100 targeted queries are drafted by
+  Claude (Opus 5.5, Anthropic), not written by Aris by hand. Why: Aris decided not to write them himself.
+  What the text said (clarification of 2026-10-27): "Written by Aris by hand from a candidate list made by a
+  script; no LLM writes queries."
+  How the effect is limited, fixed before any query was drafted (api/targeted_draft.py, committed with this entry):
+  1. The planner will be a model from another family (OpenAI), the condition D5's option (b) set for an
+     LLM-written set.
+  2. Exclusion, phrase and identifier queries (75): the choice and the wording are mechanical. Claims are taken in
+     a fixed random order (seed 20261015) with a fixed rule per category; the constraint sentence comes from a
+     fixed list of phrasings, used in turn. Claude's only choices are the claims or terms it skips (for example a
+     constraint that makes no sense for its claim), each listed with its reason in data/targeted/skips.tsv.
+  3. Paraphrases (25): written freely by Claude, so this category is the most exposed to an LLM's way of
+     writing; this is said wherever H2 is reported.
+  4. Claude also wrote the reference predictions. Points 2 and the skip list are meant to keep that from shaping
+     the set; they do not rule it out.
+  Known limitation, reported with every result on the set: a set written by an LLM may be easier for an LLM
+  planner than one written by a person. Whether Aris reviewed the drafted queries is recorded at the freeze.
