@@ -7,10 +7,13 @@ exactly the same treatment; only the pool differs. The output has exactly the N 
 the pool had fewer): the Setting cuts every system to the same top N, so documents below N are not added back.
 
 Which reranker the confirmatory runs use is NOT decided yet (PROGRESS.md, 2026-10-28: Jev and/or a cross-encoder;
-it is written into hypotheses.md before any reranked run on the targeted set or on test). For now there is one
-entry in RERANKERS, a free local cross-encoder, used for development; until an entry has fixed_in_hypotheses set,
-the script reranks train runs only. An API reranker such as Jev becomes one
-more entry (with its own scoring function) once there is a key; nothing else changes.
+it is written into hypotheses.md before any reranked run on the targeted set or on test). For now RERANKERS has
+free local cross-encoders, used for development; until an entry has fixed_in_hypotheses set, the script reranks
+train runs only. An API reranker such as Jev becomes one more entry (with its own scoring function) once there is
+a key; nothing else changes.
+
+--sample N reranks only N claims of the development sample (api/dev_sample.py: train claims, never a base claim
+of the targeted set) and writes to results/dev/: for trying a reranker without running all of train.
 
 Every score is cached (results/work/rerank_cache/, one file per reranker, revision and device), keyed by the
 exact request and document text, so a rerun or N = 30 after N = 100 costs nothing.
@@ -23,6 +26,7 @@ For example B1_train.tsv, N = 100 -> B1-rr100-ce-minilm_train.tsv (harness name 
 
 Run from the project folder:
     venv\\Scripts\\python.exe api/rerank.py --run results/runs/B1_train.tsv --split train --n 100
+and, for the development sample, the same with --reranker bge-m3 --sample 200 at the end.
 Commit first: the .json records the git commit, and git_dirty = true if tracked files had uncommitted changes.
 """
 import argparse
@@ -31,9 +35,11 @@ import hashlib
 import json
 import os
 import sys
+import time
 from importlib.metadata import version
 
 from baseline_pyserini import ROOT, WORK, corpus_sha256, file_sha256
+from dev_sample import SAMPLE_SEED, dev_sample
 from run_baselines import git_commit, git_dirty, load_corpus, load_queries, queries_path
 
 sys.path.insert(0, ROOT)   # so that "harness" can be imported when this file is run directly
@@ -42,10 +48,18 @@ from harness.run_io import read_run, run_name   # noqa: E402
 RERANKERS = {
     'ce-minilm': {'kind': 'cross-encoder', 'model': 'cross-encoder/ms-marco-MiniLM-L6-v2',
                   'revision': '233902d25c440f23af6f7d6e94d2946bac0bee0a',   # Hugging Face commit, pinned 2026-10-28
-                  'max_tokens': 512,
+                  'max_tokens': 512, 'half_on_gpu': False,
                   'fixed_in_hypotheses': None,   # the date of the hypotheses.md entry that fixes it; None = not fixed
                   'description': 'MiniLM-L6 cross-encoder trained on MS MARCO; the reranker of the BEIR paper '
                                  '(Thakur et al., 2021). Local, free; development only for now'},
+    # About 25 times bigger than ce-minilm. half_on_gpu: computed in 16-bit numbers on the GPU, as its model card
+    # does (use_fp16=True); about 4 times faster on a T4, and scores keep about 3 significant digits.
+    'bge-m3': {'kind': 'cross-encoder', 'model': 'BAAI/bge-reranker-v2-m3',
+               'revision': '953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e',   # Hugging Face commit, pinned 2026-10-28
+               'max_tokens': 512, 'half_on_gpu': True,
+               'fixed_in_hypotheses': None,
+               'description': "BGE reranker v2 (M3), 568M parameters, from BAAI (who also made B3's model). Local, "
+                              'free; tried on a development sample of train (PROGRESS.md, 2026-10-28)'},
 }
 # Pairs per forward pass. On the laptop's CPU one pair at a time is the fastest (about 19 pairs a second against
 # 13 for batches of 32, since nothing is padded). On a GPU (Google Colab) batches are much faster. A score can
@@ -72,6 +86,9 @@ class CrossEncoder:
         self.device_name = torch.cuda.get_device_name(0) if self.device == 'cuda' else 'cpu'
         self.model = AutoModelForSequenceClassification.from_pretrained(
             setting['model'], revision=setting['revision']).eval().to(self.device)
+        self.half = self.device == 'cuda' and setting['half_on_gpu']
+        if self.half:
+            self.model.half()
 
     def n_truncated(self, pairs):
         """How many (request, document) pairs are longer than max_tokens (their document gets cut)."""
@@ -82,14 +99,18 @@ class CrossEncoder:
     def score(self, pairs):
         """[(request, document)] -> [score], in the same order."""
         import torch
-        scores = []
+        # Pairs of similar length go into the same batch, so less padding is computed.
+        order = sorted(range(len(pairs)), key=lambda i: len(pairs[i][1]))
+        scores = [None] * len(pairs)
+        size = BATCH[self.device]
         with torch.no_grad():
-            for start in range(0, len(pairs), BATCH[self.device]):
-                batch = pairs[start:start + BATCH[self.device]]
-                requests, documents = [p[0] for p in batch], [p[1] for p in batch]
+            for start in range(0, len(order), size):
+                batch = order[start:start + size]
+                requests, documents = [pairs[i][0] for i in batch], [pairs[i][1] for i in batch]
                 inputs = self.tokenizer(requests, documents, padding=True, truncation='only_second',
                                         max_length=self.setting['max_tokens'], return_tensors='pt').to(self.device)
-                scores.extend(self.model(**inputs).logits[:, 0].tolist())
+                for i, score in zip(batch, self.model(**inputs).logits[:, 0].float().tolist()):
+                    scores[i] = score
         return scores
 
 
@@ -119,6 +140,7 @@ def rerank(run, requests, documents, n, reranker, cache):
     Returns {query_id: [(doc_id, score)]}: the top n of each query, ordered by the reranker's score (equal scores
     keep their order in the input run). Also returns how many scores came from the cache."""
     out, hits = {}, 0
+    started, n_new = time.time(), 0
     for i, (qid, items) in enumerate(run.items(), start=1):
         pool = [doc for doc, _ in items[:n]]
         keys = [pair_key(requests[qid], documents[doc]) for doc in pool]
@@ -127,11 +149,13 @@ def rerank(run, requests, documents, n, reranker, cache):
         if missing:
             new = reranker.score([(requests[qid], documents[doc]) for _, doc in missing])
             cache.add({key: s for (key, _), s in zip(missing, new)})
+            n_new += len(missing)
         scored = [(doc, cache.scores[key]) for doc, key in zip(pool, keys)]
         # sorted() is stable, so equal scores keep the input run's order.
         out[qid] = sorted(scored, key=lambda pair: -pair[1])
-        if i % 100 == 0:
-            print(f'  reranked {i} / {len(run)} queries', flush=True)
+        if i % 20 == 0:
+            rate = n_new / (time.time() - started)
+            print(f'  reranked {i} / {len(run)} queries, {n_new} new pairs, {rate:.0f} new pairs a second', flush=True)
     return out, hits
 
 
@@ -141,7 +165,11 @@ def main():
     ap.add_argument('--split', required=True, choices=['train', 'test', 'targeted'])
     ap.add_argument('--n', type=int, required=True, choices=[30, 100], help='rerank the top N (the Setting: 30, 100)')
     ap.add_argument('--reranker', default='ce-minilm', choices=sorted(RERANKERS))
+    ap.add_argument('--sample', type=int, help='development: only N train claims of api/dev_sample.py (never '
+                                               'targeted base claims); writes to results/dev/')
     args = ap.parse_args()
+    if args.sample and args.split != 'train':
+        sys.exit('--sample is for development, on train only.')
 
     commit, dirty = git_commit(), git_dirty()
     if dirty:
@@ -152,14 +180,19 @@ def main():
                  'Write the reranker choice into hypotheses.md first, then set fixed_in_hypotheses.')
     source = run_name(args.run, args.split)
     name = f'{source}-rr{args.n}-{args.reranker}'
-    out_dir = os.path.dirname(os.path.abspath(args.run))
+    out_dir = os.path.join(ROOT, 'results', 'dev') if args.sample else os.path.dirname(os.path.abspath(args.run))
+    os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, f'{name}_{args.split}.tsv')
 
     run = read_run(args.run)
-    requests = {qid: text for qid, text, _ in load_queries(args.split, None)}
+    queries = load_queries(args.split, None)
+    requests = {qid: text for qid, text, _ in queries}
     unknown = sorted(set(run) - set(requests))
     if unknown:
         sys.exit(f'{args.run} has queries that are not in the {args.split} split, e.g. {unknown[:5]}')
+    if args.sample:
+        sample = {qid for qid, _, _ in dev_sample(queries, args.sample)}
+        run = {qid: items for qid, items in run.items() if qid in sample}
     ids, texts = load_corpus()
     documents = dict(zip(ids, texts))
 
@@ -183,6 +216,7 @@ def main():
         with open(source_meta, encoding='utf-8') as f:
             source_commit = json.load(f).get('git_commit')
     meta = {'system': name, 'split': args.split, 'n_queries': len(reranked), 'pool_n': args.n,
+            'sample': args.sample, 'sample_seed': SAMPLE_SEED if args.sample else None,
             'reranked_run': os.path.relpath(args.run, ROOT),
             'reranked_run_sha256': file_sha256(args.run),
             'reranked_run_git_commit': source_commit,
@@ -193,7 +227,8 @@ def main():
                               f'text; pairs over {setting["max_tokens"]} tokens have the document cut, never the '
                               'request',
             'device': reranker.device, 'device_name': reranker.device_name,
-            'batch_size': BATCH[reranker.device], 'cache_file': os.path.relpath(cache.path, ROOT),
+            'batch_size': BATCH[reranker.device], 'half_precision': reranker.half,
+            'cache_file': os.path.relpath(cache.path, ROOT),
             'pairs_scored': n_pairs, 'pairs_from_cache': hits, 'pairs_truncated': n_truncated,
             'corpus': 'data/scifact.tsv', 'corpus_sha256': corpus_sha256(),
             'queries_sha256': file_sha256(queries_path(args.split)),

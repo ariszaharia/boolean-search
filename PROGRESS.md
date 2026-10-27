@@ -273,6 +273,14 @@ test runs NOT made yet, they come at the end with the final runs):
       Fingerprints (2026-10-28): file_sha256 now ignores line endings (Colab has LF, this laptop CRLF), so both
       record the same value. data/scifact.tsv is 8003e6c7...; run files written before this change recorded the
       Windows copy, 7865b98e..., which is the same text. The B3 cache and the Lucene stamp were relabelled.
+      Pass rule for a reranker (written 2026-10-28, before any bge-m3 score exists; a development decision, not
+      a confirmatory test). Data: the first 200 claims of the development sample (api/dev_sample.py: train,
+      never a base claim of the targeted set), rerank.py --sample 200. A reranker passes if, at N = 100:
+        (1) the mean nDCG@10 of B3 reranked minus B3 alone is >= 0 (it does not make the best first stage worse),
+        (2) the mean nDCG@10 of B1 reranked minus B1 alone is > 0 (it improves BM25).
+      Reported with both: 95% paired intervals, and N = 30. The same rule and the same 200 claims are used for
+      every reranker tried later (Jev included). ce-minilm is scored on the same 200 claims from its train runs.
+      First candidate: BAAI/bge-reranker-v2-m3 (bge-m3 in RERANKERS, 16-bit on the GPU), on Colab.
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.

@@ -12,9 +12,9 @@ Writes  results/runs/<system>_<split>.tsv            the run: top 100 by BM25 in
 
 Development: --sample N runs N train claims that are neither base claims of the targeted set nor prompt examples,
 writes to results/dev/ instead, prints a short summary and adds it to results/prompt_dev_log.tsv (committed: the
-history of the prompt). The eligible claims are shuffled once (seed 20261015); --part a takes the first N, --part b
-the next N, so the two never overlap: tune on a, check the final prompt once on b. The prompt is developed only
-this way: never on the targeted set or on test.
+history of the prompt). The eligible claims are shuffled once (seed 20261015, api/dev_sample.py); --part a takes
+the first N, --part b the next N, so the two never overlap: tune on a, check the final prompt once on b. The
+prompt is developed only this way: never on the targeted set or on test.
 
 Run from the project folder (Ollama running; the engine built with CMake):
     venv\\Scripts\\python.exe api/run_planner.py --split train --sample 30
@@ -26,27 +26,13 @@ import collections
 import datetime
 import json
 import os
-import random
 import statistics
 
 from baseline_pyserini import ROOT, corpus_sha256, file_sha256
+from dev_sample import SAMPLE_SEED, dev_sample
 from planner import (EXAMPLE_CLAIMS, LLM, MAX_RELAX_ROUNDS, MAX_RETRIES, MAX_TOKENS, MODELS, RELAX_MESSAGE, SEED,
                      SYSTEM_PROMPT, TEMPERATURE, plan, prompt_sha256, relax)
 from run_baselines import BOOLEAN_CLI, K, git_commit, git_dirty, load_queries, queries_path, run_boolean
-
-SAMPLE_SEED = 20261015
-# Claims kept out of the development pool before it is shuffled: the examples of the first prompt (9309c3d). Fixed,
-# so parts a and b stay the same claims when the prompt's examples change. A new example must come from outside
-# both parts (main() stops if one is inside the part being run).
-DEV_EXCLUDED = ['1125', '334', '326', '1209']
-
-
-def targeted_base_claims():
-    with open(os.path.join(ROOT, 'data', 'targeted', 'queries.tsv'), encoding='utf-8') as f:
-        rows = [line.rstrip('\r\n').split('\t') for line in f if line.strip()]
-    col = rows[0].index('base_claim_id')
-    return {r[col] for r in rows[1:]}
-
 
 def dev_summary(out_path, sizes_path, qids, retried, split):
     """Prints how the run did on the sampled train claims: failures, empty sets, set sizes, relevant documents found.
@@ -113,11 +99,7 @@ def main():
     queries = load_queries(args.split, None)
     out_dir = os.path.join(ROOT, 'results', 'dev' if args.sample else 'runs')
     if args.sample:
-        excluded = targeted_base_claims() | set(DEV_EXCLUDED)
-        pool = sorted((q for q in queries if q[0] not in excluded), key=lambda q: int(q[0]))
-        random.Random(SAMPLE_SEED).shuffle(pool)
-        start = 0 if args.part == 'a' else args.sample
-        queries = sorted(pool[start:start + args.sample], key=lambda q: int(q[0]))
+        queries = dev_sample(queries, args.sample, 0 if args.part == 'a' else args.sample)
         inside = sorted(set(EXAMPLE_CLAIMS) & {q[0] for q in queries})
         if inside:
             raise SystemExit(f'prompt examples {inside} are inside this development part; pick examples elsewhere')
