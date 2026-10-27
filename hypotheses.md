@@ -173,6 +173,20 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
   B3 code); this clarification and the B3 code were committed together at 19:16 (commit 30500f9). The settings
   recorded in that run's file are the ones above. B3 was then run again on train from the commit that adds this note, so that
   its run file names the exact code. No B3 test run had been made.
+- 2026-10-27, H1 precision (H1 says k = the size of the query's Boolean set, but not what happens when the set is
+  larger than the pool N, nor which N; fixed before any E1 run): let S be the query's Boolean set. Precision is
+  computed at k = min(|S|, N) with N = 100, as in H2. E1's precision is that of the top k documents of S ranked by
+  BM25 (ties by doc id); B1's and B3's is that of their own top k for the same query. A system that returns fewer
+  than k documents counts the missing ranks as not relevant. When |S| <= N this is exactly the text of H1.
+  N = 30 is also reported, but it is not a confirmatory test and is not in the Holm correction.
+  Empty sets (|S| = 0): the primary analysis leaves the query out, as the Setting says; the second analysis gives
+  E1 precision 0 and compares it with B1's and B3's precision at k = N.
+  Why: the Setting cuts every Boolean result to the top N and compares every system on the same N, and only the
+  top N reaches the reranker; one fixed N avoids two tests for one hypothesis.
+  Run files: E runs write the usual run file cut at N, plus a file with one line per query, query_id <TAB>
+  set_size. Set size 0 means the query matched nothing. A query that failed (for example ParseError after the
+  retries) has no line; it is logged and reported separately, and is treated like an empty set in both analyses
+  (left out of the primary one, 0 in the second), so failures cannot silently leave the second analysis.
 
 ## Deviations
 (None yet. Format: date, what changed, why, what the original text said.)

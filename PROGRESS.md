@@ -89,14 +89,13 @@ test runs NOT made yet, they come at the end with the final runs):
   B3 against B1 -> `results/comparisons/B3_vs_B1_train.json` (`harness.run_io.run_name`). The old
   `B1_train_train.json`, `B2_train_train.json` and `B2_train_vs_B1_train_train.json` were regenerated under the
   new names (contents byte-for-byte the same) and removed.
-- Not built yet: precision of the Boolean set and top-k with k = set size (H1), per-category reporting
+- Not built yet: H1's precision at k = min(set size, N) and reading the set-size file, per-category reporting
   (needs the targeted set's format), the final script that collects all confirmatory p-values for Holm.
-- Open, decide before building E1 (blocks H1's precision): run files are cut at the top N, so they lose the size
-  of the Boolean set. A query matching 2,000 documents looks the same as one matching exactly 100, but H1 needs
-  k = the true set size. Decide (a) whether the engine writes the full set, or the top N plus a small file
-  `query_id <TAB> set_size`, and (b) what "precision of the Boolean set" means when the set is larger than N:
-  over the whole set, or over the top N. H1's text does not say; write the choice into hypotheses.md
-  (clarification or Deviation, dated) before any E1 run.
+- Decided 2026-10-27 (H1 precision clarification in hypotheses.md, before any E1 run): precision at
+  k = min(|S|, N), N = 100 primary (N = 30 reported, not tested); E1 = top k of its set by BM25, B1/B3 = their
+  own top k. E runs write the usual run file cut at N plus `query_id <TAB> set_size` (0 = matched nothing,
+  no line = failed; failures are reported separately and count like empty sets). Second analysis: an empty E1
+  set scores 0 against B1/B3 at k = N.
 
 ## Decisions taken
 - No stemming and no stopword removal in the engine for now: the engine is a pure exact-match engine.
@@ -124,6 +123,11 @@ test runs NOT made yet, they come at the end with the final runs):
 4. Reranker (Jev and an open cross-encoder) on the same top-N pool for every system.
 5. Targeted constraint query set (about 100 queries in 4 categories, written before any system runs) and the
    engine's `why-not(doc, query)` function.
+   Keep in mind: SciFact has about 1 relevant document per query, and precision at k = 100 can be at most
+   (number of relevant documents) / 100 for every system. If the targeted set's relevant sets are this small,
+   large precision gaps (H1 predicts about +20 points) are only possible on queries with small Boolean sets.
+   Decide the targeted set's design on its own merits and write it down before any run; do not shape it to
+   make H1 come out.
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.
