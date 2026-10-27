@@ -4,6 +4,8 @@ Status: DRAFT written 2026-10-15. Aris fills every "MY PREDICTION" line in his o
 then commits this file. Committed on: ____ (date and git commit id).
 Rule: no experiment may run before this file is committed. After that, the text of H1 to H9 is not edited.
 Anything that has to change is added at the bottom under "Deviations" with a date and the reason.
+"REFERENCE ESTIMATE (Claude, 2026-10-27)" lines are a second, independent prediction written by the AI assistant
+(Claude Opus 5.5) before any experiment. They are not Aris's predictions; both are reported against the results.
 
 ## Setting (fixed in advance)
 - Systems: B1 BM25 stemmed (Pyserini default analyzer) | B2 BM25 exact match | B3 dense (one named embedding model)
@@ -35,6 +37,9 @@ dense (B3) top-k, where k equals the size of that query's Boolean set.
 Primary test: mean paired difference in precision, E1 minus B1, on constraint queries (E1 minus B3 also reported).
 Falsified if: the 95% interval of E1 minus B1 includes 0 (BM25 matches within the interval).
 MY PREDICTION (direction and size, e.g. "E1 higher by ____ points"): ____
+REFERENCE ESTIMATE (Claude, 2026-10-27): E1 minus B1 is +15 to +30 precision points (about +20); E1 minus B3
+about +25. Reason: the targeted set's ground truth is a text rule, so a correct Boolean query nearly matches it by
+construction; most E1 errors will come from the LLM writing a wrong query, not from the engine.
 
 ## H2. Recall on paraphrase queries
 Statement: On paraphrase queries, the Boolean candidate set has lower recall than BM25 and dense.
@@ -42,6 +47,8 @@ Primary test: mean paired difference in recall of the top-N pool (N = 100), E1 m
 (E1 minus B3 also reported).
 Falsified if: the 95% interval of E1 minus B1 includes 0 or is positive.
 MY PREDICTION: ____
+REFERENCE ESTIMATE (Claude, 2026-10-27): E1 minus B1 is -15 to -25 recall@100 points; E1 minus B3 is -20 to -30.
+Reason: a strict AND over paraphrased wording drops many relevant documents; dense retrieval handles synonyms best.
 
 ## H3. nDCG on exclusions and exact identifiers
 Statement: After the same reranker on the same pool, E2 beats BM25 (B1) and dense (B3) in nDCG@10 on exclusion
@@ -49,6 +56,9 @@ queries and on exact-identifier queries.
 Primary test: mean paired difference in nDCG@10, E2 minus B1, separately for each of the two categories.
 Falsified if: no significant gain for either category after Holm correction.
 MY PREDICTION (per category): ____
+REFERENCE ESTIMATE (Claude, 2026-10-27): exclusions, E2 minus B1 is +0.10 to +0.20 nDCG@10; exact identifiers,
++0.03 to +0.08, possibly not significant. Reason: BM25 cannot express NOT at all, but it already ranks rare
+identifiers highly through idf, so the gain there is small.
 
 ## H4. Relaxation recovers recall
 Statement: The relaxation loop (E2) recovers part of the recall lost by the strict query (E1), at some cost in
@@ -57,6 +67,8 @@ Primary test: mean paired difference in recall of the top-N pool, E2 minus E1, o
 targeted set. The precision change is reported next to it.
 Falsified if: the recall gain is not significant after Holm correction.
 MY PREDICTION (recall gain of ____ points, precision cost of ____ points): ____
+REFERENCE ESTIMATE (Claude, 2026-10-27): recall gain of +8 to +15 points, precision cost of 3 to 8 points.
+Reason: relaxation mostly helps the queries that returned zero or very few documents.
 
 ## H5. Failures of Boolean can be traced from the query
 Statement: Most Boolean failures can be diagnosed from the generated query and the `why-not` output alone;
@@ -67,6 +79,9 @@ labels 30 to 50 of them; Cohen's kappa is reported.
 Falsified if: the two proportions differ by less than the annotator disagreement (the interval of the difference
 includes 0, or kappa is below ____).
 MY PREDICTION (share diagnosable: Boolean ____ %, dense ____ %): ____
+REFERENCE ESTIMATE (Claude, 2026-10-27): Boolean about 70 %, dense about 25 to 35 %; kappa threshold 0.6.
+Reason: the query plus `why-not` usually shows the cause (missing synonym, over-strict AND); a dense ranked list
+alone rarely does.
 
 ## H6. Faithfulness end to end (stretch)
 Statement: End to end, answer faithfulness is no worse for Boolean when the evidence is retrieved, but answer
@@ -75,6 +90,9 @@ Primary test: claim-level support rate, E2 pipeline minus B3 pipeline, with the 
 on 50 items.
 Falsified if: faithfulness is significantly lower for Boolean.
 MY PREDICTION: ____
+REFERENCE ESTIMATE (Claude, 2026-10-27): faithfulness difference about 0 (within 3 points either way); coverage
+5 to 10 points lower for Boolean. Reason: given the same evidence the generator behaves the same; Boolean simply
+retrieves less evidence.
 
 ## H7. Null on the standard set
 Statement: After reranking, nDCG@10 on the standard SciFact test queries differs little between the pipelines
@@ -84,6 +102,11 @@ M = ____ nDCG points (suggested: 0.02; Aris decides before the run).
 Falsified if: Boolean is clearly ahead, i.e. the interval of E2 minus B1 lies above +M.
 Note: kept as a null on purpose. Reporting it honestly makes H3 more credible.
 MY PREDICTION: ____
+REFERENCE ESTIMATE (Claude, 2026-10-27): E2 minus B1 is -0.01 to -0.03 nDCG@10; E2 minus B3 about -0.03.
+Reason: BM25 scores about 0.665 nDCG@10 on SciFact; the reranker narrows the gaps but cannot win back recall lost
+before reranking. Caution on M: per-query nDCG@10 differences typically have a standard deviation of about 0.20 to
+0.25, so on 300 queries the 95% interval is about +-0.025 wide on each side. With M = 0.02 the equivalence test
+likely fails even if the systems are equal; M of 0.03 to 0.05, or stating the low power in advance, avoids that.
 
 ## H8. Cost versus quality of the planner (stretch)
 Statement: Single shot plus relaxation (E2) reaches most of the multi-call agent's (E4) nDCG@10 with a fraction
@@ -91,12 +114,16 @@ of the model calls.
 Primary test: nDCG@10 of E2 divided by nDCG@10 of E4 at several call budgets; calls per query reported.
 Falsified if: nDCG@10 keeps rising steeply with the call budget (E2 reaches less than ____ % of E4).
 MY PREDICTION: ____
+REFERENCE ESTIMATE (Claude, 2026-10-27): E2 reaches about 90 % of E4. Reason: extra model calls help only a
+minority of hard queries.
 
 ## H9. SSR versus BM25 ranking (stretch)
 Statement: On the same Boolean candidate set, SSR (shortest-substring ranking, C = 42) and BM25 rank similarly.
 Primary test: mean paired difference in nDCG@10, E3 minus E1.
 Falsified if: one is significantly better after Holm correction.
 MY PREDICTION: ____
+REFERENCE ESTIMATE (Claude, 2026-10-27): the difference lies within 0.02 nDCG@10 either way, BM25 slightly ahead.
+Reason: both rank the same candidate set, and SSR uses no idf.
 
 ---
 
