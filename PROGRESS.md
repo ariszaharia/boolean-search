@@ -261,6 +261,18 @@ test runs NOT made yet, they come at the end with the final runs):
       Built 2026-10-28: api/rerank.py (cross-encoder/ms-marco-MiniLM-L6-v2, revision 233902d2, pinned). It
       refuses targeted and test until a RERANKERS entry is marked as fixed in hypotheses.md. Uses the GPU when
       there is one; long runs go to Google Colab (colab/rerank.ipynb), since the laptop's CPU does ~19 pairs/s.
+      First runs (development, train, 2026-10-28; Colab T4 from 5cf45f6, about 25 minutes). nDCG@10, 809 claims:
+        B1 0.699 -> rr100 0.711, rr30 0.708 | B2 0.667 -> 0.702, 0.703 | B3 0.769 -> 0.716, 0.727.
+      Paired, rr100 minus the run it reranked: B1 +0.012 [-0.005, +0.028]; B2 +0.035 [+0.018, +0.051];
+      B3 -0.054 [-0.072, -0.036]. B1-rr100 minus B3-rr100: -0.005. The same without the 100 targeted base
+      claims (709 claims): B1 +0.009, B2 +0.036, B3 -0.059. GPU and CPU scores differ by at most 0.000007.
+      Reading: this cross-encoder is weaker than B3's dense model on SciFact (as in BEIR, where it moves BM25
+      from 0.665 to 0.688). It makes every pool score about the same, and it makes B3 worse. With it, H3 and H7
+      would mostly measure the reranker's ceiling, not what each system's pool contains. A stronger reranker
+      (Jev, or a bigger open one) should be tried on train before the choice is fixed.
+      Fingerprints (2026-10-28): file_sha256 now ignores line endings (Colab has LF, this laptop CRLF), so both
+      record the same value. data/scifact.tsv is 8003e6c7...; run files written before this change recorded the
+      Windows copy, 7865b98e..., which is the same text. The B3 cache and the Lucene stamp were relabelled.
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.

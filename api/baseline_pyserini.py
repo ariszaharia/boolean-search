@@ -48,8 +48,11 @@ def words_of(text):
 
 
 def file_sha256(path):
+    """Fingerprint of a text file, the same on Windows and Linux: Windows line endings (CRLF, which git writes on
+    this laptop) count as Linux ones (LF, as git stores the file and as Colab sees it). Since 2026-10-28; earlier
+    run files recorded the fingerprint of the Windows copy (data/scifact.tsv: 7865b98e..., now 8003e6c7...)."""
     with open(path, 'rb') as f:
-        return hashlib.sha256(f.read()).hexdigest()
+        return hashlib.sha256(f.read().replace(b'\r\n', b'\n')).hexdigest()
 
 
 def corpus_sha256():
