@@ -15,6 +15,7 @@
  "documents_truncated": 455,
  "transformers_version": "5.19.0",
  "torch_version": "2.14.1",
- "git_commit": "9cf3a800fc2a5089df42dceb8231fbfb3192a280",
- "run_at": "2026-10-27T16:59:49"
+ "git_commit": "a24f1924d53bdb85c15b90fefbf23e4373d59ad8",
+ "git_dirty": false,
+ "run_at": "2026-10-27T19:21:44"
 }
