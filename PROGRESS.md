@@ -147,8 +147,16 @@ test runs NOT made yet, they come at the end with the final runs):
    a. DONE 2026-10-27: D7 (Greek letters -> names), caches tied to the corpus, B1 to B3 rerun on train.
       The unstemmed index of the Phase 0 check (`results/work/lucene_index`) has no stamp yet; it is rebuilt
       the next time api/baseline_pyserini.py runs. The Phase 0 numbers above were made on the earlier corpus.
-   b. Candidate script (qrels and corpus only) -> Aris writes the 100 queries and rules -> build and check
-      script for data/targeted/qrels.tsv -> commit and push (the freeze).
+   b. Candidate script DONE 2026-10-27: `venv\Scripts\python.exe api/targeted_candidates.py` (about 2 minutes)
+      -> `data/targeted/candidates/` (columns explained at the top of the script). Shared definitions in
+      `api/targeted.py` (stopwords = Lucene's English list, content words, overlap share, term -> rule, rule
+      matching on raw text), which the build/check script will use too. 806 usable train claims (D10: 86 is a
+      duplicate of 85; 89 and 90 have the same text but different relevant documents, both dropped).
+      Available: 52 claims with a trap exclusion (118 rows; mice 19, in vitro 18, ...), 211 fallback claims,
+      phrases/entities for 806 claims, identifiers for 566, paraphrase overlap for all 806.
+      NEXT, Aris: pick and write the 100 queries and rules (25 per category, each claim once, by hand), using
+      the lists only as a menu; then the build/check script for data/targeted/qrels.tsv; then commit and push
+      (the freeze).
    c. Harness: split "targeted" in load_qrels, per-category results.
    d. Then the planner (step 3).
 6. Ablations, error analysis (about 100 failures), auditability study.

@@ -1,0 +1,430 @@
+claim_id	claim	exclude	rule	rarest_word	distractors
+4	1-1% of colorectal cancer patients are diagnosed with regional or distant metastases.	mice	\b(mice|mouse|murine)\b	distant	8
+4	1-1% of colorectal cancer patients are diagnosed with regional or distant metastases.	cell lines	\bcell lines?\b	distant	3
+10	4-PBA treatment decreases endoplasmic reticulum stress in response to general endoplasmic reticulum stress markers.	mice	\b(mice|mouse|murine)\b	endoplasmic	10
+10	4-PBA treatment decreases endoplasmic reticulum stress in response to general endoplasmic reticulum stress markers.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	endoplasmic	7
+10	4-PBA treatment decreases endoplasmic reticulum stress in response to general endoplasmic reticulum stress markers.	in vitro	\bin vitro\b	endoplasmic	5
+11	4-PBA treatment raises endoplasmic reticulum stress in response to general endoplasmic reticulum stress markers.	mice	\b(mice|mouse|murine)\b	raises	6
+15	50% of patients exposed to radiation have activated markers of mesenchymal stem cells.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	radiation	29
+15	50% of patients exposed to radiation have activated markers of mesenchymal stem cells.	men	\b(men|males?)\b	radiation	7
+15	50% of patients exposed to radiation have activated markers of mesenchymal stem cells.	yeast	\b(yeasts?|saccharomyces)\b	radiation	5
+17	53% of perinatal mortality is due to low birth weight.	women	\b(women|woman|females?)\b	perinatal	12
+17	53% of perinatal mortality is due to low birth weight.	pregnancy	\b(pregnant|pregnancy|pregnancies)\b	perinatal	7
+17	53% of perinatal mortality is due to low birth weight.	cohort studies	\bcohorts?\b	perinatal	5
+18	61% of colorectal cancer patients are diagnosed with regional or distant metastases.	mice	\b(mice|mouse|murine)\b	distant	8
+18	61% of colorectal cancer patients are diagnosed with regional or distant metastases.	cell lines	\bcell lines?\b	distant	3
+19	7-day-old adult Caenorhabditis elegans exhibit approximately 5% of the learning capacity seen in 1-day old adults.	mice	\b(mice|mouse|murine)\b	learning	15
+19	7-day-old adult Caenorhabditis elegans exhibit approximately 5% of the learning capacity seen in 1-day old adults.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	learning	5
+19	7-day-old adult Caenorhabditis elegans exhibit approximately 5% of the learning capacity seen in 1-day old adults.	rats	\brats?\b	learning	4
+20	7-day-old adult Caenorhabditis elegans exhibit approximately 75% of the learning capacity seen in 1-day old adults.	mice	\b(mice|mouse|murine)\b	learning	15
+20	7-day-old adult Caenorhabditis elegans exhibit approximately 75% of the learning capacity seen in 1-day old adults.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	learning	5
+20	7-day-old adult Caenorhabditis elegans exhibit approximately 75% of the learning capacity seen in 1-day old adults.	rats	\brats?\b	learning	4
+22	76-85% of people with severe mental disorder receive no treatment in low and middle income countries.	women	\b(women|woman|females?)\b	income	13
+22	76-85% of people with severe mental disorder receive no treatment in low and middle income countries.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	income	11
+22	76-85% of people with severe mental disorder receive no treatment in low and middle income countries.	men	\b(men|males?)\b	income	9
+24	90% of patients with melanoma and an objective response to PD-1 blockade will experience a progression in their melanoma.	in vitro	\bin vitro\b	pd	10
+24	90% of patients with melanoma and an objective response to PD-1 blockade will experience a progression in their melanoma.	mice	\b(mice|mouse|murine)\b	pd	6
+24	90% of patients with melanoma and an objective response to PD-1 blockade will experience a progression in their melanoma.	women	\b(women|woman|females?)\b	pd	3
+34	A deficiency of folate increases blood levels of homocysteine.	women	\b(women|woman|females?)\b	folate	6
+34	A deficiency of folate increases blood levels of homocysteine.	men	\b(men|males?)\b	folate	3
+43	A low percentage of hematopoietic progenitor cells are susceptible to HIV-1 infection ex vivo.	mice	\b(mice|mouse|murine)\b	ex	20
+43	A low percentage of hematopoietic progenitor cells are susceptible to HIV-1 infection ex vivo.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	ex	9
+43	A low percentage of hematopoietic progenitor cells are susceptible to HIV-1 infection ex vivo.	rats	\brats?\b	ex	4
+55	AMP-activated protein kinase (AMPK) activation reduces inflammation-related fibrosis in the lungs.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	ampk	4
+55	AMP-activated protein kinase (AMPK) activation reduces inflammation-related fibrosis in the lungs.	in vitro	\bin vitro\b	ampk	3
+55	AMP-activated protein kinase (AMPK) activation reduces inflammation-related fibrosis in the lungs.	diabetes	\b(diabetes|diabetic)\b	ampk	3
+74	Active H. pylori urease has a polymeric structure consisting of five distinct subunits.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	polymeric	3
+80	Acute ablation of KRAS causes severe growth impairment.	mice	\b(mice|mouse|murine)\b	kras	8
+80	Acute ablation of KRAS causes severe growth impairment.	in vitro	\bin vitro\b	kras	6
+80	Acute ablation of KRAS causes severe growth impairment.	cohort studies	\bcohorts?\b	kras	3
+95	Albendazole is used to treat soil-transmitted helminths.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	helminths	3
+96	Algerian physicians constitue the largest component of sub-Saharan Africa-trained physicians in the United States.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	saharan	8
+96	Algerian physicians constitue the largest component of sub-Saharan Africa-trained physicians in the United States.	HIV	\bhiv\b	saharan	5
+96	Algerian physicians constitue the largest component of sub-Saharan Africa-trained physicians in the United States.	women	\b(women|woman|females?)\b	saharan	3
+105	Alteration of origin firing causes changes in termination zones of Okazaki fragments.	yeast	\b(yeasts?|saccharomyces)\b	okazaki	3
+109	An M2-like phenotype in brown adipose tissue macrophages is quickly induced by cold exposure.	United States	\b(united states|usa)\b	quickly	3
+112	Angiotensin converting enzyme inhibitors are associated with decreased risk for functional renal insufficiency.	women	\b(women|woman|females?)\b	insufficiency	7
+112	Angiotensin converting enzyme inhibitors are associated with decreased risk for functional renal insufficiency.	mice	\b(mice|mouse|murine)\b	insufficiency	4
+112	Angiotensin converting enzyme inhibitors are associated with decreased risk for functional renal insufficiency.	pregnancy	\b(pregnant|pregnancy|pregnancies)\b	insufficiency	4
+134	Assessing treatment adherence is more beneficial to clinical practice than measuring routine outcomes.	HIV	\bhiv\b	adherence	11
+134	Assessing treatment adherence is more beneficial to clinical practice than measuring routine outcomes.	Africa	\b(africa|african)\b	adherence	5
+134	Assessing treatment adherence is more beneficial to clinical practice than measuring routine outcomes.	men	\b(men|males?)\b	adherence	3
+139	At least 85% of patients exposed to radiation have activated markers of myofibroblasts.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	myofibroblasts	4
+144	Autologous transplantation of mesenchymal stem cells has better graft function than induction therapy with anti-interleukin-2 receptor antibodies.	mice	\b(mice|mouse|murine)\b	autologous	3
+144	Autologous transplantation of mesenchymal stem cells has better graft function than induction therapy with anti-interleukin-2 receptor antibodies.	in vitro	\bin vitro\b	autologous	3
+144	Autologous transplantation of mesenchymal stem cells has better graft function than induction therapy with anti-interleukin-2 receptor antibodies.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	autologous	3
+149	Autophagy deficiency in the liver increases vulnerability to insulin resistance.	rats	\brats?\b	vulnerability	3
+156	BCL-2 promotes the apoptotic effects of c-Myc.	in vitro	\bin vitro\b	bcl	9
+156	BCL-2 promotes the apoptotic effects of c-Myc.	cell lines	\bcell lines?\b	bcl	7
+157	BLM gene encodes RecQ-class DNA helicase.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	recq	4
+173	Bcp1 is a chaperone for Rpl23.	mice	\b(mice|mouse|murine)\b	chaperone	6
+173	Bcp1 is a chaperone for Rpl23.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	chaperone	4
+182	Bone Marrow (BM) transplantation is used to treat acute myeloid leukemia (AML)	in vitro	\bin vitro\b	aml	4
+197	CCL19 is a ligand for CCR7.	mice	\b(mice|mouse|murine)\b	ccl19	3
+199	CCL19 is predominantly present within dLNs.	mice	\b(mice|mouse|murine)\b	ccl19	3
+220	Ca2+ cycling controls whole-body energy homeostasis in beige fat.	obesity	\b(obesity|obese)\b	beige	5
+221	Ca2+ cycling is a UCP1-dependent thermogenic mechanism.	obesity	\b(obesity|obese)\b	thermogenic	4
+222	Ca2+ cycling is a UCP1-independent thermogenic mechanism.	obesity	\b(obesity|obese)\b	thermogenic	4
+223	Cancer cells can stimulate the accumulation of intra-tumoural myeloid-derived suppressor cells by promoting granulocyte colony stimulating factor production.	mice	\b(mice|mouse|murine)\b	granulocyte	11
+227	Cancers that initially benefit from epidermal growth factor receptor targeted therapies later become refractory through several mechanisms.	mice	\b(mice|mouse|murine)\b	refractory	3
+227	Cancers that initially benefit from epidermal growth factor receptor targeted therapies later become refractory through several mechanisms.	randomized trials	\brandomi[sz]ed\b	refractory	3
+235	Cell autonomous sex determination in somatic cells occurs in Galliformes.	mice	\b(mice|mouse|murine)\b	autonomous	13
+235	Cell autonomous sex determination in somatic cells occurs in Galliformes.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	autonomous	6
+235	Cell autonomous sex determination in somatic cells occurs in Galliformes.	in vitro	\bin vitro\b	autonomous	5
+243	Cellular differentiation of embryonic stem cells is accompanied by changes in replication timing, transcription and nuclear localization.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	timing	9
+243	Cellular differentiation of embryonic stem cells is accompanied by changes in replication timing, transcription and nuclear localization.	women	\b(women|woman|females?)\b	timing	5
+243	Cellular differentiation of embryonic stem cells is accompanied by changes in replication timing, transcription and nuclear localization.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	timing	4
+247	Chemical injury represses transglutaminase 2 activity.	in vitro	\bin vitro\b	transglutaminase	4
+259	Chronic HIV stimulation of B cells leads to the premature exhaustion of B cells.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	exhaustion	8
+259	Chronic HIV stimulation of B cells leads to the premature exhaustion of B cells.	mice	\b(mice|mouse|murine)\b	exhaustion	5
+280	Comparative transcriptome analysis identified new platelet proteins with structural features suggesting a role in platelet function.	mice	\b(mice|mouse|murine)\b	transcriptome	12
+280	Comparative transcriptome analysis identified new platelet proteins with structural features suggesting a role in platelet function.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	transcriptome	8
+280	Comparative transcriptome analysis identified new platelet proteins with structural features suggesting a role in platelet function.	yeast	\b(yeasts?|saccharomyces)\b	transcriptome	4
+283	Consumption of whole fruits increases the risk of type 2 diabetes.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	fruits	3
+292	Cost effectiveness evaluations based on cRCT data lack external validity.	men	\b(men|males?)\b	evaluations	4
+292	Cost effectiveness evaluations based on cRCT data lack external validity.	women	\b(women|woman|females?)\b	evaluations	3
+292	Cost effectiveness evaluations based on cRCT data lack external validity.	systematic reviews	\bsystematic reviews?\b	evaluations	3
+296	Cyclin A2 destruction is necessary to switch from unstable to stable kt-mt attachments in mitosis.	mice	\b(mice|mouse|murine)\b	a2	5
+301	Cytosolic proteins bind to iron-responsive elements on mRNAs coding for TFRC1.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	iron	10
+301	Cytosolic proteins bind to iron-responsive elements on mRNAs coding for TFRC1.	women	\b(women|woman|females?)\b	iron	6
+301	Cytosolic proteins bind to iron-responsive elements on mRNAs coding for TFRC1.	in vitro	\bin vitro\b	iron	5
+304	DMS3 protein enables Pol V transcription in vivo.	in vitro	\bin vitro\b	pol	8
+304	DMS3 protein enables Pol V transcription in vivo.	yeast	\b(yeasts?|saccharomyces)\b	pol	6
+304	DMS3 protein enables Pol V transcription in vivo.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	pol	6
+315	Decrease of p62 in prostate tumor stroma results in defective autophagy.	mice	\b(mice|mouse|murine)\b	p62	3
+339	Dexamethasone increases risk of postoperative bleeding.	mice	\b(mice|mouse|murine)\b	dexamethasone	5
+339	Dexamethasone increases risk of postoperative bleeding.	in vitro	\bin vitro\b	dexamethasone	5
+339	Dexamethasone increases risk of postoperative bleeding.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	dexamethasone	5
+346	Differentiation of progenitor cells to myeloid cells is skewed upon activation of insulin signaling.	mice	\b(mice|mouse|murine)\b	skewed	3
+346	Differentiation of progenitor cells to myeloid cells is skewed upon activation of insulin signaling.	in vitro	\bin vitro\b	skewed	3
+347	Differentiation of progenitor cells to myeloid cells is skewed when insulin signaling is suppressed.	mice	\b(mice|mouse|murine)\b	skewed	3
+347	Differentiation of progenitor cells to myeloid cells is skewed when insulin signaling is suppressed.	in vitro	\bin vitro\b	skewed	3
+357	During non-homologous end joining, the ligation step is not as tolerant of disrepairs and other distortions when joining 3' of strand breaks as compared to 5' strand breaks.	mice	\b(mice|mouse|murine)\b	tolerant	3
+358	During non-homologous end joining, the ligation step is not as tolerant of disrepairs and other distortions when joining 5' of strand breaks as compared to 3' strand breaks.	mice	\b(mice|mouse|murine)\b	tolerant	3
+367	Early patent ductus ateriosus (PDA) screening decreases in-hospital mortality.	randomized trials	\brandomi[sz]ed\b	ductus	3
+368	Early patent ductus ateriosus (PDA) screening increases in-hospital mortality.	randomized trials	\brandomi[sz]ed\b	ductus	3
+375	Elevated cell-free mitochondrial DNA levels are associated with mortality.	mice	\b(mice|mouse|murine)\b	mitochondrial	36
+375	Elevated cell-free mitochondrial DNA levels are associated with mortality.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	mitochondrial	27
+375	Elevated cell-free mitochondrial DNA levels are associated with mortality.	in vitro	\bin vitro\b	mitochondrial	15
+376	Eliminating the last sporadic cases of malaria requires considerable funding.	mice	\b(mice|mouse|murine)\b	eliminating	6
+376	Eliminating the last sporadic cases of malaria requires considerable funding.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	eliminating	5
+381	Environmental factors can influence the development of breast cancer.	mice	\b(mice|mouse|murine)\b	environmental	14
+381	Environmental factors can influence the development of breast cancer.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	environmental	11
+381	Environmental factors can influence the development of breast cancer.	yeast	\b(yeasts?|saccharomyces)\b	environmental	7
+394	Excess gestational weight gain is associated with obesity-related pregnancy outcomes.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	gestational	15
+394	Excess gestational weight gain is associated with obesity-related pregnancy outcomes.	cohort studies	\bcohorts?\b	gestational	8
+394	Excess gestational weight gain is associated with obesity-related pregnancy outcomes.	United States	\b(united states|usa)\b	gestational	5
+407	FACT and other histone chaperone(s) compensate for Histone 2A (H2A)-histone 2B (H2B) dimer eviction during the histone exchange process.	mice	\b(mice|mouse|murine)\b	2b	3
+418	Fibroblast Growth Factor is a ligand which signals through receptor tyrosine kinases.	mice	\b(mice|mouse|murine)\b	fibroblast	26
+418	Fibroblast Growth Factor is a ligand which signals through receptor tyrosine kinases.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	fibroblast	19
+418	Fibroblast Growth Factor is a ligand which signals through receptor tyrosine kinases.	in vitro	\bin vitro\b	fibroblast	18
+425	For every 1,000 children with cerebral palsy, more than 300 of them are premature or underweight at birth.	randomized trials	\brandomi[sz]ed\b	palsy	3
+426	Forkhead 0 (fox0) transcription factors are involved in apoptosis.	mice	\b(mice|mouse|murine)\b	forkhead	3
+428	Forkhead 0 (fox0) transcription factors are involved in cellular differentiation.	mice	\b(mice|mouse|murine)\b	forkhead	3
+434	Foxp3 enables the expression of transcriptional regulators implicated in memory T cell development.	mice	\b(mice|mouse|murine)\b	foxp3	16
+434	Foxp3 enables the expression of transcriptional regulators implicated in memory T cell development.	in vitro	\bin vitro\b	foxp3	5
+434	Foxp3 enables the expression of transcriptional regulators implicated in memory T cell development.	diabetes	\b(diabetes|diabetic)\b	foxp3	3
+435	Foxp3 represses the expression of transcriptional regulators implicated in memory T cell development.	mice	\b(mice|mouse|murine)\b	represses	12
+435	Foxp3 represses the expression of transcriptional regulators implicated in memory T cell development.	yeast	\b(yeasts?|saccharomyces)\b	represses	4
+435	Foxp3 represses the expression of transcriptional regulators implicated in memory T cell development.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	represses	4
+447	Gastric infection with Helicobacter pylori decreases risk of gastric cancer in humans.	mice	\b(mice|mouse|murine)\b	pylori	7
+447	Gastric infection with Helicobacter pylori decreases risk of gastric cancer in humans.	in vitro	\bin vitro\b	pylori	3
+448	Gastric infection with Helicobacter pylori increases risk of gastric cancer in humans.	mice	\b(mice|mouse|murine)\b	pylori	7
+448	Gastric infection with Helicobacter pylori increases risk of gastric cancer in humans.	in vitro	\bin vitro\b	pylori	3
+455	Genes involved in pre-mRNA splicing have a significant impact on genome stability.	mice	\b(mice|mouse|murine)\b	splicing	12
+455	Genes involved in pre-mRNA splicing have a significant impact on genome stability.	yeast	\b(yeasts?|saccharomyces)\b	splicing	5
+455	Genes involved in pre-mRNA splicing have a significant impact on genome stability.	in vitro	\bin vitro\b	splicing	4
+463	Genomic aberrations of metastases provide information for targeted therapy.	cohort studies	\bcohorts?\b	aberrations	4
+483	H.pylori-mediated gastric cancer occurs due to the accumulation of mutations in host epithelial cells.	mice	\b(mice|mouse|murine)\b	pylori	7
+484	H4 G94P proteins induce chromatin assembly, which increases free histones.	in vitro	\bin vitro\b	h4	3
+486	H4 G94P proteins inhibit chromatin assembly, which decreases free histones.	in vitro	\bin vitro\b	h4	3
+492	HOXB4 facilitates HSC expansion when co-cultured with HSCs.	in vitro	\bin vitro\b	hscs	4
+495	Having a main partner improves HIV outcomes.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	partner	5
+495	Having a main partner improves HIV outcomes.	men	\b(men|males?)\b	partner	4
+495	Having a main partner improves HIV outcomes.	mice	\b(mice|mouse|murine)\b	partner	3
+506	Helminths interfere with immune system control of coinfections by microbial pathogens 16.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	helminths	3
+547	IL-10 production by monocytes inhibits CD4 + T cell response.	mice	\b(mice|mouse|murine)\b	monocytes	21
+547	IL-10 production by monocytes inhibits CD4 + T cell response.	in vitro	\bin vitro\b	monocytes	9
+547	IL-10 production by monocytes inhibits CD4 + T cell response.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	monocytes	7
+548	IL-6 signaling plays a major role in atherosclerotic cardiovascular disease.	mice	\b(mice|mouse|murine)\b	atherosclerotic	20
+548	IL-6 signaling plays a major role in atherosclerotic cardiovascular disease.	women	\b(women|woman|females?)\b	atherosclerotic	5
+548	IL-6 signaling plays a major role in atherosclerotic cardiovascular disease.	men	\b(men|males?)\b	atherosclerotic	3
+553	IgA plasma cells that are specific for transglutaminase 2 are scarce in the duodenal mucosa of celiac disease patients when the disease is active.	diabetes	\b(diabetes|diabetic)\b	duodenal	3
+555	Immune complex triggered cell death leads to extracellular release of nuclear DNA.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	triggered	17
+555	Immune complex triggered cell death leads to extracellular release of nuclear DNA.	rats	\brats?\b	triggered	3
+555	Immune complex triggered cell death leads to extracellular release of nuclear DNA.	yeast	\b(yeasts?|saccharomyces)\b	triggered	3
+559	Immune responses in immune cells are geographically segregated.	women	\b(women|woman|females?)\b	geographically	4
+565	In S. cerevisiae, the absence of RNA surveillance pathways causes sensitivity to high iron conditions.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	iron	10
+565	In S. cerevisiae, the absence of RNA surveillance pathways causes sensitivity to high iron conditions.	women	\b(women|woman|females?)\b	iron	6
+565	In S. cerevisiae, the absence of RNA surveillance pathways causes sensitivity to high iron conditions.	in vitro	\bin vitro\b	iron	5
+566	In S. cerevisiae, the absence of RNA surveillance pathways reduces sensitivity to high iron conditions.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	iron	10
+566	In S. cerevisiae, the absence of RNA surveillance pathways reduces sensitivity to high iron conditions.	women	\b(women|woman|females?)\b	iron	6
+566	In S. cerevisiae, the absence of RNA surveillance pathways reduces sensitivity to high iron conditions.	in vitro	\bin vitro\b	iron	5
+579	In patients with congenital heart defects, beta-blockers significantly improve clinical heart failure outcomes.	meta-analyses	\bmeta[ -]?analys[ie]s\b	blockers	5
+579	In patients with congenital heart defects, beta-blockers significantly improve clinical heart failure outcomes.	systematic reviews	\bsystematic reviews?\b	blockers	3
+579	In patients with congenital heart defects, beta-blockers significantly improve clinical heart failure outcomes.	diabetes	\b(diabetes|diabetic)\b	blockers	3
+590	In young and middle-aged adults, current or remote uses of ADHD medications increase the risk of serious cardiovascular events.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	adhd	5
+594	Incidence of heart failure increased by 10% in women since 1979.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	since	33
+594	Incidence of heart failure increased by 10% in women since 1979.	mice	\b(mice|mouse|murine)\b	since	21
+594	Incidence of heart failure increased by 10% in women since 1979.	in vitro	\bin vitro\b	since	17
+602	Increase of p62 in prostate tumor stroma results in defective autophagy.	mice	\b(mice|mouse|murine)\b	p62	3
+610	Increased flux of microbial products suppresses immune responses.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	flux	4
+610	Increased flux of microbial products suppresses immune responses.	in vitro	\bin vitro\b	flux	3
+611	Increased lipolysis leads to higher P38 phosphorylation in adipose tissue.	mice	\b(mice|mouse|murine)\b	lipolysis	5
+620	Increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments.	in vitro	\bin vitro\b	vessel	8
+620	Increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments.	women	\b(women|woman|females?)\b	vessel	4
+620	Increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments.	men	\b(men|males?)\b	vessel	3
+621	Individuals with Alzheimers who participate in six months of physical activity improve cognitive function for up to 18 months.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	participate	14
+621	Individuals with Alzheimers who participate in six months of physical activity improve cognitive function for up to 18 months.	mice	\b(mice|mouse|murine)\b	participate	13
+621	Individuals with Alzheimers who participate in six months of physical activity improve cognitive function for up to 18 months.	men	\b(men|males?)\b	participate	8
+622	Individuals with low serum vitamin D concentrations have decreased risk of multiple sclerosis.	mice	\b(mice|mouse|murine)\b	sclerosis	11
+622	Individuals with low serum vitamin D concentrations have decreased risk of multiple sclerosis.	women	\b(women|woman|females?)\b	sclerosis	5
+622	Individuals with low serum vitamin D concentrations have decreased risk of multiple sclerosis.	in vitro	\bin vitro\b	sclerosis	4
+633	Inhibiting focal adhesion formation increases the rate at which cells convert mechanical strain into inflammation and fibrosis.	in vitro	\bin vitro\b	convert	8
+642	Insulin decreases risk of severe kidney failure.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	decreases	18
+642	Insulin decreases risk of severe kidney failure.	mice	\b(mice|mouse|murine)\b	decreases	15
+642	Insulin decreases risk of severe kidney failure.	women	\b(women|woman|females?)\b	decreases	11
+643	Insulin effects appetite via ventral tegmental neurons.	obesity	\b(obesity|obese)\b	appetite	4
+645	Intake of folic acid (FA) and vitamin B6 (VB6) increases levels of homocysteine.	mice	\b(mice|mouse|murine)\b	b6	4
+646	Intake of folic acid (FA) and vitamin B6 (VB6) reduces levels of homocysteine.	mice	\b(mice|mouse|murine)\b	b6	4
+653	Interleukin-18 plays an important role in the pathogenesis of atherosclerosis.	diabetes	\b(diabetes|diabetic)\b	atherosclerosis	7
+653	Interleukin-18 plays an important role in the pathogenesis of atherosclerosis.	women	\b(women|woman|females?)\b	atherosclerosis	6
+653	Interleukin-18 plays an important role in the pathogenesis of atherosclerosis.	men	\b(men|males?)\b	atherosclerosis	5
+667	Klf2 is important for proper myeloid cell function.	mice	\b(mice|mouse|murine)\b	klf2	11
+673	LDL cholesterol has a causal role in the development of cardiovascular disease.	mice	\b(mice|mouse|murine)\b	ldl	10
+673	LDL cholesterol has a causal role in the development of cardiovascular disease.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	ldl	4
+673	LDL cholesterol has a causal role in the development of cardiovascular disease.	women	\b(women|woman|females?)\b	ldl	4
+680	Lack of FGF21 in mice increases life expectancy.	diabetes	\b(diabetes|diabetic)\b	fgf21	5
+680	Lack of FGF21 in mice increases life expectancy.	obesity	\b(obesity|obese)\b	fgf21	5
+681	Lack of FGF21 in mice leads to atherosclerotic plaque formation.	diabetes	\b(diabetes|diabetic)\b	fgf21	5
+681	Lack of FGF21 in mice leads to atherosclerotic plaque formation.	obesity	\b(obesity|obese)\b	fgf21	5
+682	Lack of FGF21 in mice leads to reduced lifespan.	diabetes	\b(diabetes|diabetic)\b	fgf21	5
+682	Lack of FGF21 in mice leads to reduced lifespan.	obesity	\b(obesity|obese)\b	fgf21	5
+683	Lack of FGF21 in mice slows the rate of atherosclerotic plaque formation.	diabetes	\b(diabetes|diabetic)\b	fgf21	5
+683	Lack of FGF21 in mice slows the rate of atherosclerotic plaque formation.	obesity	\b(obesity|obese)\b	fgf21	5
+689	Less than 10% of patients exposed to radiation have activated markers of mesenchymal stem cells.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	radiation	29
+689	Less than 10% of patients exposed to radiation have activated markers of mesenchymal stem cells.	men	\b(men|males?)\b	radiation	7
+689	Less than 10% of patients exposed to radiation have activated markers of mesenchymal stem cells.	yeast	\b(yeasts?|saccharomyces)\b	radiation	5
+694	Lice attenuated SIV vaccines induce a stronger antigen-specific T cell response in lymph node cells.	non-human primates	\b(monkeys?|macaques?)\b	siv	8
+694	Lice attenuated SIV vaccines induce a stronger antigen-specific T cell response in lymph node cells.	Africa	\b(africa|african)\b	siv	4
+694	Lice attenuated SIV vaccines induce a stronger antigen-specific T cell response in lymph node cells.	in vitro	\bin vitro\b	siv	3
+704	Long - range chromatin interactions regulate transcription.	mice	\b(mice|mouse|murine)\b	chromatin	39
+704	Long - range chromatin interactions regulate transcription.	yeast	\b(yeasts?|saccharomyces)\b	chromatin	39
+704	Long - range chromatin interactions regulate transcription.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	chromatin	36
+713	Low expression of miR7a does not repress target genes or exert a biological function in ovaries.	mice	\b(mice|mouse|murine)\b	ovaries	4
+713	Low expression of miR7a does not repress target genes or exert a biological function in ovaries.	women	\b(women|woman|females?)\b	ovaries	4
+714	Low expression of miR7a does not repress target genes or exert a biological function in testis.	mice	\b(mice|mouse|murine)\b	testis	3
+714	Low expression of miR7a does not repress target genes or exert a biological function in testis.	women	\b(women|woman|females?)\b	testis	3
+714	Low expression of miR7a does not repress target genes or exert a biological function in testis.	men	\b(men|males?)\b	testis	3
+717	Low nucleosome occupancy correlates with high methylation levels across species.	yeast	\b(yeasts?|saccharomyces)\b	occupancy	10
+717	Low nucleosome occupancy correlates with high methylation levels across species.	in vitro	\bin vitro\b	occupancy	5
+717	Low nucleosome occupancy correlates with high methylation levels across species.	mice	\b(mice|mouse|murine)\b	occupancy	3
+734	MEK inhibitors are effective treatments in RAS-driven mouse models of cancer.	cell lines	\bcell lines?\b	mek	5
+739	MT binding domain drives amyloid structure formation.	mice	\b(mice|mouse|murine)\b	mt	4
+739	MT binding domain drives amyloid structure formation.	Drosophila	\b(drosophila|fruit fly|fruit flies)\b	mt	3
+739	MT binding domain drives amyloid structure formation.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	mt	3
+755	Many cytokines that are produced by cancer cells also contribute to carcinogenesis.	cell lines	\bcell lines?\b	carcinogenesis	6
+755	Many cytokines that are produced by cancer cells also contribute to carcinogenesis.	in vitro	\bin vitro\b	carcinogenesis	5
+760	Mathematical models predict that using Artemisinin-based combination therapy over nongametocytocidal drugs have only a modest impact in reducing malaria transmission.	Africa	\b(africa|african)\b	artemisinin	3
+761	MeCP2 influences the synaptic maturation of neurons.	mice	\b(mice|mouse|murine)\b	mecp2	4
+762	Measuring routine outcomes is more beneficial to clinical practice than assessing treatment adherence.	HIV	\bhiv\b	adherence	11
+762	Measuring routine outcomes is more beneficial to clinical practice than assessing treatment adherence.	Africa	\b(africa|african)\b	adherence	5
+762	Measuring routine outcomes is more beneficial to clinical practice than assessing treatment adherence.	men	\b(men|males?)\b	adherence	3
+764	Medications to treat obesity are highly effective.	women	\b(women|woman|females?)\b	medications	9
+764	Medications to treat obesity are highly effective.	cohort studies	\bcohorts?\b	medications	9
+764	Medications to treat obesity are highly effective.	men	\b(men|males?)\b	medications	8
+765	Medications to treat obesity do not have side effects.	women	\b(women|woman|females?)\b	medications	9
+765	Medications to treat obesity do not have side effects.	cohort studies	\bcohorts?\b	medications	9
+765	Medications to treat obesity do not have side effects.	men	\b(men|males?)\b	medications	8
+766	Medications to treat obesity have unwanted side effects.	women	\b(women|woman|females?)\b	unwanted	3
+766	Medications to treat obesity have unwanted side effects.	pregnancy	\b(pregnant|pregnancy|pregnancies)\b	unwanted	3
+789	Microglia are an innate immune cell type of the central nervous system.	mice	\b(mice|mouse|murine)\b	microglia	7
+789	Microglia are an innate immune cell type of the central nervous system.	rats	\brats?\b	microglia	3
+789	Microglia are an innate immune cell type of the central nervous system.	in vitro	\bin vitro\b	microglia	3
+790	Microglia are an innate immune cell type of the peripheral nervous system.	mice	\b(mice|mouse|murine)\b	microglia	7
+790	Microglia are an innate immune cell type of the peripheral nervous system.	rats	\brats?\b	microglia	3
+790	Microglia are an innate immune cell type of the peripheral nervous system.	in vitro	\bin vitro\b	microglia	3
+795	Mitochondria play a major role in apoptosis.	mice	\b(mice|mouse|murine)\b	mitochondria	13
+795	Mitochondria play a major role in apoptosis.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	mitochondria	12
+795	Mitochondria play a major role in apoptosis.	in vitro	\bin vitro\b	mitochondria	9
+797	Mitochondria play a major role in energy production.	mice	\b(mice|mouse|murine)\b	mitochondria	13
+797	Mitochondria play a major role in energy production.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	mitochondria	12
+797	Mitochondria play a major role in energy production.	in vitro	\bin vitro\b	mitochondria	9
+804	Monoclonal antibody targeting of N-cadherin inhibits growth.	Drosophila	\b(drosophila|fruit fly|fruit flies)\b	cadherin	5
+804	Monoclonal antibody targeting of N-cadherin inhibits growth.	mice	\b(mice|mouse|murine)\b	cadherin	3
+804	Monoclonal antibody targeting of N-cadherin inhibits growth.	cell lines	\bcell lines?\b	cadherin	3
+810	Mouse models can be generated using "artificial spermatids."	yeast	\b(yeasts?|saccharomyces)\b	artificial	4
+818	Myelin sheaths play a role in action potential propagation.	in vitro	\bin vitro\b	propagation	3
+818	Myelin sheaths play a role in action potential propagation.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	propagation	3
+840	Natriuretic peptides increase susceptibility to diabetes.	women	\b(women|woman|females?)\b	natriuretic	6
+840	Natriuretic peptides increase susceptibility to diabetes.	pregnancy	\b(pregnant|pregnancy|pregnancies)\b	natriuretic	4
+841	Natriuretic peptides protect against diabetes.	women	\b(women|woman|females?)\b	natriuretic	6
+841	Natriuretic peptides protect against diabetes.	pregnancy	\b(pregnant|pregnancy|pregnancies)\b	natriuretic	4
+846	Neutrophils produce IL-1 beta in response to large particles.	mice	\b(mice|mouse|murine)\b	particles	7
+846	Neutrophils produce IL-1 beta in response to large particles.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	particles	7
+846	Neutrophils produce IL-1 beta in response to large particles.	yeast	\b(yeasts?|saccharomyces)\b	particles	3
+866	Nuclear transfer from adult human fibroblasts to human oocytes can give rise to blastocysts containing expandable pluripotent cells.	mice	\b(mice|mouse|murine)\b	expandable	4
+866	Nuclear transfer from adult human fibroblasts to human oocytes can give rise to blastocysts containing expandable pluripotent cells.	in vitro	\bin vitro\b	expandable	3
+871	Obesity decreases life quality.	mice	\b(mice|mouse|murine)\b	decreases	15
+871	Obesity decreases life quality.	women	\b(women|woman|females?)\b	decreases	11
+871	Obesity decreases life quality.	in vitro	\bin vitro\b	decreases	9
+876	Obesity raises life quality.	mice	\b(mice|mouse|murine)\b	raises	6
+885	One in five surgical randomized controlled trials are discontinued early.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	discontinued	5
+885	One in five surgical randomized controlled trials are discontinued early.	women	\b(women|woman|females?)\b	discontinued	3
+885	One in five surgical randomized controlled trials are discontinued early.	United States	\b(united states|usa)\b	discontinued	3
+886	One in two surgical randomized controlled trials are discontinued early.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	discontinued	5
+886	One in two surgical randomized controlled trials are discontinued early.	women	\b(women|woman|females?)\b	discontinued	3
+886	One in two surgical randomized controlled trials are discontinued early.	United States	\b(united states|usa)\b	discontinued	3
+900	Oxidative phosphorylation is one of the primary glycometabolic pathways in cells.	mice	\b(mice|mouse|murine)\b	oxidative	29
+900	Oxidative phosphorylation is one of the primary glycometabolic pathways in cells.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	oxidative	27
+900	Oxidative phosphorylation is one of the primary glycometabolic pathways in cells.	in vitro	\bin vitro\b	oxidative	14
+902	PD-1 triggering on monocytes enhances IL-10 production by monocytes.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	pd	16
+902	PD-1 triggering on monocytes enhances IL-10 production by monocytes.	in vitro	\bin vitro\b	pd	10
+902	PD-1 triggering on monocytes enhances IL-10 production by monocytes.	mice	\b(mice|mouse|murine)\b	pd	6
+908	PGE 2 suppresss intestinal tumor growth by altering the expression of tumor suppressing and DNA repair genes.	mice	\b(mice|mouse|murine)\b	pge	5
+919	Participants who quit smoking reduce lung cancer risk by approximately 50%.	randomized trials	\brandomi[sz]ed\b	quit	6
+919	Participants who quit smoking reduce lung cancer risk by approximately 50%.	meta-analyses	\bmeta[ -]?analys[ie]s\b	quit	3
+926	Patients with common epithelial cancers  are more likely to have an emergency event as their first hospital admission if they live in resource-deprived areas.	United Kingdom	\b(united kingdom|uk|britain|british|england)\b	deprived	4
+927	Patients with common epithelial cancers are less likely to have an emergency event as their first hospital admission if they live in resource-deprived areas.	United Kingdom	\b(united kingdom|uk|britain|british|england)\b	deprived	4
+934	Perigenital skin is not the primary site of HIV acquisition.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	acquisition	13
+934	Perigenital skin is not the primary site of HIV acquisition.	mice	\b(mice|mouse|murine)\b	acquisition	8
+934	Perigenital skin is not the primary site of HIV acquisition.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	acquisition	5
+938	Persister cells provide relapse resistance in cancer patients.	randomized trials	\brandomi[sz]ed\b	relapse	7
+938	Persister cells provide relapse resistance in cancer patients.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	relapse	6
+938	Persister cells provide relapse resistance in cancer patients.	meta-analyses	\bmeta[ -]?analys[ie]s\b	relapse	4
+939	Persistor cells are one reason for incomplete responses to Tyrosine kinase inhibitor (TKI) therapy in cancer patients.	cell lines	\bcell lines?\b	tki	3
+944	Physical activity does not improve cognitive function in individuals with Alzheimers.	women	\b(women|woman|females?)\b	cognitive	16
+944	Physical activity does not improve cognitive function in individuals with Alzheimers.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	cognitive	14
+944	Physical activity does not improve cognitive function in individuals with Alzheimers.	mice	\b(mice|mouse|murine)\b	cognitive	10
+949	Physical injury represses transgultaminase activity.	mice	\b(mice|mouse|murine)\b	represses	12
+949	Physical injury represses transgultaminase activity.	yeast	\b(yeasts?|saccharomyces)\b	represses	4
+949	Physical injury represses transgultaminase activity.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	represses	4
+952	Pioglitazone use is not associated with an increased risk of prostate cancer.	randomized trials	\brandomi[sz]ed\b	pioglitazone	3
+953	Pioglitazone use is significantly associated with an increased risk of pancreatic cancer.	randomized trials	\brandomi[sz]ed\b	pioglitazone	3
+954	Pioglitazone use is significantly associated with an increased risk of prostate cancer.	randomized trials	\brandomi[sz]ed\b	pioglitazone	3
+965	Prescribed exercise training improves quality of life.	women	\b(women|woman|females?)\b	prescribed	6
+965	Prescribed exercise training improves quality of life.	cohort studies	\bcohorts?\b	prescribed	6
+965	Prescribed exercise training improves quality of life.	United Kingdom	\b(united kingdom|uk|britain|british|england)\b	prescribed	6
+976	Primary pro-inflammatory cytokines suppress secondary pro- and anti-inflammatory mediators.	mice	\b(mice|mouse|murine)\b	mediators	25
+976	Primary pro-inflammatory cytokines suppress secondary pro- and anti-inflammatory mediators.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	mediators	13
+976	Primary pro-inflammatory cytokines suppress secondary pro- and anti-inflammatory mediators.	obesity	\b(obesity|obese)\b	mediators	7
+978	Pro-inflammatory cytokines are up repressed during tumor development.	mice	\b(mice|mouse|murine)\b	repressed	5
+978	Pro-inflammatory cytokines are up repressed during tumor development.	yeast	\b(yeasts?|saccharomyces)\b	repressed	3
+978	Pro-inflammatory cytokines are up repressed during tumor development.	in vitro	\bin vitro\b	repressed	3
+1008	RUNX is not expressed in skin tissue.	mice	\b(mice|mouse|murine)\b	skin	26
+1008	RUNX is not expressed in skin tissue.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	skin	24
+1008	RUNX is not expressed in skin tissue.	women	\b(women|woman|females?)\b	skin	8
+1025	Reduced levels of lipolysis leads to higher P38 phosphorylation in adipose tissue.	mice	\b(mice|mouse|murine)\b	lipolysis	5
+1042	Repressing IL-18 has negative effects on atherosclerotic lesion composition and progression.	mice	\b(mice|mouse|murine)\b	repressing	4
+1055	Risk-adjusted mortality rates are similar in teaching and non-teaching hospitals.	United Kingdom	\b(united kingdom|uk|britain|british|england)\b	teaching	3
+1072	Sepsis related mortality has remained stable between 2009-2014.	mice	\b(mice|mouse|murine)\b	sepsis	4
+1072	Sepsis related mortality has remained stable between 2009-2014.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	sepsis	4
+1072	Sepsis related mortality has remained stable between 2009-2014.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	sepsis	3
+1073	Sepsis related mortality has risen from 2009 to 2014.	mice	\b(mice|mouse|murine)\b	sepsis	4
+1073	Sepsis related mortality has risen from 2009 to 2014.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	sepsis	4
+1073	Sepsis related mortality has risen from 2009 to 2014.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	sepsis	3
+1074	Sequence conservation in gene regulatory regions between species is a high-accuracy predictor of conserved functionality.	mice	\b(mice|mouse|murine)\b	functionality	5
+1074	Sequence conservation in gene regulatory regions between species is a high-accuracy predictor of conserved functionality.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	functionality	4
+1074	Sequence conservation in gene regulatory regions between species is a high-accuracy predictor of conserved functionality.	Drosophila	\b(drosophila|fruit fly|fruit flies)\b	functionality	3
+1075	Sequence conservation in gene regulatory regions between species is a poor predictor of conserved functionality.	mice	\b(mice|mouse|murine)\b	functionality	5
+1075	Sequence conservation in gene regulatory regions between species is a poor predictor of conserved functionality.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	functionality	4
+1075	Sequence conservation in gene regulatory regions between species is a poor predictor of conserved functionality.	Drosophila	\b(drosophila|fruit fly|fruit flies)\b	functionality	3
+1081	Side effects associated with antidepressants do not represent a mortality risk to postmenopausal women.	randomized trials	\brandomi[sz]ed\b	antidepressants	4
+1081	Side effects associated with antidepressants do not represent a mortality risk to postmenopausal women.	systematic reviews	\bsystematic reviews?\b	antidepressants	3
+1084	Side effects associated with antidepressants increases risk of stroke.	randomized trials	\brandomi[sz]ed\b	antidepressants	4
+1084	Side effects associated with antidepressants increases risk of stroke.	systematic reviews	\bsystematic reviews?\b	antidepressants	3
+1085	Side effects associated with antidepressants lower risk of myocardial infarction.	randomized trials	\brandomi[sz]ed\b	antidepressants	4
+1085	Side effects associated with antidepressants lower risk of myocardial infarction.	systematic reviews	\bsystematic reviews?\b	antidepressants	3
+1096	Specialized functional cell types can be derived from human pluripotent stem cells.	mice	\b(mice|mouse|murine)\b	specialized	12
+1096	Specialized functional cell types can be derived from human pluripotent stem cells.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	specialized	11
+1096	Specialized functional cell types can be derived from human pluripotent stem cells.	yeast	\b(yeasts?|saccharomyces)\b	specialized	5
+1125	Systemic immunosuppressive (IS) therapy does not enhance the chance of cancer mortality in patients with inflammatory eye disease (IED)	women	\b(women|woman|females?)\b	chance	4
+1126	Systemic immunosuppressive (IS) therapy increases the chance of cancer mortality in patients with inflammatory eye disease (IED)	women	\b(women|woman|females?)\b	chance	4
+1127	Systemic lupus erythematosus is a risk factor for cardiovascular disease.	mice	\b(mice|mouse|murine)\b	erythematosus	6
+1138	TRAP+ osteoclasts regulate mature osteoblast maintenance.	in vitro	\bin vitro\b	osteoclasts	5
+1138	TRAP+ osteoclasts regulate mature osteoblast maintenance.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	osteoclasts	4
+1139	Taking 400mg of alpha-tocopheryl acetate does not prevent prostate cancer.	in vitro	\bin vitro\b	acetate	8
+1139	Taking 400mg of alpha-tocopheryl acetate does not prevent prostate cancer.	cell lines	\bcell lines?\b	acetate	5
+1141	Taking 400mg of alpha-tocopheryl acetate in combination with vitamin C reduces the risk of prostate cancer.	in vitro	\bin vitro\b	acetate	8
+1141	Taking 400mg of alpha-tocopheryl acetate in combination with vitamin C reduces the risk of prostate cancer.	cell lines	\bcell lines?\b	acetate	5
+1142	Taking anti-depresents is associated with a decrease in the A beta level in the brain of experimental animals.	randomized trials	\brandomi[sz]ed\b	taking	12
+1142	Taking anti-depresents is associated with a decrease in the A beta level in the brain of experimental animals.	women	\b(women|woman|females?)\b	taking	11
+1142	Taking anti-depresents is associated with a decrease in the A beta level in the brain of experimental animals.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	taking	11
+1148	Ten percent (10%) of kidney cancers in the UK are attributable to excess weight.	randomized trials	\brandomi[sz]ed\b	uk	13
+1148	Ten percent (10%) of kidney cancers in the UK are attributable to excess weight.	women	\b(women|woman|females?)\b	uk	12
+1148	Ten percent (10%) of kidney cancers in the UK are attributable to excess weight.	men	\b(men|males?)\b	uk	6
+1166	The H2A-H2B eviction defect is compensated for by other histone chaperone(s).	yeast	\b(yeasts?|saccharomyces)\b	eviction	3
+1169	The M2-phenotype in brown adipose tissue macrophages increases brown adipose tissue thermogenic activity.	obesity	\b(obesity|obese)\b	thermogenic	4
+1170	The NF-kappa B essential modulator gene induces intestinal inflammation by promoting receptor-interacting protein (RIP) kinase 1 kinase activity-mediated epithelial cell death.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	rip	4
+1171	The NF-kappa B essential modulator gene prevents intestinal inflammation by inhibiting receptor-interacting protein (RIP) kinase 1 kinase activity-mediated epithelial cell death.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	rip	4
+1193	The appearance of brown-like or beige cells primarily occurs in visceral fat, not subcutaneous fat.	obesity	\b(obesity|obese)\b	beige	5
+1210	The density of cytokine receptor bearing cells affects the distance over which cytokines act.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	distance	7
+1210	The density of cytokine receptor bearing cells affects the distance over which cytokines act.	women	\b(women|woman|females?)\b	distance	5
+1210	The density of cytokine receptor bearing cells affects the distance over which cytokines act.	cell lines	\bcell lines?\b	distance	3
+1211	The density of cytokine receptor bearing cells has no effect on the distance over which cytokines act.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	distance	7
+1211	The density of cytokine receptor bearing cells has no effect on the distance over which cytokines act.	women	\b(women|woman|females?)\b	distance	5
+1211	The density of cytokine receptor bearing cells has no effect on the distance over which cytokines act.	cell lines	\bcell lines?\b	distance	3
+1220	The generation of reactive oxygen species by activated oncogenes contributes to the increased genomic instability of leukaemia cells.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	leukaemia	9
+1220	The generation of reactive oxygen species by activated oncogenes contributes to the increased genomic instability of leukaemia cells.	mice	\b(mice|mouse|murine)\b	leukaemia	8
+1220	The generation of reactive oxygen species by activated oncogenes contributes to the increased genomic instability of leukaemia cells.	in vitro	\bin vitro\b	leukaemia	3
+1223	The innate immune response struggles to remove small numbers of parasites.	mice	\b(mice|mouse|murine)\b	remove	3
+1227	The mean suicide rate in women is higher after miscarriage than live birth.	cohort studies	\bcohorts?\b	miscarriage	3
+1228	The mean suicide rate in women is lower after miscarriage than live birth.	cohort studies	\bcohorts?\b	miscarriage	3
+1229	The microtubule-dependent delivery and secretion of matrix metalloproteases (MMPs) is partially responsible for the disassembly of adhesion sites.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	mmps	4
+1229	The microtubule-dependent delivery and secretion of matrix metalloproteases (MMPs) is partially responsible for the disassembly of adhesion sites.	in vitro	\bin vitro\b	mmps	3
+1246	The one-child policy has created a hospitable environment for female infants.	mice	\b(mice|mouse|murine)\b	created	4
+1246	The one-child policy has created a hospitable environment for female infants.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	created	4
+1246	The one-child policy has created a hospitable environment for female infants.	obesity	\b(obesity|obese)\b	created	4
+1247	The origin of the CRF01_1b2k protein occurred between 1923 and 1956.	mice	\b(mice|mouse|murine)\b	origin	26
+1247	The origin of the CRF01_1b2k protein occurred between 1923 and 1956.	in vitro	\bin vitro\b	origin	17
+1247	The origin of the CRF01_1b2k protein occurred between 1923 and 1956.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	origin	16
+1254	The proliferative capacity of neural progenitors differs across species.	mice	\b(mice|mouse|murine)\b	differs	3
+1254	The proliferative capacity of neural progenitors differs across species.	men	\b(men|males?)\b	differs	3
+1261	The removal of reactive oxygen species by activated oncogenes contributes to the increased genomic instability of leukaemia cells.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	leukaemia	9
+1261	The removal of reactive oxygen species by activated oncogenes contributes to the increased genomic instability of leukaemia cells.	mice	\b(mice|mouse|murine)\b	leukaemia	8
+1261	The removal of reactive oxygen species by activated oncogenes contributes to the increased genomic instability of leukaemia cells.	in vitro	\bin vitro\b	leukaemia	3
+1276	The tissue surrounding the granuloma in an immune cell induces an anti-inflammatory immune response.	mice	\b(mice|mouse|murine)\b	granuloma	4
+1284	Therapeutics receiving accelerated approval encounter a lower frequency of post-marketing safety events	men	\b(men|males?)\b	marketing	3
+1288	There is a positive correlation between hip fractures and statin use.	women	\b(women|woman|females?)\b	hip	7
+1288	There is a positive correlation between hip fractures and statin use.	men	\b(men|males?)\b	hip	5
+1288	There is a positive correlation between hip fractures and statin use.	cohort studies	\bcohorts?\b	hip	4
+1297	There was an estimated 30 million cases of pneumonia in young children worldwide in 2010.	cohort studies	\bcohorts?\b	pneumonia	6
+1297	There was an estimated 30 million cases of pneumonia in young children worldwide in 2010.	women	\b(women|woman|females?)\b	pneumonia	3
+1297	There was an estimated 30 million cases of pneumonia in young children worldwide in 2010.	men	\b(men|males?)\b	pneumonia	3
+1302	Tirasemtiv has no effect on cardiac muscle.	mice	\b(mice|mouse|murine)\b	cardiac	34
+1302	Tirasemtiv has no effect on cardiac muscle.	in vitro	\bin vitro\b	cardiac	14
+1302	Tirasemtiv has no effect on cardiac muscle.	cohort studies	\bcohorts?\b	cardiac	13
+1304	Tirasemtiv targets cardiac muscle.	mice	\b(mice|mouse|murine)\b	cardiac	34
+1304	Tirasemtiv targets cardiac muscle.	in vitro	\bin vitro\b	cardiac	14
+1304	Tirasemtiv targets cardiac muscle.	cohort studies	\bcohorts?\b	cardiac	13
+1311	Trans-acting factors, such as lncRNAs, influence mRNA translation.	mice	\b(mice|mouse|murine)\b	lncrnas	5
+1312	Transcription factor EB induces transcription of pro-inflammatory cytokines in macrophages infected with Staphylococcus aureus.	in vitro	\bin vitro\b	eb	3
+1322	Transplanted human glial progenitor cells can mature in their host animal.	in vitro	\bin vitro\b	transplanted	7
+1322	Transplanted human glial progenitor cells can mature in their host animal.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	transplanted	7
+1322	Transplanted human glial progenitor cells can mature in their host animal.	diabetes	\b(diabetes|diabetic)\b	transplanted	4
+1328	Tuberculosis-induced granulomas express different immune system protein signatures than the surrounding tissue.	mice	\b(mice|mouse|murine)\b	granulomas	5
+1330	Tumor development occurs in conjunction with suppression of pro-inflammatory cytokines.	mice	\b(mice|mouse|murine)\b	conjunction	3
+1331	Tumor development occurs in conjunction with upregulation of pro-inflammatory cytokines.	mice	\b(mice|mouse|murine)\b	conjunction	3
+1342	Understanding epigenetic regulation of replication is essential for the reational design of episomally replicating vectors.	yeast	\b(yeasts?|saccharomyces)\b	replicating	3
+1346	Upon developing tyrosine-kinase inhibitor resistance, new mutations in epidermal growth factor receptors emerge and cause treatment failure.	mice	\b(mice|mouse|murine)\b	emerge	3
+1348	Upon viral challenge, influenza-specific memory CD4+ T cells greatly enhance the early production of inflammatory chemokines in the lung.	mice	\b(mice|mouse|murine)\b	influenza	4
+1355	V-9302 inhibits antitumor responses by decreasing cell death and oxidative stress.	mice	\b(mice|mouse|murine)\b	antitumor	13
+1355	V-9302 inhibits antitumor responses by decreasing cell death and oxidative stress.	cell lines	\bcell lines?\b	antitumor	9
+1356	Vaccinating the gastrointestinal tract induces protection of rectal and vaginal mucosa.	women	\b(women|woman|females?)\b	vaginal	5
+1367	Vitamin D deficiency effects birth weight.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	vitamin	13
+1367	Vitamin D deficiency effects birth weight.	men	\b(men|males?)\b	vitamin	9
+1367	Vitamin D deficiency effects birth weight.	randomized trials	\brandomi[sz]ed\b	vitamin	7
+1371	Vitamin D is an important factor in the relationship between calcium and parathyroid hormone.	mice	\b(mice|mouse|murine)\b	parathyroid	5
+1371	Vitamin D is an important factor in the relationship between calcium and parathyroid hormone.	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	parathyroid	3
+1376	Whole brain radiotherapy increases the occurrence of new brain metastases.	mice	\b(mice|mouse|murine)\b	radiotherapy	6
+1376	Whole brain radiotherapy increases the occurrence of new brain metastases.	cell lines	\bcell lines?\b	radiotherapy	4
+1376	Whole brain radiotherapy increases the occurrence of new brain metastases.	in vitro	\bin vitro\b	radiotherapy	3
+1383	aPKCz causes tumour suppression by affecting glutamine metabolism.	in vitro	\bin vitro\b	glutamine	5
+1383	aPKCz causes tumour suppression by affecting glutamine metabolism.	cell lines	\bcell lines?\b	glutamine	5
+1391	miR-142-5P is a known regulator of raised body temperature.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	5p	4
+1391	miR-142-5P is a known regulator of raised body temperature.	cell lines	\bcell lines?\b	5p	3
+1392	miR-142-5P is a temperature-sensitive microRNA (miRNA).	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	5p	4
+1392	miR-142-5P is a temperature-sensitive microRNA (miRNA).	cell lines	\bcell lines?\b	5p	3
+1397	p16INK4A degradation is  linked to an abnormal wound response caused by the microinvasive step of advanced Oral Potentially Malignant Lesions (OPMLs).	in vitro	\bin vitro\b	p16ink4a	4
+1398	p16INK4A degradation is encoded by CDKN2A.	in vitro	\bin vitro\b	cdkn2a	3
+1402	r-protein chaperones are found in complexes with their r-protein binding partners.	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	chaperones	3

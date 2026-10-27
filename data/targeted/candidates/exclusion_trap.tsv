@@ -1,0 +1,119 @@
+claim_id	claim	n_relevant	exclude	rule	relevant_kept	relevant_removed	corpus_docs
+69	Activation of PPM1D enhances p53 function.	2	in vitro	\bin vitro\b	1	1	489
+85	Adult tissue-resident macrophages are seeded before birth.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+88	Adult tissue-resident macrophages possess a self-renewing capacity.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+106	Ambulatory blood pressure monitoring is inaccurate at diagnosing hypertension.	2	women	\b(women|woman|females?)\b	1	1	431
+106	Ambulatory blood pressure monitoring is inaccurate at diagnosing hypertension.	2	men	\b(men|males?)\b	1	1	292
+106	Ambulatory blood pressure monitoring is inaccurate at diagnosing hypertension.	2	meta-analyses	\bmeta[ -]?analys[ie]s\b	1	1	100
+106	Ambulatory blood pressure monitoring is inaccurate at diagnosing hypertension.	2	systematic reviews	\bsystematic reviews?\b	1	1	84
+108	Amitriptyline is an effective treatment for chronic tension-type headaches.	3	women	\b(women|woman|females?)\b	2	1	431
+108	Amitriptyline is an effective treatment for chronic tension-type headaches.	3	randomized trials	\brandomi[sz]ed\b	2	1	241
+178	Birth-weight is negatively associated with breast cancer.	4	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	3	1	263
+178	Birth-weight is negatively associated with breast cancer.	4	meta-analyses	\bmeta[ -]?analys[ie]s\b	2	2	100
+178	Birth-weight is negatively associated with breast cancer.	4	systematic reviews	\bsystematic reviews?\b	2	2	84
+205	CDK6 shows improved binding to loss-of-function variants of p18 INK4C.	2	in vitro	\bin vitro\b	1	1	489
+241	Cellular clocks are associated with mitosis timing in NIH 3T3 cells.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+242	Cellular clocks are not predictive of mitosis timing in NIH 3T3 cells.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+245	Charcoal is an effective treatment for acute paraquat poisoning.	2	systematic reviews	\bsystematic reviews?\b	1	1	84
+245	Charcoal is an effective treatment for acute paraquat poisoning.	2	China	\b(china|chinese)\b	1	1	44
+246	Charcoal shows no benefit for acute paraquat poisoning.	2	systematic reviews	\bsystematic reviews?\b	1	1	84
+246	Charcoal shows no benefit for acute paraquat poisoning.	2	China	\b(china|chinese)\b	1	1	44
+263	Citrullinated proteins externalized in neutrophil extracellular traps act indirectly to disrupt the inflammatory cycle.	3	in vitro	\bin vitro\b	2	1	489
+263	Citrullinated proteins externalized in neutrophil extracellular traps act indirectly to disrupt the inflammatory cycle.	3	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	2	1	1077
+267	Cognitive behavioral therapy is an ineffective treatment for insomnia	2	older adults	\b(elderly|older adults|older people)\b	1	1	68
+267	Cognitive behavioral therapy is an ineffective treatment for insomnia	2	women	\b(women|woman|females?)\b	1	1	431
+267	Cognitive behavioral therapy is an ineffective treatment for insomnia	2	randomized trials	\brandomi[sz]ed\b	1	1	241
+342	Diabetic patients with acute coronary syndrome experience decreased short-term and long-term risk for bleeding events.	2	women	\b(women|woman|females?)\b	1	1	431
+342	Diabetic patients with acute coronary syndrome experience decreased short-term and long-term risk for bleeding events.	2	men	\b(men|males?)\b	1	1	292
+342	Diabetic patients with acute coronary syndrome experience decreased short-term and long-term risk for bleeding events.	2	randomized trials	\brandomi[sz]ed\b	1	1	241
+342	Diabetic patients with acute coronary syndrome experience decreased short-term and long-term risk for bleeding events.	2	meta-analyses	\bmeta[ -]?analys[ie]s\b	1	1	100
+378	Energy balance requires hypothalamic glutamate neurotransmission.	5	obesity	\b(obesity|obese)\b	3	2	173
+449	Gastric lavage is an effective treatment for acute paraquat poisoning.	2	randomized trials	\brandomi[sz]ed\b	1	1	241
+529	Human embryonic stem cells give rise to cell types from all three embryonic germ layers.	3	in vitro	\bin vitro\b	1	2	489
+530	Human embryonic stem cells give rise to cell types from the outer embryonic germ layer, but not the other two layers.	4	mice	\b(mice|mouse|murine)\b	1	3	1021
+530	Human embryonic stem cells give rise to cell types from the outer embryonic germ layer, but not the other two layers.	4	in vitro	\bin vitro\b	1	3	489
+530	Human embryonic stem cells give rise to cell types from the outer embryonic germ layer, but not the other two layers.	4	cell lines	\bcell lines?\b	1	3	240
+531	Human embryonic stem cells have the capacity to give rise to differentiated progeny representative of all three embryonic germ layers.	3	in vitro	\bin vitro\b	1	2	489
+541	Hypothalamic glutamate neurotransmission is unrelated to energy balance.	3	obesity	\b(obesity|obese)\b	2	1	173
+668	Klf4 is important for proper myeloid cell differentiation.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+668	Klf4 is important for proper myeloid cell differentiation.	2	in vitro	\bin vitro\b	1	1	489
+668	Klf4 is important for proper myeloid cell differentiation.	2	cell lines	\bcell lines?\b	1	1	240
+669	Klf4 is not required for proper myeloid cell differentiation.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+669	Klf4 is not required for proper myeloid cell differentiation.	2	in vitro	\bin vitro\b	1	1	489
+669	Klf4 is not required for proper myeloid cell differentiation.	2	cell lines	\bcell lines?\b	1	1	240
+738	MICAL redox enzymes regulate actin dynamics.	3	Drosophila	\b(drosophila|fruit fly|fruit flies)\b	1	2	87
+738	MICAL redox enzymes regulate actin dynamics.	3	in vitro	\bin vitro\b	2	1	489
+945	Physical activity level has no association with the difference in maximal oxygen consumption between black and white youth.	4	pregnancy	\b(pregnant|pregnancy|pregnancies)\b	3	1	98
+945	Physical activity level has no association with the difference in maximal oxygen consumption between black and white youth.	4	cross-sectional studies	\bcross[ -]sectional\b	3	1	80
+945	Physical activity level has no association with the difference in maximal oxygen consumption between black and white youth.	4	obesity	\b(obesity|obese)\b	3	1	173
+945	Physical activity level has no association with the difference in maximal oxygen consumption between black and white youth.	4	United States	\b(united states|usa)\b	3	1	104
+945	Physical activity level has no association with the difference in maximal oxygen consumption between black and white youth.	4	Africa	\b(africa|african)\b	3	1	92
+946	Physical activity level is associated with the difference in maximal oxygen consumption between black and white youth.	4	pregnancy	\b(pregnant|pregnancy|pregnancies)\b	3	1	98
+946	Physical activity level is associated with the difference in maximal oxygen consumption between black and white youth.	4	cross-sectional studies	\bcross[ -]sectional\b	3	1	80
+946	Physical activity level is associated with the difference in maximal oxygen consumption between black and white youth.	4	obesity	\b(obesity|obese)\b	3	1	173
+946	Physical activity level is associated with the difference in maximal oxygen consumption between black and white youth.	4	United States	\b(united states|usa)\b	3	1	104
+946	Physical activity level is associated with the difference in maximal oxygen consumption between black and white youth.	4	Africa	\b(africa|african)\b	3	1	92
+969	PrimPol degrades short DNA replication intermediates on the leading strand during DNA replication.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+969	PrimPol degrades short DNA replication intermediates on the leading strand during DNA replication.	2	in vitro	\bin vitro\b	1	1	489
+970	PrimPol generates short DNA replication intermediates on the leading strand during DNA replication.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+970	PrimPol generates short DNA replication intermediates on the leading strand during DNA replication.	2	in vitro	\bin vitro\b	1	1	489
+972	Primary cervical cancer screening with HPV detection has lower longitudinal sensitivity than conventional cytology to detect cervical intraepithelial neoplasia grade 2.	4	randomized trials	\brandomi[sz]ed\b	1	3	241
+972	Primary cervical cancer screening with HPV detection has lower longitudinal sensitivity than conventional cytology to detect cervical intraepithelial neoplasia grade 2.	4	meta-analyses	\bmeta[ -]?analys[ie]s\b	3	1	100
+972	Primary cervical cancer screening with HPV detection has lower longitudinal sensitivity than conventional cytology to detect cervical intraepithelial neoplasia grade 2.	4	systematic reviews	\bsystematic reviews?\b	3	1	84
+972	Primary cervical cancer screening with HPV detection has lower longitudinal sensitivity than conventional cytology to detect cervical intraepithelial neoplasia grade 2.	4	cohort studies	\bcohorts?\b	3	1	242
+972	Primary cervical cancer screening with HPV detection has lower longitudinal sensitivity than conventional cytology to detect cervical intraepithelial neoplasia grade 2.	4	United States	\b(united states|usa)\b	3	1	104
+972	Primary cervical cancer screening with HPV detection has lower longitudinal sensitivity than conventional cytology to detect cervical intraepithelial neoplasia grade 2.	4	Europe	\b(europe|european)\b	3	1	73
+973	Primary cervical cytology screening with HPV detection has higher longitudinal sensitivity to detect severe cervical intraepithelial neoplasia than conventional cytology.	4	meta-analyses	\bmeta[ -]?analys[ie]s\b	3	1	100
+973	Primary cervical cytology screening with HPV detection has higher longitudinal sensitivity to detect severe cervical intraepithelial neoplasia than conventional cytology.	4	systematic reviews	\bsystematic reviews?\b	3	1	84
+973	Primary cervical cytology screening with HPV detection has higher longitudinal sensitivity to detect severe cervical intraepithelial neoplasia than conventional cytology.	4	cohort studies	\bcohorts?\b	3	1	242
+973	Primary cervical cytology screening with HPV detection has higher longitudinal sensitivity to detect severe cervical intraepithelial neoplasia than conventional cytology.	4	United States	\b(united states|usa)\b	3	1	104
+973	Primary cervical cytology screening with HPV detection has higher longitudinal sensitivity to detect severe cervical intraepithelial neoplasia than conventional cytology.	4	Europe	\b(europe|european)\b	3	1	73
+1003	RAD52 is involved in break-induced DNA replication (BIR).	3	mice	\b(mice|mouse|murine)\b	2	1	1021
+1003	RAD52 is involved in break-induced DNA replication (BIR).	3	yeast	\b(yeasts?|saccharomyces)\b	2	1	189
+1003	RAD52 is involved in break-induced DNA replication (BIR).	3	cell lines	\bcell lines?\b	1	2	240
+1004	RANK-RANKL pathway signalling has no known association with development of Aire-expressing medullary thymic epithelial cells.	3	mice	\b(mice|mouse|murine)\b	2	1	1021
+1004	RANK-RANKL pathway signalling has no known association with development of Aire-expressing medullary thymic epithelial cells.	3	in vitro	\bin vitro\b	2	1	489
+1004	RANK-RANKL pathway signalling has no known association with development of Aire-expressing medullary thymic epithelial cells.	3	cohort studies	\bcohorts?\b	2	1	242
+1004	RANK-RANKL pathway signalling has no known association with development of Aire-expressing medullary thymic epithelial cells.	3	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	2	1	1077
+1005	RANK-RANKL pathway signalling is linked to development of Aire-expressing medullary thymic epithelial cells.	3	mice	\b(mice|mouse|murine)\b	2	1	1021
+1005	RANK-RANKL pathway signalling is linked to development of Aire-expressing medullary thymic epithelial cells.	3	in vitro	\bin vitro\b	2	1	489
+1005	RANK-RANKL pathway signalling is linked to development of Aire-expressing medullary thymic epithelial cells.	3	cohort studies	\bcohorts?\b	2	1	242
+1005	RANK-RANKL pathway signalling is linked to development of Aire-expressing medullary thymic epithelial cells.	3	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	2	1	1077
+1028	Reduced responsiveness to interleukin-2 in regulatory T cells is associated with autoimmune diseases such as Type 1 Diabetes.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+1040	Replacement of histone H2A with H2A.Z accelerates gene activation in yeasts by destabilizing +1 nucleosomes.	2	in vitro	\bin vitro\b	1	1	489
+1046	Ribosomal protein (RP) expression is controlled in part by stress-activated regulators.	3	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	1	2	1077
+1109	Suboptimal nutrition is a leading cause of premature death	2	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	1	1	263
+1109	Suboptimal nutrition is a leading cause of premature death	2	randomized trials	\brandomi[sz]ed\b	1	1	241
+1109	Suboptimal nutrition is a leading cause of premature death	2	meta-analyses	\bmeta[ -]?analys[ie]s\b	1	1	100
+1109	Suboptimal nutrition is a leading cause of premature death	2	systematic reviews	\bsystematic reviews?\b	1	1	84
+1109	Suboptimal nutrition is a leading cause of premature death	2	cohort studies	\bcohorts?\b	1	1	242
+1109	Suboptimal nutrition is a leading cause of premature death	2	United States	\b(united states|usa)\b	1	1	104
+1109	Suboptimal nutrition is a leading cause of premature death	2	Africa	\b(africa|african)\b	1	1	92
+1181	The RANK-RANK-Ligand (RANKL) pathway is involved in the development of Aire-expressing medullary thymic epithelial cells (mTECs).	4	mice	\b(mice|mouse|murine)\b	2	2	1021
+1181	The RANK-RANK-Ligand (RANKL) pathway is involved in the development of Aire-expressing medullary thymic epithelial cells (mTECs).	4	in vitro	\bin vitro\b	3	1	489
+1181	The RANK-RANK-Ligand (RANKL) pathway is involved in the development of Aire-expressing medullary thymic epithelial cells (mTECs).	4	cohort studies	\bcohorts?\b	3	1	242
+1181	The RANK-RANK-Ligand (RANKL) pathway is involved in the development of Aire-expressing medullary thymic epithelial cells (mTECs).	4	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	3	1	1077
+1212	The deregulated and prolonged activation of monocytes has deleterious effects in chronic infectious conditions.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+1214	The deregulated and prolonged activation of monocytes improves inflammatory disease outcomes.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+1219	The gene daf-16, which encodes forkhead Box O (FOXO), is required for all phenotypes associated with reduced insulin/insulin-like growth factor (Igf) signaling.	2	yeast	\b(yeasts?|saccharomyces)\b	1	1	189
+1224	The latent infection of myeloid cells with human cytomegalovirus induces a number of changes in gene expression.	2	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	1	1	263
+1239	The myocardial cell lineage originally develops from cardiac progenitors of exclusively endodermal origin.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+1306	Toll-like receptor (TLR) signaling is involved in the pathogenesis of human MDS.	2	mice	\b(mice|mouse|murine)\b	1	1	1021
+1306	Toll-like receptor (TLR) signaling is involved in the pathogenesis of human MDS.	2	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	1	1	1077
+1314	Transcription rates in S. cerevisiae range between 0.7 and 2 kb/min.	2	yeast	\b(yeasts?|saccharomyces)\b	1	1	189
+1315	Transcription rates in S. cerevisiae range between 7 and 12 kb/min.	2	yeast	\b(yeasts?|saccharomyces)\b	1	1	189
+1327	Tuberculosis incidence occurs at higher rates in more sparsely populated areas in the UK.	2	women	\b(women|woman|females?)\b	1	1	431
+1327	Tuberculosis incidence occurs at higher rates in more sparsely populated areas in the UK.	2	men	\b(men|males?)\b	1	1	292
+1334	Type 1 Diabetes is associated with subtle perturbations in T reg development.	3	mice	\b(mice|mouse|murine)\b	2	1	1021
+1361	Varying expression levels of EBI2 affect the positioning and migration of B cells.	2	cell lines	\bcell lines?\b	1	1	240
+1361	Varying expression levels of EBI2 affect the positioning and migration of B cells.	2	cancer	\b(cancers?|tumou?rs?|carcinomas?)\b	1	1	1077
+1361	Varying expression levels of EBI2 affect the positioning and migration of B cells.	2	diabetes	\b(diabetes|diabetic)\b	1	1	224
+1361	Varying expression levels of EBI2 affect the positioning and migration of B cells.	2	obesity	\b(obesity|obese)\b	1	1	173
+1380	Women with a lower birth weight are more likely to develop breast cancer later in life.	3	children	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	2	1	263
+1380	Women with a lower birth weight are more likely to develop breast cancer later in life.	3	meta-analyses	\bmeta[ -]?analys[ie]s\b	1	2	100
+1380	Women with a lower birth weight are more likely to develop breast cancer later in life.	3	systematic reviews	\bsystematic reviews?\b	1	2	84
+1403	siRNA knockdown of A20 accelerates tumor progression in an in vivo murine xenograft model.	2	in vitro	\bin vitro\b	1	1	489
+1403	siRNA knockdown of A20 accelerates tumor progression in an in vivo murine xenograft model.	2	cell lines	\bcell lines?\b	1	1	240
+1404	siRNA knockdown of A20 slows tumor progression in an in vivo murine xenograft model.	2	in vitro	\bin vitro\b	1	1	489
+1404	siRNA knockdown of A20 slows tumor progression in an in vivo murine xenograft model.	2	cell lines	\bcell lines?\b	1	1	240
+1407	beta 1/Ketel is able to bind microtubules.	2	in vitro	\bin vitro\b	1	1	489
