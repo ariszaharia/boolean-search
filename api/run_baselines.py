@@ -4,6 +4,8 @@ Runs the baselines without an LLM on one split and writes their run files.
   B1      BM25 with Pyserini's default analyzer (Porter stemming, English stopwords removed)
   B2      BM25 exact match: the C++ engine with (+ word1 word2 ...)
   B3      dense retrieval: BAAI/bge-base-en-v1.5 (pinned revision), exact cosine search over all documents
+  E0      the engine with (^ word1 word2 ...): an AND of exactly B2's words, BM25 ranked; no LLM. Also writes
+          E0_<split>_sizes.tsv and E0_<split>_failures.tsv (cpp/build/boolean_cli, which E1/E2 will use too)
   B1-lit  a check, not a system: B1 set up like Pyserini's published BEIR baseline, to show that the setup
           reproduces the published BM25 number for SciFact. Not part of any hypothesis; run it on the test
           split at the end, with the final runs.
@@ -45,6 +47,7 @@ from baseline_pyserini import ROOT, WORK, build_lucene_index, corpus_sha256, fil
 CORPUS = os.path.join(ROOT, 'data', 'scifact.tsv')
 INDEX_DEFAULT = os.path.join(WORK, 'lucene_index_default')   # stemmed; the unstemmed one is lucene_index
 SEARCH_CLI = os.path.join(ROOT, 'cpp', 'build', 'search_cli.exe' if os.name == 'nt' else 'search_cli')
+BOOLEAN_CLI = os.path.join(ROOT, 'cpp', 'build', 'boolean_cli.exe' if os.name == 'nt' else 'boolean_cli')
 
 K = 100
 K1 = 1.2
@@ -152,6 +155,36 @@ def run_b2(queries, out_path, split):
             'query': '(+ word1 word2 ...)', 'engine_binary': os.path.relpath(SEARCH_CLI, ROOT)}
 
 
+def run_boolean(pairs, out_path, split, system):
+    """Runs [(query_id, Boolean query)] with cpp/build/boolean_cli (E0 now, E1/E2 later). Writes, next to the run
+    file, <system>_<split>_sizes.tsv (query_id <TAB> set_size, for H1) and <system>_<split>_failures.tsv
+    (query_id <TAB> position <TAB> message; a failed query has no size line). Returns the counts."""
+    if not os.path.isfile(BOOLEAN_CLI):
+        sys.exit(f'Missing {BOOLEAN_CLI}. Build the engine first (cmake, see PROGRESS.md).')
+    os.makedirs(WORK, exist_ok=True)
+    queries_file = os.path.join(WORK, f'boolean_queries_{system}_{split}.tsv')
+    with open(queries_file, 'w', encoding='utf-8') as f:
+        for qid, query in pairs:
+            f.write(f'{qid}\t{query}\n')
+    stem = os.path.splitext(out_path)[0]
+    sizes_path, failures_path = stem + '_sizes.tsv', stem + '_failures.tsv'
+    subprocess.run([BOOLEAN_CLI, CORPUS, queries_file, out_path, sizes_path, failures_path, str(K)], check=True)
+    with open(sizes_path, encoding='utf-8') as f:
+        sizes = [int(line.split('\t')[1]) for line in f if line.strip()]
+    with open(failures_path, encoding='utf-8') as f:
+        n_failed = sum(1 for line in f if line.strip())
+    return {'sizes_file': os.path.relpath(sizes_path, ROOT), 'failures_file': os.path.relpath(failures_path, ROOT),
+            'n_ran': len(sizes), 'n_empty_set': sizes.count(0), 'n_failed': n_failed,
+            'engine_binary': os.path.relpath(BOOLEAN_CLI, ROOT)}
+
+
+def run_e0(queries, out_path, split):
+    """E0 (hypotheses.md, clarification of 2026-10-27): an AND of exactly the words B2 uses, BM25 ranked."""
+    pairs = [(qid, '(^ ' + ' '.join(words) + ')') for qid, _, words in queries]
+    return {'k1': K1, 'b': B, 'query_input': 'engine words (lowercase, split on non-alphanumeric)',
+            'query': '(^ word1 word2 ...)', **run_boolean(pairs, out_path, split, 'E0')}
+
+
 def load_corpus():
     """([doc_id], [text]) in file order (ids increasing)."""
     ids, texts = [], []
@@ -218,7 +251,7 @@ def run_b3(queries, out_path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--system', required=True, choices=['B1', 'B2', 'B3', 'B1-lit'])
+    ap.add_argument('--system', required=True, choices=['B1', 'B2', 'B3', 'E0', 'B1-lit'])
     ap.add_argument('--split', required=True, choices=['train', 'test', 'targeted'])
     ap.add_argument('--limit', type=int, help='only the first N queries (for a quick check)')
     ap.add_argument('--out-dir', default=os.path.join(ROOT, 'results', 'runs'))
@@ -238,6 +271,8 @@ def main():
         settings = run_b1(queries, out_path, K1, B, raw_text=False)
     elif args.system == 'B1-lit':
         settings = run_b1(queries, out_path, K1_LIT, B_LIT, raw_text=True)
+    elif args.system == 'E0':
+        settings = run_e0(queries, out_path, args.split)
     elif args.system == 'B3':
         settings = run_b3(queries, out_path)
     else:
