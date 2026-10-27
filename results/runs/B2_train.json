@@ -1,0 +1,16 @@
+{
+ "system": "B2",
+ "split": "train",
+ "n_queries": 809,
+ "limit": null,
+ "k": 100,
+ "corpus": "data/scifact.tsv",
+ "k1": 1.2,
+ "b": 0.75,
+ "query_input": "engine words (lowercase, split on non-alphanumeric)",
+ "analyzer": "engine tokenizer (lowercase, split on non-alphanumeric; no stemming, no stopwords)",
+ "query": "(+ word1 word2 ...)",
+ "engine_binary": "cpp\\build\\search_cli.exe",
+ "git_commit": "9cf3a800fc2a5089df42dceb8231fbfb3192a280",
+ "run_at": "2026-10-27T16:23:16"
+}

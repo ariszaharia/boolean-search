@@ -157,5 +157,17 @@ Reason: both rank the same candidate set, and SSR uses no idf.
 
 ---
 
+## Clarifications
+Details the text above left open, fixed after the commit of 2026-10-27 but before any run they concern.
+They add to the text above; they do not change it. Format: date, what is fixed, why.
+
+- 2026-10-27, B3 (the Setting says "one named embedding model"): B3 = BAAI/bge-base-en-v1.5 at Hugging Face
+  revision a5beb1e3e68b9ab74eb54cfd186867f64f240e1a. Queries get the prefix the model card recommends for
+  retrieval ("Represent this sentence for searching relevant passages: "); documents are title and text from
+  data/scifact.tsv, at most 512 tokens. Embedding = normalized CLS vector; score = cosine similarity, exact search
+  over all documents, top 100 kept. Why this model: a strong, widely used open model that runs on a CPU, so B3 is
+  a fair rival, not a weak one. Its model card reports nDCG@10 = 0.740 on SciFact test (MTEB). The card does not
+  list its training data, so it cannot be confirmed from the card that SciFact was not used in training.
+
 ## Deviations
 (None yet. Format: date, what changed, why, what the original text said.)

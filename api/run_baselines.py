@@ -3,6 +3,7 @@ Runs the baselines without an LLM on one split and writes their run files.
 
   B1      BM25 with Pyserini's default analyzer (Porter stemming, English stopwords removed)
   B2      BM25 exact match: the C++ engine with (+ word1 word2 ...)
+  B3      dense retrieval: BAAI/bge-base-en-v1.5 (pinned revision), exact cosine search over all documents
   B1-lit  a check, not a system: B1 set up like Pyserini's published BEIR baseline, to show that the setup
           reproduces the published BM25 number for SciFact. Not part of any hypothesis; run it on the test
           split at the end, with the final runs.
@@ -14,6 +15,10 @@ B2 does neither.
 B1-lit differs from B1 in the two ways the published baseline does: k1 = 0.9, b = 0.4, and the raw query
 text goes to Lucene's analyzer (so, for example, 0.05 stays one token). Same stemmed index as B1, which
 matches BEIR's "flat" index (title and text joined).
+B3 gets the raw query text (with the query prefix the model card recommends for retrieval) and the same
+documents (title and text, as in data/scifact.tsv). Embedding = the first token's (CLS) vector, normalized,
+as the model card specifies; score = cosine similarity, computed against every document (no approximate search).
+Document embeddings are computed once and cached in results/work/.
 
 Writes   results/runs/<system>_<split>.tsv    query_id <TAB> rank <TAB> doc_id <TAB> score
          results/runs/<system>_<split>.json   the settings of the run (for the thesis and for reruns)
@@ -42,6 +47,12 @@ K1 = 1.2
 B = 0.75
 K1_LIT = 0.9   # Pyserini's BM25 setting for its BEIR baselines
 B_LIT = 0.4
+
+DENSE_MODEL = 'BAAI/bge-base-en-v1.5'
+DENSE_REVISION = 'a5beb1e3e68b9ab74eb54cfd186867f64f240e1a'   # Hugging Face commit, pinned 2026-10-27
+DENSE_QUERY_PREFIX = 'Represent this sentence for searching relevant passages: '   # from the model card
+DENSE_MAX_TOKENS = 512
+DENSE_BATCH = 32
 
 
 def git_commit():
@@ -126,9 +137,71 @@ def run_b2(queries, out_path, split):
             'query': '(+ word1 word2 ...)', 'engine_binary': os.path.relpath(SEARCH_CLI, ROOT)}
 
 
+def load_corpus():
+    """([doc_id], [text]) in file order (ids increasing)."""
+    ids, texts = [], []
+    with open(CORPUS, encoding='utf-8') as f:
+        for line in f:
+            line = line.rstrip('\r\n')
+            if '\t' in line:
+                doc_id, text = line.split('\t', 1)
+                ids.append(doc_id)
+                texts.append(text)
+    return ids, texts
+
+
+def encode(texts, tokenizer, model):
+    """Normalized CLS embeddings, one row per text."""
+    import numpy as np
+    import torch
+    rows = []
+    with torch.no_grad():
+        for start in range(0, len(texts), DENSE_BATCH):
+            batch = tokenizer(texts[start:start + DENSE_BATCH], padding=True, truncation=True,
+                              max_length=DENSE_MAX_TOKENS, return_tensors='pt')
+            cls = model(**batch).last_hidden_state[:, 0]
+            rows.append(torch.nn.functional.normalize(cls, dim=-1).numpy())
+            if len(texts) > 1000 and (start // DENSE_BATCH) % 20 == 0:
+                print(f'  encoded {start + len(rows[-1])} / {len(texts)}', flush=True)
+    return np.concatenate(rows).astype(np.float32)
+
+
+def run_b3(queries, out_path):
+    import numpy as np
+    from transformers import AutoModel, AutoTokenizer
+
+    tokenizer = AutoTokenizer.from_pretrained(DENSE_MODEL, revision=DENSE_REVISION)
+    model = AutoModel.from_pretrained(DENSE_MODEL, revision=DENSE_REVISION).eval()
+
+    doc_ids, doc_texts = load_corpus()
+    cache = os.path.join(WORK, f'b3_docs_{DENSE_REVISION[:12]}.npz')
+    if os.path.isfile(cache) and list(np.load(cache)['ids']) == doc_ids:
+        print(f'Reusing document embeddings from {cache} (delete it to recompute)')
+        docs = np.load(cache)['emb']
+    else:
+        print(f'Encoding {len(doc_ids)} documents (once; CPU takes several minutes)')
+        docs = encode(doc_texts, tokenizer, model)
+        os.makedirs(WORK, exist_ok=True)
+        np.savez(cache, ids=np.array(doc_ids), emb=docs)
+
+    q_emb = encode([DENSE_QUERY_PREFIX + text for _, text, _ in queries], tokenizer, model)
+    scores = q_emb @ docs.T   # cosine similarity, since every vector has length 1
+    n_truncated = sum(len(tokenizer(t)['input_ids']) > DENSE_MAX_TOKENS for t in doc_texts)
+    with open(out_path, 'w', encoding='utf-8') as out:
+        for (qid, _, _), row in zip(queries, scores):
+            # Stable sort on the negated score: equal scores keep file order (increasing doc id).
+            for rank, j in enumerate(np.argsort(-row, kind='stable')[:K], start=1):
+                out.write(f'{qid}\t{rank}\t{doc_ids[j]}\t{row[j]:.9g}\n')
+    return {'model': DENSE_MODEL, 'revision': DENSE_REVISION, 'query_prefix': DENSE_QUERY_PREFIX,
+            'query_input': 'raw query text with the prefix', 'pooling': 'CLS, L2-normalized',
+            'similarity': 'cosine, exact search over all documents', 'max_tokens': DENSE_MAX_TOKENS,
+            'documents_truncated': n_truncated, 'transformers_version': version('transformers'),
+            'torch_version': version('torch')}
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--system', required=True, choices=['B1', 'B2', 'B1-lit'])
+    ap.add_argument('--system', required=True, choices=['B1', 'B2', 'B3', 'B1-lit'])
     ap.add_argument('--split', required=True, choices=['train', 'test'])
     ap.add_argument('--limit', type=int, help='only the first N queries (for a quick check)')
     ap.add_argument('--out-dir', default=os.path.join(ROOT, 'results', 'runs'))
@@ -144,6 +217,8 @@ def main():
         settings = run_b1(queries, out_path, K1, B, raw_text=False)
     elif args.system == 'B1-lit':
         settings = run_b1(queries, out_path, K1_LIT, B_LIT, raw_text=True)
+    elif args.system == 'B3':
+        settings = run_b3(queries, out_path)
     else:
         settings = run_b2(queries, out_path, args.split)
     meta = {'system': args.system, 'split': args.split, 'n_queries': len(queries), 'limit': args.limit,
