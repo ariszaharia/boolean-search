@@ -220,6 +220,20 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
     counts empty results as 0. Not "both non-empty": if relaxation runs only when E1 is empty, E2 = E1 on every
     query where E1 is non-empty, and the difference would be 0 by construction. When relaxation is triggered
     (only on zero results, or also on few) is fixed with the planner design, before any E2 run.
+- 2026-10-27, E2's relaxation (fixed before E2 exists and before any E2 run; recommendations drafted by Claude,
+  adopted by Aris):
+  - Trigger: only when E1's query is valid and its Boolean set is empty. Where E1's set is non-empty, E2 = E1.
+    Where E1 failed (no valid query after the parse retries), E2 failed too: there is nothing to relax.
+    Why only on empty: a small non-empty set is usually right (E0: 21 of 22 sets of one document were relevant).
+  - How: the same model, in the same conversation, is told that its valid query matched no documents and is asked
+    for a broader one (fewer AND parts, more variants, shorter phrases). At most 2 relaxation rounds; the first
+    non-empty set ends them. A relaxed query that does not parse gets the usual parse retries within its round.
+  - Constraints are kept: the model is told to keep every exclusion and every term the request requires. The
+    exclusions are also checked mechanically: every word inside a (- ...) exclusion of E1's query must still be
+    excluded in the relaxed query, otherwise that relaxed query is rejected and the round counts. Required terms
+    cannot be identified reliably from the query, so for them only the instruction applies.
+  - E2's result is the last accepted query (it may still be empty). The number of rounds used and every attempt are
+    recorded for each request. Everything else is as in E1 (model, prompt, settings, BM25 ranking in the set).
 
 ## Deviations
 Format: date, what changed, why, what the original text said.
