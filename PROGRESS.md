@@ -292,6 +292,17 @@ test runs NOT made yet, they come at the end with the final runs):
       SciFact. 16-bit (GPU) and 32-bit (CPU) bge-m3 scores differ by at most 0.007 (60 shared pairs).
       Second candidate (added 2026-10-28, before any of its scores exist): ncbi/MedCPT-Cross-Encoder (medcpt in
       RERANKERS, 32-bit), trained on PubMed search logs, i.e. SciFact's domain. Same rule, same 200 claims.
+      Result (Colab T4 from 86b7b4c, about 15 minutes). nDCG@10 on the 200 claims: B1-rr100 0.815, B3-rr100
+      0.831, B1-rr30 0.795, B3-rr30 0.822 (B1 alone 0.713, B3 alone 0.794). Paired, reranked minus not reranked:
+        medcpt     B3 rr100 +0.037 [+0.001, +0.074]; B1 rr100 +0.102 [+0.065, +0.141]
+                   B3 rr30  +0.028 [-0.004, +0.061]; B1 rr30  +0.082 [+0.051, +0.115]
+      medcpt PASSES both rules, and beats bge-m3 at N = 100 on B3 (+0.067) and B1 (+0.058). After it, B1 and B3
+      are 0.016 apart (B1 lower). Weights: the pinned revision has only pytorch_model.bin; transformers also
+      fetched Hugging Face's converted model.safetensors during the run. All 201 tensors are bit-identical in
+      both files, so the pinned revision describes exactly what ran.
+      To note in the thesis: MedCPT was trained on PubMed search logs, and SciFact's documents are PubMed
+      abstracts. That is training on the domain (SciFact's claims and qrels are not PubMed logs), not on the
+      test labels, but it should be stated. Three rerankers were compared on the same 200 claims; also stated.
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.
