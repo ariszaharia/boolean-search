@@ -28,6 +28,8 @@ api/prep_scifact.py and api/prep_queries.py; B2 needs the engine built with CMak
     venv\\Scripts\\python.exe api/run_baselines.py --system B1 --split train
     venv\\Scripts\\python.exe api/run_baselines.py --system B2 --split train
     venv\\Scripts\\python.exe api/run_baselines.py --system B3 --split train
+--split targeted runs on the frozen targeted set (data/targeted/queries.tsv): every system gets the query text
+as written there, constraint sentence included (B1 and B2 its words, B3 the text).
 Commit first: the .json records the git commit, and git_dirty = true if tracked files had uncommitted changes.
 """
 import argparse
@@ -77,21 +79,29 @@ def git_dirty():
 
 
 def queries_path(split):
+    if split == 'targeted':
+        return os.path.join(ROOT, 'data', 'targeted', 'queries.tsv')
     return os.path.join(ROOT, 'data', f'scifact_queries_{split}.tsv')
 
 
 def load_queries(split, limit):
-    """[(query_id, text, [words])] in file order."""
+    """[(query_id, text, [words])] in file order. SciFact files: query_id <TAB> text, no header. The targeted
+    set (data/targeted/queries.tsv, frozen): a header line, and the text in the column named text."""
     path = queries_path(split)
     if not os.path.isfile(path):
         sys.exit(f'Missing {path}. Run api/prep_queries.py first.')
-    queries = []
     with open(path, encoding='utf-8') as f:
-        for line in f:
-            qid, text = line.rstrip('\r\n').split('\t', 1)
-            words = words_of(text)
-            if words:
-                queries.append((qid, text, words))
+        lines = [line.rstrip('\r\n').split('\t') for line in f if line.strip()]
+    if split == 'targeted':
+        header, lines = lines[0], lines[1:]
+        pairs = [(row[header.index('query_id')], row[header.index('text')]) for row in lines]
+    else:
+        pairs = [(row[0], '\t'.join(row[1:])) for row in lines]
+    queries = []
+    for qid, text in pairs:
+        words = words_of(text)
+        if words:
+            queries.append((qid, text, words))
     return queries[:limit] if limit else queries
 
 
@@ -209,7 +219,7 @@ def run_b3(queries, out_path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--system', required=True, choices=['B1', 'B2', 'B3', 'B1-lit'])
-    ap.add_argument('--split', required=True, choices=['train', 'test'])
+    ap.add_argument('--split', required=True, choices=['train', 'test', 'targeted'])
     ap.add_argument('--limit', type=int, help='only the first N queries (for a quick check)')
     ap.add_argument('--out-dir', default=os.path.join(ROOT, 'results', 'runs'))
     args = ap.parse_args()
