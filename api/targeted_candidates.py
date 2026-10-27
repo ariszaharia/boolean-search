@@ -29,8 +29,9 @@ import os
 import re
 
 from baseline_pyserini import words_of
-from targeted import (STOPWORDS, TARGETED_DIR, RuleMatcher, content_words, load_claims, load_corpus,
-                      load_relevant, overlap, term_docs, term_pieces, term_rule, usable_claims)
+from targeted import (STOPWORDS, TARGETED_DIR, RuleMatcher, content_words, distractors, load_claims, load_corpus,
+                      load_relevant, overlap, rarest_content_word, term_docs, term_pieces, term_rule,
+                      usable_claims, word_stats)
 
 OUT_DIR = os.path.join(TARGETED_DIR, 'candidates')
 
@@ -170,12 +171,7 @@ def main():
     relevant = load_relevant()
     claims = usable_claims(load_claims(), relevant)
     matcher = RuleMatcher(docs)
-    doc_words = {d: set(words_of(t)) for d, t in docs.items()}
-    df = collections.Counter(w for ws in doc_words.values() for w in ws)
-    postings = collections.defaultdict(set)
-    for d, ws in doc_words.items():
-        for w in ws:
-            postings[w].add(d)
+    doc_words, df, postings = word_stats(docs)
     print(f'{len(claims)} usable train claims (D10), {len(docs)} documents')
 
     trap, fallback, multi = [], [], []
@@ -194,18 +190,17 @@ def main():
             multi.append({'claim_id': qid, 'claim': claim, 'n_relevant': len(rel),
                           'words_in_some_relevant_docs': ' '.join(split[:SPLIT_WORDS_SHOWN])})
         else:
-            known = [w for w in content_words(claim) if df[w] > 0]
-            if not known:
+            rarest = rarest_content_word(claim, df)
+            if rarest is None:
                 continue
-            rarest = min(known, key=lambda w: (df[w], w))
             rows = []
             for name, rule in EXCLUSIONS.items():
                 if matcher.docs(rule) & rel or re.search(rule, claim, re.IGNORECASE):
                     continue
-                distractors = (matcher.docs(rule) & postings[rarest]) - rel
-                if len(distractors) >= 3:
+                n = len(distractors(matcher.docs(rule), rarest, postings, rel))
+                if n >= 3:
                     rows.append({'claim_id': qid, 'claim': claim, 'exclude': name, 'rule': rule,
-                                 'rarest_word': rarest, 'distractors': len(distractors)})
+                                 'rarest_word': rarest, 'distractors': n})
             fallback += sorted(rows, key=lambda r: -r['distractors'])[:FALLBACK_PER_CLAIM]
 
     # Phrases, entities, identifiers: ranked on quick estimates (compact, runs_in) first; only the best

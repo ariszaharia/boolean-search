@@ -74,6 +74,30 @@ def content_words(text):
     return seen
 
 
+def word_stats(docs):
+    """(doc_words, df, postings) over the corpus, with words_of: {doc_id: set of words}, {word: number of
+    documents}, {word: set of doc ids}."""
+    doc_words = {d: set(words_of(t)) for d, t in docs.items()}
+    df = collections.Counter(w for ws in doc_words.values() for w in ws)
+    postings = collections.defaultdict(set)
+    for d, ws in doc_words.items():
+        for w in ws:
+            postings[w].add(d)
+    return doc_words, df, postings
+
+
+def rarest_content_word(text, df):
+    """The text's content word found in the fewest documents (ties: alphabetical), or None."""
+    known = [w for w in content_words(text) if df[w] > 0]
+    return min(known, key=lambda w: (df[w], w)) if known else None
+
+
+def distractors(rule_docs, rarest, postings, relevant_docs):
+    """D3 fallback exclusions: documents that match the rule and contain the claim's rarest content word,
+    other than the relevant ones."""
+    return (rule_docs & postings[rarest]) - relevant_docs
+
+
 def overlap(text, relevant_texts):
     """D4: (share, words) = the share of the text's content words that occur in at least one relevant document,
     and those words. A paraphrase must at least halve the share of its claim."""

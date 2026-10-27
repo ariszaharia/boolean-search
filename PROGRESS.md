@@ -158,9 +158,13 @@ test runs NOT made yet, they come at the end with the final runs):
       duplicate of 85; 89 and 90 have the same text but different relevant documents, both dropped).
       Available: 52 claims with a trap exclusion (118 rows; mice 19, in vitro 18, ...), 211 fallback claims,
       phrases/entities for 806 claims, identifiers for 566, paraphrase overlap for all 806.
-      NEXT, Aris: pick and write the 100 queries and rules (25 per category, each claim once, by hand), using
-      the lists only as a menu; then the build/check script for data/targeted/qrels.tsv; then commit and push
-      (the freeze).
+      Build/check script DONE 2026-10-27: `venv\Scripts\python.exe api/targeted_build.py` checks
+      `data/targeted/queries.tsv` and `rules.tsv` (templates with the header are there; formats and every check
+      explained at the top of the script) against D1 to D10 and writes `data/targeted/qrels.tsv` only when
+      nothing is wrong. Run it as often as you like while writing; `--final` also requires 25 per category.
+      Tested on two fixtures outside the repo (5 valid queries pass; 9 planted mistakes are all reported).
+      NEXT, Aris: write the 100 queries and rules by hand (D5), using the candidate lists only as a menu; run
+      the script until it passes with --final; commit and push (the freeze).
    c. Harness: split "targeted" in load_qrels, per-category results.
    d. Then the planner (step 3).
 6. Ablations, error analysis (about 100 failures), auditability study.
