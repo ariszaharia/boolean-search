@@ -173,8 +173,8 @@ test runs NOT made yet, they come at the end with the final runs):
       Exclusions are all traps; phrases and identifiers are 24 no-trap + 1 trap each, because the exclusions
       used up almost all claims with several relevant documents (D3 only prefers traps there). Some phrase
       terms are lowercase as extracted ("preventable ades", "enhancer rnas").
-      NEXT, Aris: read data/targeted/queries.tsv (or decide not to), then the freeze: record in the Deviation
-      whether you reviewed them, commit and push. No system runs on the set before that.
+      FROZEN 2026-10-27: Aris reviewed all 100 and accepted them without changes (recorded in the Deviation).
+      From here on the set is not edited; any change goes under Deviations in hypotheses.md.
    c. Harness: split "targeted" in load_qrels, per-category results.
    d. Then the planner (step 3).
 6. Ablations, error analysis (about 100 failures), auditability study.

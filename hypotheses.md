@@ -241,3 +241,6 @@ Format: date, what changed, why, what the original text said.
      the set; they do not rule it out.
   Known limitation, reported with every result on the set: a set written by an LLM may be easier for an LLM
   planner than one written by a person. Whether Aris reviewed the drafted queries is recorded at the freeze.
+  Freeze, 2026-10-27: Aris reviewed all 100 drafted queries and accepted them without changes. The set
+  (data/targeted/queries.tsv, rules.tsv, qrels.tsv; 22 skips, 25 paraphrases) is frozen in the commit that adds
+  this line, before any system has run on it. From here on, changes to the set go under Deviations.
