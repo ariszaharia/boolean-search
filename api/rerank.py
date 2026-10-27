@@ -60,6 +60,14 @@ RERANKERS = {
                'fixed_in_hypotheses': None,
                'description': "BGE reranker v2 (M3), 568M parameters, from BAAI (who also made B3's model). Local, "
                               'free; tried on a development sample of train (PROGRESS.md, 2026-10-28)'},
+    # Trained on PubMed search logs (biomedical, SciFact's domain). Input as its model card: [query, "Title.
+    # Abstract"], which is how data/scifact.tsv joins them. Base size (110M), so 32-bit is fast enough.
+    'medcpt': {'kind': 'cross-encoder', 'model': 'ncbi/MedCPT-Cross-Encoder',
+               'revision': '71caf65d4927987813984f54c284405a13fcca49',   # Hugging Face commit, pinned 2026-10-28
+               'max_tokens': 512, 'half_on_gpu': False,
+               'fixed_in_hypotheses': None,
+               'description': 'MedCPT cross-encoder (NCBI; Jin et al., 2023), PubMedBERT trained on PubMed search '
+                              'logs. Local, free, public domain; tried on a development sample of train'},
 }
 # Pairs per forward pass. On the laptop's CPU one pair at a time is the fastest (about 19 pairs a second against
 # 13 for batches of 32, since nothing is padded). On a GPU (Google Colab) batches are much faster. A score can

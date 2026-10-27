@@ -378,8 +378,8 @@ Built (2026-10-28): `api/rerank.py` reranks the top N (30 or 100) of any run fil
 `<run>-rr<N>-<reranker>_<split>.tsv` next to it (for example `B1-rr100-ce-minilm_train.tsv`). The reranker reads
 the request as written (constraint sentence included), never the Boolean query. The rerankers are entries in
 `RERANKERS`, all free local cross-encoders for development, revisions pinned: `ce-minilm`
-(`cross-encoder/ms-marco-MiniLM-L6-v2`; on train it makes B3 worse, see PROGRESS.md) and `bge-m3`
-(`BAAI/bge-reranker-v2-m3`, much bigger). `--sample 200` reranks only 200 development claims
+(`cross-encoder/ms-marco-MiniLM-L6-v2`; on train it makes B3 worse, see PROGRESS.md), `bge-m3`
+(`BAAI/bge-reranker-v2-m3`, much bigger) and `medcpt` (`ncbi/MedCPT-Cross-Encoder`, trained on PubMed searches). `--sample 200` reranks only 200 development claims
 (`api/dev_sample.py`, never a base claim of the targeted set) into `results/dev/`, to try a reranker quickly
 against the pass rule in PROGRESS.md. Which reranker the confirmatory runs use (Jev and/or a cross-encoder) is not decided; until an
 entry is marked as fixed in hypotheses.md, the script reranks train runs only. Scores are cached in

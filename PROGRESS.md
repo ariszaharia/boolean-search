@@ -290,6 +290,8 @@ test runs NOT made yet, they come at the end with the final runs):
       bge-m3 FAILS rule (1) (B3 reranked is 0.030 lower; not significant, but the rule asks for >= 0) and passes
       rule (2). It is much better than ce-minilm, but no reranker tried so far beats B3's dense model alone on
       SciFact. 16-bit (GPU) and 32-bit (CPU) bge-m3 scores differ by at most 0.007 (60 shared pairs).
+      Second candidate (added 2026-10-28, before any of its scores exist): ncbi/MedCPT-Cross-Encoder (medcpt in
+      RERANKERS, 32-bit), trained on PubMed search logs, i.e. SciFact's domain. Same rule, same 200 claims.
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.
