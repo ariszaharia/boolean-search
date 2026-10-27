@@ -38,10 +38,49 @@ How to rerun the comparison (from the project folder):
 `python api/baseline_pyserini.py`, then build with CMake (above) and run
 `cpp\build\search_cli data\scifact.tsv results\queries_words.tsv results\engine_top100.tsv 100`, then
 `python api/compare_runs.py`.
+Python: use the project venv, `venv\Scripts\python.exe` (it has pyserini, ir_measures, numpy). Plain `python`
+on this machine opens the Microsoft Store shortcut.
+
+Evaluation harness (`harness/`, self-tests: `venv\Scripts\python.exe -m harness.selftest`, 36 checks, all pass):
+- `python -m harness.evaluate --run R.tsv --split train` scores one run (nDCG@10, R@30, R@100; R@30 and R@100
+  are the recall of the N = 30 and N = 100 pools).
+- `python -m harness.compare --a A.tsv --b B.tsv --split train` compares two runs, A minus B: paired 95% bootstrap
+  interval (10,000 resamples, fixed seed) and a bootstrap p-value, for both analyses of hypotheses.md
+  (non-empty queries only = primary; empty counted as 0 = second) plus the zero-result rate of each system.
+- `harness.stats.holm` does the Holm correction, once, over all confirmatory tests; `stats.equivalent` is H7.
+- An "empty" result means the query is missing from the run file. The planner must log failures (for example
+  repeated ParseError) separately, otherwise they look like zero results.
+- Open, decide before the run: for H4 (E2 minus E1), the non-empty subset can be E2's (`--a E2`, default) or
+  both systems' (`--nonempty-from both`). If relaxation runs only when E1 returns nothing, then E2 = E1 on every
+  query where E1 is non-empty, so "both" gives a difference of exactly 0 by construction. For H4 the meaningful
+  numbers are A = E2 (non-empty) and "empty counted as 0".
+
+Baselines without an LLM (built and checked on 5 train queries 2026-10-27; full runs NOT run yet, they wait
+for the predictions in hypotheses.md):
+- `venv\Scripts\python.exe api/prep_queries.py` -> `data/scifact_queries_{train,test}.tsv` (809 / 300 queries).
+- `venv\Scripts\python.exe api/run_baselines.py --system B1 --split train` (and `--system B2`) ->
+  `results/runs/B1_train.tsv` plus `B1_train.json` with the settings, git commit and time.
+- B1: Pyserini 2.4.0, index built from the same `data/scifact.tsv` with the default analyzer (Porter stemming
+  AND English stopwords removed), in `results/work/lucene_index_default`. B2: `cpp/build/search_cli`, (+ words).
+- Same words for both (lowercase, split on non-alphanumeric), same documents, same k1 = 1.2, b = 0.75.
+- k1/b (decided 2026-10-27, written in the Setting of hypotheses.md): B1 and B2 keep k1 = 1.2,
+  b = 0.75, so B1 minus B2 is only the analyzer. `--system B1-lit` is a check, not a system: k1 = 0.9, b = 0.4
+  and the raw query text, like Pyserini's published BEIR baseline. Run it on test at the end, to show the setup
+  reproduces the published SciFact BM25 number (about 0.67 nDCG@10). Not in any hypothesis, not in Holm.
+  Checked: runs on all 809 train and 300 test queries without errors (not scored).
+- Not built yet: precision of the Boolean set and top-k with k = set size (H1), per-category reporting
+  (needs the targeted set's format), the final script that collects all confirmatory p-values for Holm.
+- Open, decide before building E1 (blocks H1's precision): run files are cut at the top N, so they lose the size
+  of the Boolean set. A query matching 2,000 documents looks the same as one matching exactly 100, but H1 needs
+  k = the true set size. Decide (a) whether the engine writes the full set, or the top N plus a small file
+  `query_id <TAB> set_size`, and (b) what "precision of the Boolean set" means when the set is larger than N:
+  over the whole set, or over the top N. H1's text does not say; write the choice into hypotheses.md
+  (clarification or Deviation, dated) before any E1 run.
 
 ## Decisions taken
 - No stemming and no stopword removal in the engine for now: the engine is a pure exact-match engine.
-  Baseline B1 (Pyserini, stemmed) versus B2 (exact match) will show what stemming alone changes.
+  Baseline B1 (Pyserini default analyzer) versus B2 (exact match) shows what stemming plus stopword removal
+  change together (the default analyzer does both; corrected 2026-10-27, this said "stemming alone").
 - Keep the textbook BM25 formula; compare with Pyserini after dividing by (k1+1).
 - Work step by step; Aris reads every diff and must be able to explain every line.
 
@@ -56,7 +95,9 @@ How to rerun the comparison (from the project folder):
 - The tokenizer difference (decimals) is only verified on one query.
 
 ## What is left, in order
-1. Hypotheses H1 to H9: write, date and commit BEFORE any experiment, with Aris's own numeric predictions.
+1. Hypotheses H1 to H9: predictions filled in 2026-10-27 (Claude's reference estimates, adopted by Aris and
+   marked as such; kappa 0.6, M = 0.03, H8 threshold 80 %). Left: commit, then write the date and commit id in
+   "Committed on" (a second small commit). Only after that may the baseline runs start.
 2. Evaluation harness: SciFact qrels, dev/test split, `ir_measures` (nDCG@10, recall), bootstrap confidence
    intervals, Holm correction, `results/` layout. Run baselines without an LLM first: B1 (Pyserini stemmed),
    B2 (exact-match BM25), B3 (dense, one named embedding model).

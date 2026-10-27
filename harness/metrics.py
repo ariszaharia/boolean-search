@@ -2,14 +2,15 @@
 
 Rules that keep every system comparable:
   * The scored queries are the ones with at least one relevant document (see data.scorable_queries).
-  * A scored query for which the system returned nothing gets 0. An empty Boolean result is a
-    failure of that system, not a missing value.
+  * A scored query for which the system returned nothing gets 0 here. hypotheses.md asks for two analyses:
+    the primary one keeps only the queries with a non-empty result (use empty_queries and restrict below),
+    the second one keeps every query with empty results counted as 0 (what evaluate_run returns).
   * The order written in the run file is the order that is scored. The rank is turned into a
     strictly decreasing score, so ties in the original scores can never change the ranking.
 """
 from .data import scorable_queries
 
-MEASURES = ['nDCG@10', 'R@100']
+MEASURES = ['nDCG@10', 'R@30', 'R@100']   # R@30 and R@100: recall of the N = 30 and N = 100 pools
 
 
 def evaluate_run(run, qrels, measures=MEASURES):
@@ -30,6 +31,17 @@ def evaluate_run(run, qrels, measures=MEASURES):
     for result in ir_measures.iter_calc(list(ir_measures.parse_measure(m) for m in measures), judged, ranked):
         per_query[parsed[str(result.measure)]][result.query_id] = float(result.value)
     return per_query
+
+
+def empty_queries(run, qrels):
+    """Scored queries for which the system returned no document (the query is missing from its run file)."""
+    return [q for q in scorable_queries(qrels) if not run.get(q)]
+
+
+def restrict(per_query, queries):
+    """Keeps only the given queries in {measure: {qid: value}}."""
+    keep = set(queries)
+    return {m: {q: v for q, v in values.items() if q in keep} for m, values in per_query.items()}
 
 
 def means(per_query):
