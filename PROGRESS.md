@@ -252,6 +252,12 @@ test runs NOT made yet, they come at the end with the final runs):
         part b 3 relaxed queries were rejected for that. It protects the targeted set's real exclusions.
       - NEXT: decide whether a 7B model is enough: compare Sol and Astra on parts a and b (E1 and E2, about $1
         with Astra) when the API key exists; then fix the model and prompt before any confirmatory run.
+   f. Reranker (step 4), 2026-10-28: for now an open cross-encoder (free, runs locally), because there is no
+      budget for an API yet. Which reranker the confirmatory runs use is NOT decided: candidates are Jev
+      (TypeSafe AI, a "System One" classification model used as a reranker; about $0.04 per million input
+      tokens, numbered versions such as 1.14, no free tier) and/or the cross-encoder. Aris is interested in
+      Jev because it is unusual. The choice is written into hypotheses.md before any reranked run on the
+      targeted set or test. The reranking step is built so that the reranker is one setting.
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.
