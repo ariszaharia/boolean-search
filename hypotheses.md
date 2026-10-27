@@ -211,6 +211,15 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
     been made. The Phase 0 Pyserini check was made on the earlier corpus.
   - Files: data/targeted/queries.tsv, rules.tsv, qrels.tsv (qrels built by a script, checked by a script).
   - Frozen when committed; after that, changes only under Deviations. No system runs on the set before that.
+- 2026-10-27, E0 and H4 (fixed before any E run; recommendations drafted by Claude, adopted by Aris):
+  - E0 = the engine with (^ word1 word2 ...): an AND of exactly the words B2 uses for the query (lowercase,
+    split on every non-alphanumeric character, Greek letters as names), ranked by BM25 with k1 = 1.2, b = 0.75.
+    Why AND: an OR of the same words is B2 itself. Many E0 results are expected to be empty; the zero-result
+    rate is reported next to both analyses.
+  - H4 (E2 minus E1): the primary analysis keeps the queries where E2 is non-empty (E2 is system A); the second
+    counts empty results as 0. Not "both non-empty": if relaxation runs only when E1 is empty, E2 = E1 on every
+    query where E1 is non-empty, and the difference would be 0 by construction. When relaxation is triggered
+    (only on zero results, or also on few) is fixed with the planner design, before any E2 run.
 
 ## Deviations
 (None yet. Format: date, what changed, why, what the original text said.)

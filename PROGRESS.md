@@ -24,9 +24,15 @@ Query language: `(^ a b)` AND, `(+ a b)` OR, `(- A B)` NOT (A minus the rest), `
   `cmake -S . -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release`, `cmake --build build`,
   `ctest --test-dir build --output-on-failure`. Executables are linked statically, because otherwise another
   program's libstdc++ DLL on PATH makes them stop at start (exit code 0xc0000139).
-- Tokenizer: non-ASCII (UTF-8) bytes separate words, so "α-synuclein" is indexed as "synuclein". Fixed on
-  2026-10-27 to pass bytes as unsigned char (it was undefined behaviour); SciFact results are byte-for-byte
-  the same as before. Whether to keep Greek letters etc. as part of words is still open (matters for H3).
+- Tokenizer: non-ASCII (UTF-8) bytes separate words. Fixed on 2026-10-27 to pass bytes as unsigned char (it was
+  undefined behaviour); SciFact results are byte-for-byte the same as before.
+- Greek letters (D7, done 2026-10-27): `api/greek.py` writes every Greek letter, and the micro sign, as its
+  name and as a separate word ("TNF-α" -> "TNF-alpha", "IFNγ" -> "IFN gamma", "TGFβ1" -> "TGF beta 1"). Applied
+  in prep_scifact.py and prep_queries.py (523 documents, 16 train and 6 test claims changed; checked: the new
+  files equal greek_to_names(old files) on every row, nothing else changed) and in `words_of`. The engine itself
+  is unchanged. Anything that sends text to a system must pass it through greek_to_names too: the planner's
+  queries later, and the targeted set's rules are written against the converted corpus. Other non-ASCII
+  characters still separate words (for example the "ß" typed for β in train claim 740; it is the only one).
 - Full SciFact corpus: `python api/prep_scifact.py` -> `data/scifact.tsv`, 5,183 documents, ids increasing.
 - Pyserini comparison (300 SciFact test queries, Pyserini built without stemming/stopwords, same k1/b):
   top-10 overlap 0.959, same #1 document 96.7%, Spearman 0.985. Scores differ by exactly the factor (k1+1) = 2.2,
@@ -50,10 +56,12 @@ Evaluation harness (`harness/`, self-tests: `venv\Scripts\python.exe -m harness.
 - `harness.stats.holm` does the Holm correction, once, over all confirmatory tests; `stats.equivalent` is H7.
 - An "empty" result means the query is missing from the run file. The planner must log failures (for example
   repeated ParseError) separately, otherwise they look like zero results.
-- Open, decide before the run: for H4 (E2 minus E1), the non-empty subset can be E2's (`--a E2`, default) or
-  both systems' (`--nonempty-from both`). If relaxation runs only when E1 returns nothing, then E2 = E1 on every
-  query where E1 is non-empty, so "both" gives a difference of exactly 0 by construction. For H4 the meaningful
-  numbers are A = E2 (non-empty) and "empty counted as 0".
+- Decided 2026-10-27 (clarification in hypotheses.md): H4 is run as `--a E2 --b E1` with the default
+  `--nonempty-from a` (E2's non-empty queries), plus "empty counted as 0". Not "both": if relaxation runs only
+  when E1 returns nothing, E2 = E1 wherever E1 is non-empty, so the difference would be 0 by construction.
+  Still open, with the planner: when relaxation is triggered (only on zero results, or also on few).
+- Decided 2026-10-27: E0 = `(^ word1 word2 ...)` of exactly B2's words, BM25 k1 = 1.2, b = 0.75 (an OR of the
+  same words would be B2 itself).
 
 Baselines without an LLM (B1, B2, B3 run on all 809 train queries 2026-10-27, after hypotheses.md was committed;
 test runs NOT made yet, they come at the end with the final runs):
@@ -70,11 +78,15 @@ test runs NOT made yet, they come at the end with the final runs):
   Checked: runs on all 809 train and 300 test queries without errors (not scored).
 - B3: BAAI/bge-base-en-v1.5 at a pinned revision, query prefix from the model card, CLS vector normalized, exact
   cosine search (`--system B3`). Fixed in the Clarifications of hypotheses.md. Needs `transformers` and `torch`
-  in the venv. Document embeddings are cached in `results/work/b3_docs_<revision>.npz`; 455 of 5,183 documents
-  are longer than 512 tokens and are cut. The first B3 run used uncommitted code; it was rerun from a commit
-  (the timing is disclosed in the B3 clarification).
-- Every run file's .json now has `git_dirty`: true means tracked files had uncommitted changes when the run
-  started, so `git_commit` alone is not the code that ran. Commit before every run that counts.
+  in the venv. Document embeddings are cached in `results/work/b3_docs_<revision>_<corpus hash>.npz`; 455 of
+  5,183 documents are longer than 512 tokens and are cut. The first B3 run used uncommitted code; it was rerun
+  from a commit (the timing is disclosed in the B3 clarification).
+- Every run file's .json has `git_dirty`: true means tracked files outside `results/` had uncommitted changes
+  when the run started, so `git_commit` alone is not the code that ran. Commit before every run that counts.
+  It also has `corpus_sha256` and `queries_sha256`, the fingerprints of the exact corpus and query file used.
+- Caches are tied to the corpus: each Lucene index has a stamp `<index>.corpus_sha256` and is deleted and rebuilt
+  when the corpus changes; the B3 cache file name contains the corpus hash. (Before 2026-10-27 both were reused
+  whenever they existed, which after D7 would have silently used the old text.)
 - Train results (`results/metrics/`, `results/comparisons/`; train only, before reranking, not a test of any
   hypothesis):
   | system | nDCG@10 | R@30 | R@100 |
@@ -132,10 +144,9 @@ test runs NOT made yet, they come at the end with the final runs):
    large precision gaps (H1 predicts about +20 points) are only possible on queries with small Boolean sets.
    Design DECIDED 2026-10-27 (`targeted_set_design.md`, all recommendations adopted; summary in the
    clarifications of hypotheses.md). Moved before the planner (step 3). Order from here:
-   a. D7, Greek letters -> names in api/prep_scifact.py and api/prep_queries.py; rebuild data/scifact.tsv,
-      the query files and both Lucene indexes; rerun B1 to B3 on train. First fix the B3 embedding cache: it is
-      reused when the document ids match, without checking the text, so after D7 it would silently reuse the
-      old embeddings. Key it on the text too.
+   a. DONE 2026-10-27: D7 (Greek letters -> names), caches tied to the corpus, B1 to B3 rerun on train.
+      The unstemmed index of the Phase 0 check (`results/work/lucene_index`) has no stamp yet; it is rebuilt
+      the next time api/baseline_pyserini.py runs. The Phase 0 numbers above were made on the earlier corpus.
    b. Candidate script (qrels and corpus only) -> Aris writes the 100 queries and rules -> build and check
       script for data/targeted/qrels.tsv -> commit and push (the freeze).
    c. Harness: split "targeted" in load_qrels, per-category results.
