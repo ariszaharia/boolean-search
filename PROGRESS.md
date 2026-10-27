@@ -12,6 +12,9 @@ Related work that started the idea: Clarke & Smucker, "Boolean queries are all y
 
 ## What is done (Phase 0, the engine)
 Query language: `(^ a b)` AND, `(+ a b)` OR, `(- A B)` NOT (A minus the rest), `"exact phrase"`, bare term.
+NOT needs at least two operands (since 2026-10-27): `(- A)` is a ParseError, because it used to return A itself,
+the opposite of what it seems to say. A NOT operand can be any subquery: `(- A (+ mice mouse murine))`. A bare
+word matches only that exact word (no stemming), and NOT removes a document wherever the word appears in it.
 
 - Parser: strict errors with a position (`ParseError`); nesting deeper than 500 is rejected (it used to crash).
 - Query terms are normalized like the indexed text: `Cat` finds "cat"; `T-cell` is matched as the phrase "t cell".
@@ -19,8 +22,8 @@ Query language: `(^ a b)` AND, `(+ a b)` OR, `(- A B)` NOT (A minus the rest), `
 - BM25 scored from the parsed query: a phrase is one unit (phrase frequency, summed idf); NOT scores only its first
   operand; ties are broken by doc id, so results are always in the same order. Term lookup is a binary search.
 - Textbook BM25 including the (k1+1) factor, k1 = 1.2, b = 0.75 (tests pass these explicitly).
-- Tests: `test_engine-v1.cpp` (6), `test_phrase.cpp` (25), `test_scoring.cpp` (12), `test_index_io.cpp` (12:
-  UTF-8 text, terms glued to `(`/`"`, save/load). All pass. Build and run them with CMake (from `cpp/`):
+- Tests: `test_engine-v1.cpp` (6), `test_phrase.cpp` (25), `test_scoring.cpp` (12), `test_index_io.cpp` (18:
+  UTF-8 text, terms glued to `(`/`"`, NOT with one operand, save/load). All pass. Build and run them with CMake (from `cpp/`):
   `cmake -S . -B build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release`, `cmake --build build`,
   `ctest --test-dir build --output-on-failure`. Executables are linked statically, because otherwise another
   program's libstdc++ DLL on PATH makes them stop at start (exit code 0xc0000139).

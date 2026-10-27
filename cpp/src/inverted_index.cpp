@@ -134,6 +134,9 @@ QueryNode InvertedIndex::parse_query(const std::string& query, size_t& pos, int 
             node.children.push_back(parse_query(query, pos, depth + 1));
         }
         if (node.children.empty()) throw ParseError("operator with no operands", open_pos);
+        // (- A) would return A itself, the opposite of what it seems to say: there is no "everything except".
+        if (op == QueryOperator::NOT && node.children.size() < 2)
+            throw ParseError("'-' needs at least two operands: (- A B) keeps A without B", open_pos);
         return node;
     }
 

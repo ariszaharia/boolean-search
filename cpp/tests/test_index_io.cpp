@@ -45,6 +45,21 @@ int main() {
         report("term right before ')' still works", ix.search("(+ foo)") == std::vector<int>({1}));
     }
 
+    // --- 2b. NOT needs at least two operands: (- A) would silently return A ---
+    {
+        InvertedIndex ix;
+        ix.add_document(1, "foo bar");
+        ix.add_document(2, "foo baz");
+        report("(- foo) is rejected",                 parse_fails(ix, "(- foo)"));
+        report("(- (+ foo bar)) is rejected",         parse_fails(ix, "(- (+ foo bar))"));
+        report("(- \"foo bar\") is rejected",         parse_fails(ix, "(- \"foo bar\")"));
+        report("(- foo bar) still works",             ix.search("(- foo bar)") == std::vector<int>({2}));
+        report("(- foo bar baz) still works",         ix.search("(- foo bar baz)").empty());
+        bool at_paren = false;
+        try { ix.parse("(^ foo (- bar))"); } catch (const ParseError& e) { at_paren = (e.position == 7); }
+        report("the error points at the '(' of the NOT", at_paren);
+    }
+
     // --- 3. Save and load ---
     const std::string path = (std::filesystem::temp_directory_path() / "licenta_test_index.idx").string();
     {
