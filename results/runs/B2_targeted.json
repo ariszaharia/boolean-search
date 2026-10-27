@@ -1,0 +1,19 @@
+{
+ "system": "B2",
+ "split": "targeted",
+ "n_queries": 100,
+ "limit": null,
+ "k": 100,
+ "corpus": "data/scifact.tsv",
+ "corpus_sha256": "7865b98eee15e30e10c32560ebd5840a7778842f4a96c25582ff2204791b66b9",
+ "queries_sha256": "81e7db5bb4220e647e6b7b20a78292fc80c48d2f6882baecc21140aa41edf8f5",
+ "k1": 1.2,
+ "b": 0.75,
+ "query_input": "engine words (lowercase, split on non-alphanumeric)",
+ "analyzer": "engine tokenizer (lowercase, split on non-alphanumeric; no stemming, no stopwords)",
+ "query": "(+ word1 word2 ...)",
+ "engine_binary": "cpp\\build\\search_cli.exe",
+ "git_commit": "fdcda6a8c718f257b18c12ff2b49da065c9c1610",
+ "git_dirty": false,
+ "run_at": "2026-10-27T21:29:54"
+}

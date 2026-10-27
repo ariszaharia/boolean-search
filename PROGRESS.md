@@ -180,7 +180,26 @@ test runs NOT made yet, they come at the end with the final runs):
       FROZEN 2026-10-27: Aris reviewed all 100 and accepted them without changes (recorded in the Deviation).
       From here on the set is not edited; any change goes under Deviations in hypotheses.md.
    c. DONE 2026-10-27: harness split "targeted" with results by group (HOW_IT_WORKS.md 6.10).
-   d. Then the planner (step 3).
+   Baselines on the targeted set DONE 2026-10-27 (`--split targeted`; runs from fdcda6a, clean; first system
+   runs on the frozen set). Descriptive only: no hypothesis compares baselines with each other.
+   | group | B1 nDCG@10 | B2 | B3 | B1 R@100 | B2 | B3 |
+   |---|---|---|---|---|---|---|
+   | constraint (75) | 0.731 | 0.705 | 0.749 | 0.980 | 0.960 | 0.987 |
+   | exclusion | 0.363 | 0.352 | 0.518 | 0.940 | 0.880 | 1.000 |
+   | phrase | 0.895 | 0.817 | 0.763 | 1.000 | 1.000 | 0.960 |
+   | identifier | 0.935 | 0.945 | 0.965 | 1.000 | 1.000 | 1.000 |
+   | paraphrase | 0.328 | 0.286 | 0.659 | 0.500 | 0.480 | 0.980 |
+   - Exclusions are hard for every baseline, as designed: a trap is ranked above the document that stays
+     relevant in 15/25 (B1), 14/25 (B2), 11/25 (B3) queries; that document is first in only 4 to 5 of 25. BM25
+     is worst because the constraint sentence adds the excluded word ("mice") to its query. B3 minus B1 nDCG@10
+     +0.155 (95% interval +0.048 to +0.260).
+   - Phrases and identifiers are easy (0.76 to 0.97): they are almost all no-trap, so there is little room for
+     a Boolean system to gain there (H3 already expects a small identifier gain). B3 is below B1 on phrases
+     (-0.131, interval -0.267 to -0.015): exact wording favours BM25.
+   - Paraphrases: BM25 loses half the relevant documents (R@100 0.50), dense keeps them (0.98); B3 minus B1
+     R@100 +0.48 (+0.30 to +0.66). Expected by construction (lexical overlap at least halved). Caveat for H2:
+     the paraphrases were written by an LLM (Claude), and dense retrieval is also a neural model.
+   d. NEXT: the planner (step 3).
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.
