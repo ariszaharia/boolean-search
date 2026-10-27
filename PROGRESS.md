@@ -281,6 +281,15 @@ test runs NOT made yet, they come at the end with the final runs):
       Reported with both: 95% paired intervals, and N = 30. The same rule and the same 200 claims are used for
       every reranker tried later (Jev included). ce-minilm is scored on the same 200 claims from its train runs.
       First candidate: BAAI/bge-reranker-v2-m3 (bge-m3 in RERANKERS, 16-bit on the GPU), on Colab.
+      Result (Colab T4 from c22c907, about 12 minutes; runs in results/dev/, not committed). nDCG@10 on the 200
+      claims: B1 0.713, B3 0.794 | ce-minilm: B1-rr100 0.725, B3-rr100 0.726 | bge-m3: B1-rr100 0.757,
+      B3-rr100 0.764, B1-rr30 0.749, B3-rr30 0.773. Paired, reranked minus not reranked:
+        bge-m3     B3 rr100 -0.030 [-0.065, +0.004]; B1 rr100 +0.044 [+0.005, +0.084]
+                   B3 rr30  -0.021 [-0.053, +0.011]; B1 rr30  +0.036 [-0.001, +0.074]
+        ce-minilm  B3 rr100 -0.068 [-0.103, -0.034]; B1 rr100 +0.012 [-0.021, +0.045]
+      bge-m3 FAILS rule (1) (B3 reranked is 0.030 lower; not significant, but the rule asks for >= 0) and passes
+      rule (2). It is much better than ce-minilm, but no reranker tried so far beats B3's dense model alone on
+      SciFact. 16-bit (GPU) and 32-bit (CPU) bge-m3 scores differ by at most 0.007 (60 shared pairs).
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.
