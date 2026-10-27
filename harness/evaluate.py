@@ -5,14 +5,15 @@ import os
 
 from .data import ROOT, load_qrels
 from .metrics import MEASURES, evaluate_run, means
-from .run_io import read_run
+from .run_io import read_run, run_name
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--run', required=True, help='run file: query_id, rank, doc_id, score (tab-separated)')
     ap.add_argument('--split', required=True, choices=['train', 'test'])
-    ap.add_argument('--name', help='name for the output file (default: the run file name)')
+    ap.add_argument('--name', help='name for the output file, before _<split> (default: the run file name '
+                                   'without _<split>, so B1_train.tsv gives B1_train.json)')
     args = ap.parse_args()
 
     qrels = load_qrels(args.split)
@@ -26,7 +27,7 @@ def main():
     for m in MEASURES:
         print(f'  {m:10s} {avg[m]:.4f}')
 
-    name = args.name or os.path.splitext(os.path.basename(args.run))[0]
+    name = args.name or run_name(args.run, args.split)
     out_dir = os.path.join(ROOT, 'results', 'metrics')
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, f'{name}_{args.split}.json')

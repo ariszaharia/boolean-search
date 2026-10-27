@@ -10,7 +10,7 @@ import tempfile
 from .compare import compare_runs
 from .data import read_qrels, scorable_queries
 from .metrics import empty_queries, evaluate_run
-from .run_io import read_run
+from .run_io import read_run, run_name
 from .stats import equivalent, holm, paired_bootstrap
 
 failures = 0
@@ -61,6 +61,12 @@ def test_run_io():
     check('run: ranks 1, 3 (gap) are rejected', raises(read_run, write_temp('q1\t1\tdA\t2\nq1\t3\tdB\t1\n')))
     check('run: ranks starting at 2 are rejected', raises(read_run, write_temp('q1\t2\tdA\t2\n')))
     check('run: the same document twice is rejected', raises(read_run, write_temp('q1\t1\tdA\t2\nq1\t2\tdA\t1\n')))
+    check('run name: folder, extension and a trailing _<split> are removed',
+          run_name(os.path.join('results', 'runs', 'B1_train.tsv'), 'train') == 'B1')
+    check('run name: a name without the split is kept (results/E1.tsv -> E1)',
+          run_name('results/E1.tsv', 'train') == 'E1')
+    check('run name: only the given split is removed (B1_train.tsv on test stays B1_train)',
+          run_name('B1_train.tsv', 'test') == 'B1_train')
 
 
 def test_scoring():

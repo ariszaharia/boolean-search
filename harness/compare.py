@@ -16,7 +16,7 @@ import os
 
 from .data import ROOT, load_qrels, scorable_queries
 from .metrics import MEASURES, empty_queries, evaluate_run, restrict
-from .run_io import read_run
+from .run_io import read_run, run_name
 from .stats import N_RESAMPLES, SEED, paired_bootstrap
 
 
@@ -52,7 +52,8 @@ def main():
     ap.add_argument('--b', required=True, help='run file of system B')
     ap.add_argument('--split', required=True, choices=['train', 'test'])
     ap.add_argument('--nonempty-from', default='a', choices=['a', 'both'])
-    ap.add_argument('--name', help='name for the output file (default: A_vs_B)')
+    ap.add_argument('--name', help='name for the output file, before _<split> (default: A_vs_B, the run file '
+                                   'names without _<split>, so B3_train.tsv and B1_train.tsv give B3_vs_B1_train.json)')
     args = ap.parse_args()
 
     qrels = load_qrels(args.split)
@@ -71,9 +72,7 @@ def main():
                   f'A-B {r["mean_diff"]:+.4f}  95% CI [{r["ci_low"]:+.4f}, {r["ci_high"]:+.4f}]  '
                   f'p {r["p_value"]:.4f}')
 
-    def stem(path):
-        return os.path.splitext(os.path.basename(path))[0]
-    name = args.name or f'{stem(args.a)}_vs_{stem(args.b)}'
+    name = args.name or f'{run_name(args.a, args.split)}_vs_{run_name(args.b, args.split)}'
     out_dir = os.path.join(ROOT, 'results', 'comparisons')
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, f'{name}_{args.split}.json')

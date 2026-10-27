@@ -41,7 +41,7 @@ How to rerun the comparison (from the project folder):
 Python: use the project venv, `venv\Scripts\python.exe` (it has pyserini, ir_measures, numpy). Plain `python`
 on this machine opens the Microsoft Store shortcut.
 
-Evaluation harness (`harness/`, self-tests: `venv\Scripts\python.exe -m harness.selftest`, 36 checks, all pass):
+Evaluation harness (`harness/`, self-tests: `venv\Scripts\python.exe -m harness.selftest`, 39 checks, all pass):
 - `python -m harness.evaluate --run R.tsv --split train` scores one run (nDCG@10, R@30, R@100; R@30 and R@100
   are the recall of the N = 30 and N = 100 pools).
 - `python -m harness.compare --a A.tsv --b B.tsv --split train` compares two runs, A minus B: paired 95% bootstrap
@@ -84,8 +84,11 @@ test runs NOT made yet, they come at the end with the final runs):
   | B3 | 0.771 | 0.938 | 0.972 |
   B1 minus B2 nDCG@10 +0.030 (95% interval +0.018 to +0.043); B3 minus B1 +0.074 (+0.052 to +0.095).
   B1 returns fewer than 100 documents for a few queries (80,827 rows instead of 80,900).
-- Open: output names are inconsistent (`B1_train_train.json` but `B3_train.json`), because evaluate/compare add
-  `_<split>` to a run name that already ends in it. Pick one convention before the test runs.
+- Output names (fixed 2026-10-27): the split appears once. evaluate/compare drop a trailing `_<split>` from the
+  run file name and add it back once: `results/runs/B1_train.tsv` -> `results/metrics/B1_train.json`, and
+  B3 against B1 -> `results/comparisons/B3_vs_B1_train.json` (`harness.run_io.run_name`). The old
+  `B1_train_train.json`, `B2_train_train.json` and `B2_train_vs_B1_train_train.json` were regenerated under the
+  new names (contents byte-for-byte the same) and removed.
 - Not built yet: precision of the Boolean set and top-k with k = set size (H1), per-category reporting
   (needs the targeted set's format), the final script that collects all confirmatory p-values for Holm.
 - Open, decide before building E1 (blocks H1's precision): run files are cut at the top N, so they lose the size

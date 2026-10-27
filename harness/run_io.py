@@ -2,6 +2,15 @@
 
     query_id <TAB> rank <TAB> doc_id <TAB> score
 """
+import os
+
+
+def run_name(path, split):
+    """The run file's name without folder, extension and a trailing _<split>: results/runs/B1_train.tsv -> B1.
+    Output files add the split back once (B1_train.json), so it is never written twice."""
+    name = os.path.splitext(os.path.basename(path))[0]
+    suffix = f'_{split}'
+    return name[:-len(suffix)] if name.endswith(suffix) and name != suffix else name
 
 
 def read_run(path):
