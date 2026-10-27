@@ -163,8 +163,15 @@ test runs NOT made yet, they come at the end with the final runs):
       explained at the top of the script) against D1 to D10 and writes `data/targeted/qrels.tsv` only when
       nothing is wrong. Run it as often as you like while writing; `--final` also requires 25 per category.
       Tested on two fixtures outside the repo (5 valid queries pass; 9 planted mistakes are all reported).
-      NEXT, Aris: write the 100 queries and rules by hand (D5), using the candidate lists only as a menu; run
-      the script until it passes with --final; commit and push (the freeze).
+      CHANGED 2026-10-27 (Deviation in hypotheses.md): Aris decided not to write the queries; Claude drafted
+      them with `api/targeted_draft.py` (seeded claim order, fixed rule per category, fixed phrasings; inputs
+      `skips.tsv`, 22 skips each with a reason, and `paraphrases.tsv`, 25 paraphrases written by Claude with no
+      padding). `targeted_build.py --final` passes: 100 queries, 113 relevant documents (1 to 3 per query).
+      Exclusions are all traps; phrases and identifiers are 24 no-trap + 1 trap each, because the exclusions
+      used up almost all claims with several relevant documents (D3 only prefers traps there). Some phrase
+      terms are lowercase as extracted ("preventable ades", "enhancer rnas").
+      NEXT, Aris: read data/targeted/queries.tsv (or decide not to), then the freeze: record in the Deviation
+      whether you reviewed them, commit and push. No system runs on the set before that.
    c. Harness: split "targeted" in load_qrels, per-category results.
    d. Then the planner (step 3).
 6. Ablations, error analysis (about 100 failures), auditability study.

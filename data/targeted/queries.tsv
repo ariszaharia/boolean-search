@@ -1,1 +1,101 @@
 query_id	category	base_claim_id	kind	text
+t001	exclusion	267	trap	Cognitive behavioral therapy is an ineffective treatment for insomnia, but not studies of women.
+t002	exclusion	449	trap	Gastric lavage is an effective treatment for acute paraquat poisoning. Exclude randomized trials.
+t003	exclusion	1214	trap	The deregulated and prolonged activation of monocytes improves inflammatory disease outcomes. I am not interested in studies in mice.
+t004	exclusion	969	trap	PrimPol degrades short DNA replication intermediates on the leading strand during DNA replication. Leave out studies in mice.
+t005	exclusion	108	trap	Amitriptyline is an effective treatment for chronic tension-type headaches. No studies of women, please.
+t006	exclusion	246	trap	Charcoal shows no benefit for acute paraquat poisoning, but not systematic reviews.
+t007	exclusion	1380	trap	Women with a lower birth weight are more likely to develop breast cancer later in life. Exclude studies of children.
+t008	exclusion	946	trap	Physical activity level is associated with the difference in maximal oxygen consumption between black and white youth. I am not interested in obesity studies.
+t009	exclusion	1306	trap	Toll-like receptor (TLR) signaling is involved in the pathogenesis of human MDS. Leave out studies in mice.
+t010	exclusion	972	trap	Primary cervical cancer screening with HPV detection has lower longitudinal sensitivity than conventional cytology to detect cervical intraepithelial neoplasia grade 2. No cohort studies, please.
+t011	exclusion	245	trap	Charcoal is an effective treatment for acute paraquat poisoning, but not systematic reviews.
+t012	exclusion	1219	trap	The gene daf-16, which encodes forkhead Box O (FOXO), is required for all phenotypes associated with reduced insulin/insulin-like growth factor (Igf) signaling. Exclude yeast studies.
+t013	exclusion	973	trap	Primary cervical cytology screening with HPV detection has higher longitudinal sensitivity to detect severe cervical intraepithelial neoplasia than conventional cytology. I am not interested in cohort studies.
+t014	exclusion	85	trap	Adult tissue-resident macrophages are seeded before birth. Leave out studies in mice.
+t015	exclusion	970	trap	PrimPol generates short DNA replication intermediates on the leading strand during DNA replication. No studies in mice, please.
+t016	exclusion	669	trap	Klf4 is not required for proper myeloid cell differentiation, but not studies in mice.
+t017	exclusion	1040	trap	Replacement of histone H2A with H2A.Z accelerates gene activation in yeasts by destabilizing +1 nucleosomes. Exclude in vitro studies.
+t018	exclusion	541	trap	Hypothalamic glutamate neurotransmission is unrelated to energy balance. I am not interested in obesity studies.
+t019	exclusion	1403	trap	siRNA knockdown of A20 accelerates tumor progression in an in vivo murine xenograft model. Leave out in vitro studies.
+t020	exclusion	1407	trap	beta 1/Ketel is able to bind microtubules. No in vitro studies, please.
+t021	exclusion	1224	trap	The latent infection of myeloid cells with human cytomegalovirus induces a number of changes in gene expression, but not studies of children.
+t022	exclusion	1109	trap	Suboptimal nutrition is a leading cause of premature death. Exclude studies of children.
+t023	exclusion	1361	trap	Varying expression levels of EBI2 affect the positioning and migration of B cells. I am not interested in cancer studies.
+t024	exclusion	1327	trap	Tuberculosis incidence occurs at higher rates in more sparsely populated areas in the UK. Leave out studies of women.
+t025	exclusion	1003	trap	RAD52 is involved in break-induced DNA replication (BIR). No studies in mice, please.
+t026	phrase	177	no-trap	Binding of p53 to enhancer regions (p53BERs) regulates the activity of p53 transcription and cell cycle arrest through the production of p53-dependent eRNAs. Only documents that mention enhancer rnas.
+t027	phrase	601	no-trap	Including pharmacists in rounding teams reduces the incidence of adverse drug events (ADEs). It must mention preventable ades.
+t028	phrase	654	no-trap	Intra-cerebroventricular infusion of amyloid-beta oligomers increases expression of fibronectin type-III domain-containing protein 5 mRNA in mice hippocampi. Show me only studies that talk about cerebrospinal fluid.
+t029	phrase	447	no-trap	Gastric infection with Helicobacter pylori decreases risk of gastric cancer in humans. The study should mention IgG.
+t030	phrase	1098	no-trap	Stacking is more stable when a purine is present in the +5 position (C1698), specifically mentioning aminoacyl trna.
+t031	phrase	1315	trap	Transcription rates in S. cerevisiae range between 7 and 12 kb/min. Only documents that mention TFIIS.
+t032	phrase	777	no-trap	Mice defective for deoxyribonucleic acid (DNA) polymerase m (polm) reveal increased sensitivity to ionizing radiation (IR). It must mention TdT.
+t033	phrase	912	no-trap	PKG-la plays an essential role in expression of spinal long term potentiation in PGK-la knockout mice. Show me only studies that talk about SNS.
+t034	phrase	1195	no-trap	The artifactual C-terminal helix swapping in the StART domain is observed in the Ups1-Mdm35 heterodimer of the StARkin superfamily. The study should mention phospholipid transfer.
+t035	phrase	698	no-trap	Lmna knock-in models are appropriate for testing therapeutic approaches against Hutchinson-Gilford progeria syndrome (HGPS), specifically mentioning cryptic splice.
+t036	phrase	495	no-trap	Having a main partner improves HIV outcomes. Only documents that mention HAART.
+t037	phrase	1333	no-trap	Two variants of chromosome 6q21 are associated with radiation therapy-induced second malignancies in pediatric Hodgkin lymphoma patients. It must mention malignant neoplasms.
+t038	phrase	615	no-trap	Increased microtubule acetylation worsens interference of axonal transport caused by LRRK2 Roc-COR domain mutations. Show me only studies that talk about TSA.
+t039	phrase	93	no-trap	Aggravated inflammation is dependent on NLRP3 inflammasome activation. The study should mention ASC.
+t040	phrase	121	no-trap	Antimicrobial agents are less effective due to the pressure of antimicrobial usage, specifically mentioning united kingdom.
+t041	phrase	979	no-trap	Progerin induces premature aging in stem cells. Only documents that mention hiPSC.
+t042	phrase	953	no-trap	Pioglitazone use is significantly associated with an increased risk of pancreatic cancer. It must mention kaiser permanente.
+t043	phrase	807	no-trap	Most termination events in Okazaki fragments are dictated by initiation patterns. Show me only studies that talk about fork pausing.
+t044	phrase	677	no-trap	LRBA promotes CTLA - 4 recycling. The study should mention fatal autoimmunity.
+t045	phrase	1161	no-trap	The DEXI promoter region is bound by multiple transcription factors in a murine haematopoietic progenitor cell line, specifically mentioning SCL.
+t046	phrase	980	no-trap	Propriospinal interneurons that play a role in the plastic reorganization of spinal circuits are integral for recovery from spinal cord injury. Only documents that mention SCIs.
+t047	phrase	262	no-trap	Cis-acting lncRNAs control the expression of genes that are positioned in the vicinity of their transcription sites. It must mention splice acceptor.
+t048	phrase	114	no-trap	Anthrax spores are very difficult to dispose once they are dispersed. Show me only studies that talk about bacillus anthracis.
+t049	phrase	10	no-trap	4-PBA treatment decreases endoplasmic reticulum stress in response to general endoplasmic reticulum stress markers. The study should mention adenylyl cyclase.
+t050	phrase	250	no-trap	Chenodeoxycholic acid treatment decreases brown adipose tissue activity, specifically mentioning iodothyronine deiodinase.
+t051	identifier	292	no-trap	Cost effectiveness evaluations based on cRCT data lack external validity. Only documents that mention 9 months.
+t052	identifier	264	no-trap	Citrullinated proteins externalized in neutrophil extracellular traps act indirectly to perpetuate the inflammatory cycle via induction of autoantibodies. It must mention interleukin-17A.
+t053	identifier	625	no-trap	Induced hepatic stem cells possess the potential to differentiate into hepatocytic cells. Show me only studies that talk about Foxa3.
+t054	identifier	825	no-trap	N348I mutations reduce resistance to nevirapine. The study should mention 66-kDa.
+t055	identifier	592	no-trap	Incidence of 10/66 dementia is lower than the incidence of DSM-IV dementia, specifically mentioning 65 years.
+t056	identifier	159	no-trap	BRCA 1 mutation carriers' risk of breast and ovarian cancer depends on where the mutation is located. Only documents that mention BRCA2.
+t057	identifier	489	no-trap	HIV trans-activator protein (TAT) effectively transports large and small molecules across cellular membranes into larger populations of neurons. It must mention CRMP-2.
+t058	identifier	766	no-trap	Medications to treat obesity have unwanted side effects. Show me only studies that talk about 3.2 kg.
+t059	identifier	472	trap	Glucose restriction to 0.05% reduces RLS (replicative life span) by 20-40% in S. cerevisiae. The study should mention Fob1.
+t060	identifier	614	no-trap	Increased microtubule acetylation repairs interference of axonal transport caused by LRRK2 Roc-COR domain mutations, specifically mentioning HDAC6.
+t061	identifier	854	no-trap	Nonhypertensive people who are 55 years old have a 90% chance of developing hypertension during their lifetime. Only documents that mention 65-year-old.
+t062	identifier	1037	no-trap	Replacement of OCT4 and SOX2 genes with GATA3 has the ability to reprogram human cells. It must mention KLF4.
+t063	identifier	398	no-trap	Exhaustion of B cells contributes to poor Ab response in HIV-infected individuals. Show me only studies that talk about gp41.
+t064	identifier	901	no-trap	PCSK9 inhibitors decrease plasma Lp(a) levels. The study should mention 2-period.
+t065	identifier	341	no-trap	Diabetes remission occurs more in people treated with conventional therapy than in people treated with laparoscopic adjustable gastric banding surgery, specifically mentioning 2-year.
+t066	identifier	1289	no-trap	There is a relation between Erythromycin use and hypertrophic pyloric stenosis. Only documents that mention 120 days.
+t067	identifier	667	no-trap	Klf2 is important for proper myeloid cell function. It must mention HIF-1.
+t068	identifier	635	no-trap	Inhibiting glucose-6-phospate dehydrogenase improves lipogenesis by deactivating LKB1-AMPK signaling. Show me only studies that talk about 6-phosphogluconate.
+t069	identifier	935	no-trap	Peroxynitrite is required for induction of T cell tolerance. The study should mention CD8.
+t070	identifier	1042	no-trap	Repressing IL-18 has negative effects on atherosclerotic lesion composition and progression, specifically mentioning interleukin-18.
+t071	identifier	897	no-trap	Overexpressing Cnp1 N-tail variants rescues the temperature-sensitive growth defect of scm3-139. Only documents that mention Mis18.
+t072	identifier	648	no-trap	Integrated care is successful at tackling multiple comorbidities. It must mention 12 month.
+t073	identifier	401	no-trap	Expression of MSX2 is induced 3 hours after the addition of BMP4, which is earlier than T and CDX2. Show me only studies that talk about FGF2.
+t074	identifier	39	no-trap	A diminished ovarian reserve does not solely indicate infertility in an a priori non-infertile population. The study should mention 44 years.
+t075	identifier	455	no-trap	Genes involved in pre-mRNA splicing have a significant impact on genome stability, specifically mentioning gammaH2AX.
+t076	paraphrase	1211	paraphrase	How tightly packed the receptor-carrying cells are does not alter how far these signalling molecules travel.
+t077	paraphrase	60	paraphrase	Virus-suppressing medicines do not make seropositive persons less contagious.
+t078	paraphrase	1314	paraphrase	Baker's yeast genes are read out at 0.7 to 2 kilobases each minute.
+t079	paraphrase	899	paraphrase	Oxidant-induced injury to the genome blocks the stimulator of interferon genes pathway.
+t080	paraphrase	1097	paraphrase	Knock-in rodents missing the SHP-2 MAP kinase route develop an enlarged spleen.
+t081	paraphrase	813	paraphrase	Many tumours carry changes in the GNB1 subunit that stop it pairing with its partner and switch on AKT.
+t082	paraphrase	214	paraphrase	Higher CRP goes with more deaths after heart-vessel rerouting operations.
+t083	paraphrase	404	paraphrase	Presenting oncolytic-virus antigens in peptide form gives extra defence against a comeback of the illness.
+t084	paraphrase	1101	paraphrase	Rigid surfaces favour a mesoderm outcome by destroying the Wnt effector via adhesion receptors.
+t085	paraphrase	396	paraphrase	Working out raises the share of PRC residents who die of malignancy.
+t086	paraphrase	500	paraphrase	People who suffer from head pain have poorer thinking and memory.
+t087	paraphrase	930	paraphrase	Sufferers of sudden fear attacks carry reduced amounts of the wakefulness neuropeptide in their spinal liquid.
+t088	paraphrase	1406	paraphrase	The pleurotolysin channel forms while its pleated sheet opens up.
+t089	paraphrase	505	paraphrase	A stomach bacterium switches on a mutation-causing enzyme through NF-kB, which helps damage the genome of infected cells.
+t090	paraphrase	952	paraphrase	Taking the diabetes drug Actos does not raise the chance of getting a tumour of the male gland below the bladder.
+t091	paraphrase	1258	paraphrase	Getting WD repeat protein 5 onto its chromatin targets relies on MYST1.
+t092	paraphrase	397	paraphrase	Working out lowers the share of PRC residents who die of malignancy.
+t093	paraphrase	168	paraphrase	Weight-loss operations lower the chance of bowel tumours.
+t094	paraphrase	1158	paraphrase	The group teaching scheme for recently identified type 2 cases does not alter everyday habits.
+t095	paraphrase	883	paraphrase	People on a mixed diet turn eaten L-carnitine into TMAO in larger amounts compared with strict vegetarians.
+t096	paraphrase	251	paraphrase	Giving CDCA makes brown fat more active.
+t097	paraphrase	266	paraphrase	How much Cnn1 is brought in changes as the division cycle proceeds.
+t098	paraphrase	1038	paraphrase	Swapping OCT4 and SOX2 for GATA3 cannot turn adult human tissue back into stem-like tissue.
+t099	paraphrase	1171	paraphrase	NEMO keeps the bowel from becoming inflamed by stopping RIPK1-triggered dying of its lining.
+t100	paraphrase	665	paraphrase	K17 alters production of the tolerance-controlling factor in sick tissue linings.

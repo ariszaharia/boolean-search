@@ -1,1 +1,101 @@
 query_id	type	rule	in_claim
+t001	exclude	\b(women|woman|females?)\b	no
+t002	exclude	\brandomi[sz]ed\b	no
+t003	exclude	\b(mice|mouse|murine)\b	no
+t004	exclude	\b(mice|mouse|murine)\b	no
+t005	exclude	\b(women|woman|females?)\b	no
+t006	exclude	\bsystematic reviews?\b	no
+t007	exclude	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	no
+t008	exclude	\b(obesity|obese)\b	no
+t009	exclude	\b(mice|mouse|murine)\b	no
+t010	exclude	\bcohorts?\b	no
+t011	exclude	\bsystematic reviews?\b	no
+t012	exclude	\b(yeasts?|saccharomyces)\b	no
+t013	exclude	\bcohorts?\b	no
+t014	exclude	\b(mice|mouse|murine)\b	no
+t015	exclude	\b(mice|mouse|murine)\b	no
+t016	exclude	\b(mice|mouse|murine)\b	no
+t017	exclude	\bin vitro\b	no
+t018	exclude	\b(obesity|obese)\b	no
+t019	exclude	\bin vitro\b	no
+t020	exclude	\bin vitro\b	no
+t021	exclude	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	no
+t022	exclude	\b(child|children|childhood|infants?|pediatric|paediatric|adolescents?)\b	no
+t023	exclude	\b(cancers?|tumou?rs?|carcinomas?)\b	no
+t024	exclude	\b(women|woman|females?)\b	no
+t025	exclude	\b(mice|mouse|murine)\b	no
+t026	require	\benhancer[ -]*rnas\b	no
+t027	require	\bpreventable[ -]*ades\b	no
+t028	require	\bcerebrospinal[ -]*fluid\b	no
+t029	require	\bigg\b	no
+t030	require	\baminoacyl[ -]*trna\b	no
+t031	require	\btfiis\b	no
+t032	require	\btdt\b	no
+t033	require	\bsns\b	no
+t034	require	\bphospholipid[ -]*transfer\b	no
+t035	require	\bcryptic[ -]*splice\b	no
+t036	require	\bhaart\b	no
+t037	require	\bmalignant[ -]*neoplasms\b	no
+t038	require	\btsa\b	no
+t039	require	\basc\b	no
+t040	require	\bunited[ -]*kingdom\b	no
+t041	require	\bhipsc\b	no
+t042	require	\bkaiser[ -]*permanente\b	no
+t043	require	\bfork[ -]*pausing\b	no
+t044	require	\bfatal[ -]*autoimmunity\b	no
+t045	require	\bscl\b	no
+t046	require	\bscis\b	no
+t047	require	\bsplice[ -]*acceptor\b	no
+t048	require	\bbacillus[ -]*anthracis\b	no
+t049	require	\badenylyl[ -]*cyclase\b	no
+t050	require	\biodothyronine[ -]*deiodinase\b	no
+t051	require	\b9[ -]*months\b	no
+t052	require	\binterleukin[ -]*17[ -]*a\b	no
+t053	require	\bfoxa[ -]*3\b	no
+t054	require	\b66[ -]*kda\b	no
+t055	require	\b65[ -]*years\b	no
+t056	require	\bbrca[ -]*2\b	no
+t057	require	\bcrmp[ -]*2\b	no
+t058	require	\b3\.2[ -]*kg\b	no
+t059	require	\bfob[ -]*1\b	no
+t060	require	\bhdac[ -]*6\b	no
+t061	require	\b65[ -]*year[ -]*old\b	no
+t062	require	\bklf[ -]*4\b	no
+t063	require	\bgp[ -]*41\b	no
+t064	require	\b2[ -]*period\b	no
+t065	require	\b2[ -]*year\b	no
+t066	require	\b120[ -]*days\b	no
+t067	require	\bhif[ -]*1\b	no
+t068	require	\b6[ -]*phosphogluconate\b	no
+t069	require	\bcd[ -]*8\b	no
+t070	require	\binterleukin[ -]*18\b	no
+t071	require	\bmis[ -]*18\b	no
+t072	require	\b12[ -]*month\b	no
+t073	require	\bfgf[ -]*2\b	no
+t074	require	\b44[ -]*years\b	no
+t075	require	\bgammah[ -]*2[ -]*ax\b	no
+t076	none	-	-
+t077	none	-	-
+t078	none	-	-
+t079	none	-	-
+t080	none	-	-
+t081	none	-	-
+t082	none	-	-
+t083	none	-	-
+t084	none	-	-
+t085	none	-	-
+t086	none	-	-
+t087	none	-	-
+t088	none	-	-
+t089	none	-	-
+t090	none	-	-
+t091	none	-	-
+t092	none	-	-
+t093	none	-	-
+t094	none	-	-
+t095	none	-	-
+t096	none	-	-
+t097	none	-	-
+t098	none	-	-
+t099	none	-	-
+t100	none	-	-

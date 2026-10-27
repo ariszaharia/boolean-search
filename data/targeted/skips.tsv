@@ -1,1 +1,23 @@
 category	claim_id	term	reason
+exclusion	1315	yeast	the claim is about S. cerevisiae, a yeast; excluding yeast studies contradicts it
+exclusion	1314	yeast	the claim is about S. cerevisiae, a yeast; excluding yeast studies contradicts it
+exclusion	1306	cancer	MDS (myelodysplastic syndrome) is a cancer; excluding cancer studies contradicts the claim
+exclusion	241	mice	NIH 3T3 cells are mouse cells; excluding mouse studies contradicts the claim
+phrase	1211	abstract figure	layout artifact of the abstract, not a topic constraint
+phrase	121	last century	generic phrase, not a topic constraint
+phrase	262	FLOWERING	fragment of the gene name FLOWERING LOCUS C, not a constraint on its own
+phrase	10	GLP	fragment of the identifier GLP-1
+identifier	177	p53-bound	not an identifier (p53 plus an ordinary word)
+identifier	447	2p	ambiguous token, not an identifiable constraint
+identifier	854	100 mm	unit cut off: the text says 100 mm Hg
+identifier	648	90 mm	unit cut off: the text says 90 mm Hg
+identifier	912	5-triphosphate	fragment of a chemical name (inositol 1,4,5-triphosphate)
+phrase	1211	graphical abstract	layout artifact of the abstract, not a topic constraint
+identifier	177	p53-binding	not an identifier (p53 plus an ordinary word)
+identifier	912	G1	ambiguous token (cell-cycle phase or other), not an identifiable constraint
+phrase	1211	*	its phrase candidates are layout artifacts (graphical abstract, abstract figure)
+identifier	177	*	its identifier candidates are p53 plus an ordinary word, not identifiers
+identifier	39	1-pg	ambiguous unit fragment, not an identifiable constraint
+phrase	177	indeed contain	ordinary words, not a topic constraint
+paraphrase	1218	*	a 25-word claim built from gene and domain names; it cannot be reworded without losing what it says
+paraphrase	1350	*	the claim is two gene names; their full names also occur in the relevant documents, so the overlap cannot be halved without changing the claim
