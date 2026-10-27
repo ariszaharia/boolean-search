@@ -130,8 +130,16 @@ test runs NOT made yet, they come at the end with the final runs):
    Keep in mind: SciFact has about 1 relevant document per query, and precision at k = 100 can be at most
    (number of relevant documents) / 100 for every system. If the targeted set's relevant sets are this small,
    large precision gaps (H1 predicts about +20 points) are only possible on queries with small Boolean sets.
-   Decide the targeted set's design on its own merits and write it down before any run; do not shape it to
-   make H1 come out.
+   Design DECIDED 2026-10-27 (`targeted_set_design.md`, all recommendations adopted; summary in the
+   clarifications of hypotheses.md). Moved before the planner (step 3). Order from here:
+   a. D7, Greek letters -> names in api/prep_scifact.py and api/prep_queries.py; rebuild data/scifact.tsv,
+      the query files and both Lucene indexes; rerun B1 to B3 on train. First fix the B3 embedding cache: it is
+      reused when the document ids match, without checking the text, so after D7 it would silently reuse the
+      old embeddings. Key it on the text too.
+   b. Candidate script (qrels and corpus only) -> Aris writes the 100 queries and rules -> build and check
+      script for data/targeted/qrels.tsv -> commit and push (the freeze).
+   c. Harness: split "targeted" in load_qrels, per-category results.
+   d. Then the planner (step 3).
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.

@@ -187,6 +187,30 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
   set_size. Set size 0 means the query matched nothing. A query that failed (for example ParseError after the
   retries) has no line; it is logged and reported separately, and is treated like an empty set in both analyses
   (left out of the primary one, 0 in the second), so failures cannot silently leave the second analysis.
+- 2026-10-27, targeted constraint set (the Setting fixes its size, categories and kind of ground truth, not the
+  details; fixed before any query of the set is written and before the planner exists). Details and reasons in
+  targeted_set_design.md (D1 to D10, recommendations drafted by Claude, adopted by Aris).
+  - Built from SciFact train claims. Every base claim is listed in the set's files and is never used while
+    developing the planner. No SciFact test claim is used.
+  - Ground truth: for a query built from claim q with relevant documents R(q): exclusion = the documents of R(q)
+    that do not match the rule; phrase and identifier = the documents of R(q) that match it; paraphrase = R(q).
+    The rule is a case-insensitive regular expression with word boundaries and explicit spelling variants, applied
+    to the raw text of data/scifact.tsv (not to the engine's tokens), written before any run.
+  - Selection uses only qrels and corpus text, never a system's output. Exclusions: |R(q)| >= 2 and the rule
+    removes at least one relevant document and keeps at least one ("trap"); if fewer than 25 qualify, the rest
+    are |R(q)| = 1 queries whose relevant document does not match and with at least 3 distractors (documents
+    matching the rule and the claim's rarest content word). Each query records trap or no-trap; both reported.
+    Phrases and identifiers: the term occurs in at least 1 relevant document and in at least 2 documents of the
+    corpus; whether it already occurs in the claim is recorded. Paraphrases: the share of the claim's content
+    words that occur in its relevant documents at least halves.
+  - Query text: the claim plus one natural sentence with the constraint; paraphrases are rewritten claims.
+    Written by Aris by hand from a candidate list made by a script; no LLM writes queries.
+  - 25 queries per category (100); each claim text used at most once, in one category.
+  - Greek letters: replaced by their names (alpha, beta, ...) once in the corpus and query preparation, so
+    data/scifact.tsv and the query files change. B1, B2 and B3 are rerun on train after that; no test run had
+    been made. The Phase 0 Pyserini check was made on the earlier corpus.
+  - Files: data/targeted/queries.tsv, rules.tsv, qrels.tsv (qrels built by a script, checked by a script).
+  - Frozen when committed; after that, changes only under Deviations. No system runs on the set before that.
 
 ## Deviations
 (None yet. Format: date, what changed, why, what the original text said.)
