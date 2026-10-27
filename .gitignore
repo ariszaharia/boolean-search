@@ -49,3 +49,5 @@ Thumbs.db
 
 # Pyserini work folder (jsonl + Lucene index)
 results/work/
+# Development runs of the planner (reproducible from the code and results/llm_cache/)
+results/dev/

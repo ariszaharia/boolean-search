@@ -209,7 +209,24 @@ test runs NOT made yet, they come at the end with the final runs):
         the wording matches, and nothing otherwise. Empty counted as 0: nDCG@10 0.026 (B2 0.667).
       - targeted: all 100 match nothing (the constraint sentence's words are required too, "not", "mice", ...).
       Strict Boolean without an LLM: near-perfect precision, almost no recall. This is what E1 has to fix.
-   e. NEXT: the planner (step 3).
+   e. Planner infrastructure BUILT 2026-10-27 (step 3, development model):
+      - `api/planner.py`: OpenAI-style chat API (openai package), so the model is one entry in MODELS. Now:
+        Qwen2.5-7B-Instruct (Q4_K_M) local through Ollama, pinned by its digest 845dbda0... and checked before
+        any call; temperature 0, seed 1. Every call cached and logged in `results/llm_cache/<alias>.jsonl`
+        (committed: it is the record of every model call). Answers cleaned (fences, extra lines, Greek letters
+        as names). Rejected queries go back with the engine's ParseError, at most 2 retries; still rejected =
+        failed query (no set size). Prompt: grammar, 5 rules (2 to 4 concepts, OR of variants, a negation inside
+        the claim is not a NOT, NOT only when asked, a required term is ANDed) and 4 examples from train claims
+        1125, 334, 326, 1209 (not targeted base claims; constraint sentences worded unlike the targeted set's
+        phrasings; each example query finds its relevant document at rank 1).
+      - `api/run_planner.py`: E1 on a split, through run_baselines.run_boolean (run, sizes, failures), plus
+        `E1_<split>_plans.jsonl` (all attempts and raw answers) and the settings. `--sample N`: development on
+        N random train claims that are neither targeted base claims nor examples, written to `results/dev/`
+        (not committed; reproducible from the cache). The prompt is developed only this way.
+      - First check, 10 dev claims: all parse, no retries, but 9 of 10 sets are empty and no relevant document
+        is found: too many AND operands, the claim's wording in quotes, and "negatively related" turned into a
+        NOT. Next: improve the prompt on a dev sample (measure the empty-set rate and relevant-in-top-100), decide
+        E2's relaxation trigger, then decide whether a 7B model is enough.
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.
