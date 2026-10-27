@@ -27,6 +27,8 @@ Run from the project folder (needs data/scifact.tsv and data/scifact_queries_<sp
 api/prep_scifact.py and api/prep_queries.py; B2 needs the engine built with CMake, see PROGRESS.md):
     venv\\Scripts\\python.exe api/run_baselines.py --system B1 --split train
     venv\\Scripts\\python.exe api/run_baselines.py --system B2 --split train
+    venv\\Scripts\\python.exe api/run_baselines.py --system B3 --split train
+Commit first: the .json records the git commit, and git_dirty = true if tracked files had uncommitted changes.
 """
 import argparse
 import datetime
@@ -59,6 +61,15 @@ def git_commit():
     try:
         return subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=ROOT, capture_output=True, text=True,
                               check=True).stdout.strip()
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def git_dirty():
+    """True if tracked files differ from the commit, so git_commit alone does not give the code that ran."""
+    try:
+        return bool(subprocess.run(['git', 'status', '--porcelain', '--untracked-files=no'], cwd=ROOT,
+                                   capture_output=True, text=True, check=True).stdout.strip())
     except Exception:  # noqa: BLE001
         return None
 
@@ -209,6 +220,10 @@ def main():
 
     if not os.path.isfile(CORPUS):
         sys.exit(f'Missing {CORPUS}. Run api/prep_scifact.py first.')
+    # Checked before the run, because writing the run file itself changes a tracked file.
+    commit, dirty = git_commit(), git_dirty()
+    if dirty:
+        print('WARNING: uncommitted changes to tracked files; the run will not match its git commit exactly.')
     queries = load_queries(args.split, args.limit)
     os.makedirs(args.out_dir, exist_ok=True)
     out_path = os.path.join(args.out_dir, f'{args.system}_{args.split}.tsv')
@@ -223,7 +238,8 @@ def main():
         settings = run_b2(queries, out_path, args.split)
     meta = {'system': args.system, 'split': args.split, 'n_queries': len(queries), 'limit': args.limit,
             'k': K, 'corpus': 'data/scifact.tsv', **settings,
-            'git_commit': git_commit(), 'run_at': datetime.datetime.now().isoformat(timespec='seconds')}
+            'git_commit': commit, 'git_dirty': dirty,
+            'run_at': datetime.datetime.now().isoformat(timespec='seconds')}
     with open(os.path.splitext(out_path)[0] + '.json', 'w', encoding='utf-8') as f:
         json.dump(meta, f, indent=1)
     print(f'{args.system} on {args.split}: {len(queries)} queries -> {out_path}')

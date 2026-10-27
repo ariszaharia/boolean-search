@@ -1,4 +1,4 @@
-# Thesis progress summary (as of 2026-10-15)
+# Thesis progress summary (as of 2026-10-27)
 
 Plan: write the thesis text only after all the code and experiments are finished.
 
@@ -55,8 +55,8 @@ Evaluation harness (`harness/`, self-tests: `venv\Scripts\python.exe -m harness.
   query where E1 is non-empty, so "both" gives a difference of exactly 0 by construction. For H4 the meaningful
   numbers are A = E2 (non-empty) and "empty counted as 0".
 
-Baselines without an LLM (built and checked on 5 train queries 2026-10-27; full runs NOT run yet, they wait
-for the predictions in hypotheses.md):
+Baselines without an LLM (B1, B2, B3 run on all 809 train queries 2026-10-27, after hypotheses.md was committed;
+test runs NOT made yet, they come at the end with the final runs):
 - `venv\Scripts\python.exe api/prep_queries.py` -> `data/scifact_queries_{train,test}.tsv` (809 / 300 queries).
 - `venv\Scripts\python.exe api/run_baselines.py --system B1 --split train` (and `--system B2`) ->
   `results/runs/B1_train.tsv` plus `B1_train.json` with the settings, git commit and time.
@@ -68,6 +68,24 @@ for the predictions in hypotheses.md):
   and the raw query text, like Pyserini's published BEIR baseline. Run it on test at the end, to show the setup
   reproduces the published SciFact BM25 number (about 0.67 nDCG@10). Not in any hypothesis, not in Holm.
   Checked: runs on all 809 train and 300 test queries without errors (not scored).
+- B3: BAAI/bge-base-en-v1.5 at a pinned revision, query prefix from the model card, CLS vector normalized, exact
+  cosine search (`--system B3`). Fixed in the Clarifications of hypotheses.md. Needs `transformers` and `torch`
+  in the venv. Document embeddings are cached in `results/work/b3_docs_<revision>.npz`; 455 of 5,183 documents
+  are longer than 512 tokens and are cut. The first B3 run used uncommitted code; it was rerun from a commit
+  (the timing is disclosed in the B3 clarification).
+- Every run file's .json now has `git_dirty`: true means tracked files had uncommitted changes when the run
+  started, so `git_commit` alone is not the code that ran. Commit before every run that counts.
+- Train results (`results/metrics/`, `results/comparisons/`; train only, before reranking, not a test of any
+  hypothesis):
+  | system | nDCG@10 | R@30 | R@100 |
+  |---|---|---|---|
+  | B1 | 0.697 | 0.870 | 0.933 |
+  | B2 | 0.667 | 0.854 | 0.907 |
+  | B3 | 0.771 | 0.938 | 0.972 |
+  B1 minus B2 nDCG@10 +0.030 (95% interval +0.018 to +0.043); B3 minus B1 +0.074 (+0.052 to +0.095).
+  B1 returns fewer than 100 documents for a few queries (80,827 rows instead of 80,900).
+- Open: output names are inconsistent (`B1_train_train.json` but `B3_train.json`), because evaluate/compare add
+  `_<split>` to a run name that already ends in it. Pick one convention before the test runs.
 - Not built yet: precision of the Boolean set and top-k with k = set size (H1), per-category reporting
   (needs the targeted set's format), the final script that collects all confirmatory p-values for Holm.
 - Open, decide before building E1 (blocks H1's precision): run files are cut at the top N, so they lose the size
@@ -95,12 +113,9 @@ for the predictions in hypotheses.md):
 - The tokenizer difference (decimals) is only verified on one query.
 
 ## What is left, in order
-1. Hypotheses H1 to H9: predictions filled in 2026-10-27 (Claude's reference estimates, adopted by Aris and
-   marked as such; kappa 0.6, M = 0.03, H8 threshold 80 %). Left: commit, then write the date and commit id in
-   "Committed on" (a second small commit). Only after that may the baseline runs start.
-2. Evaluation harness: SciFact qrels, dev/test split, `ir_measures` (nDCG@10, recall), bootstrap confidence
-   intervals, Holm correction, `results/` layout. Run baselines without an LLM first: B1 (Pyserini stemmed),
-   B2 (exact-match BM25), B3 (dense, one named embedding model).
+1. DONE 2026-10-27: hypotheses H1 to H9 committed in 9cf3a80 (16:22), recorded in "Committed on".
+2. Evaluation harness: built (see above). Baselines B1, B2, B3 run and scored on train. Left: precision of the
+   Boolean set (H1), per-category reporting, the Holm script, the set-size decision before E1.
 3. Planner: an OpenAI model with a pinned version, temperature 0, prompt with grammar and examples, everything
    logged and cached; retries on `ParseError`; relaxation loop for zero results (E0, E1, E2).
 4. Reranker (Jev and an open cross-encoder) on the same top-N pool for every system.

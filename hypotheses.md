@@ -3,7 +3,7 @@
 Status: written 2026-10-15; predictions and open values filled in 2026-10-27, before any experiment.
 On 2026-10-27 Aris adopted the reference estimates (below) as the predictions and the values Claude suggested
 for kappa (H5), M (H7) and the H8 threshold; each "MY PREDICTION" line says so.
-Committed on: ____ (date and git commit id).
+Committed on: 2026-10-27 16:22 (+0200), git commit 9cf3a800fc2a5089df42dceb8231fbfb3192a280.
 Rule: no experiment may run before this file is committed. After that, the text of H1 to H9 is not edited.
 Anything that has to change is added at the bottom under "Deviations" with a date and the reason.
 "REFERENCE ESTIMATE (Claude, 2026-10-27)" lines are a second, independent prediction written by the AI assistant
@@ -168,6 +168,11 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
   over all documents, top 100 kept. Why this model: a strong, widely used open model that runs on a CPU, so B3 is
   a fair rival, not a weak one. Its model card reports nDCG@10 = 0.740 on SciFact test (MTEB). The card does not
   list its training data, so it cannot be confirmed from the card that SciFact was not used in training.
+  Timing (added 2026-10-27): this clarification was not "before any run" as the heading requires. B3 was first
+  run on the train split at 16:59, from code not yet committed (its run file named commit 9cf3a80, which has no
+  B3 code); this clarification and the B3 code were committed together at 19:16 (commit 30500f9). The settings
+  recorded in that run's file are the ones above. B3 was then run again on train from the commit that adds this note, so that
+  its run file names the exact code. No B3 test run had been made.
 
 ## Deviations
 (None yet. Format: date, what changed, why, what the original text said.)
