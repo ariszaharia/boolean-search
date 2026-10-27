@@ -66,9 +66,11 @@ def git_commit():
 
 
 def git_dirty():
-    """True if tracked files differ from the commit, so git_commit alone does not give the code that ran."""
+    """True if tracked files differ from the commit, so git_commit alone does not give the code that ran.
+    results/ is left out: it holds outputs, which earlier runs change (that is not uncommitted code or data)."""
     try:
-        return bool(subprocess.run(['git', 'status', '--porcelain', '--untracked-files=no'], cwd=ROOT,
+        return bool(subprocess.run(['git', 'status', '--porcelain', '--untracked-files=no', '--', '.',
+                                    ':(exclude)results'], cwd=ROOT,
                                    capture_output=True, text=True, check=True).stdout.strip())
     except Exception:  # noqa: BLE001
         return None
