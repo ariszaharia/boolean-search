@@ -371,9 +371,17 @@ it costs.
 
 ### 9.3 The reranker
 A model that reads the question and each candidate document together, and scores how well they match. It is
-slower than BM25 but more accurate, so it is only used on the top N of each system. Two are planned: Jev and an
-open cross-encoder. Every system gets the same reranker on the same N, so the comparison is about *which
-documents each system brought*, not about the reranker.
+slower than BM25 but more accurate, so it is only used on the top N of each system. Every system gets the same
+reranker on the same N, so the comparison is about *which documents each system brought*, not about the reranker.
+
+Built (2026-10-28): `api/rerank.py` reranks the top N (30 or 100) of any run file and writes
+`<run>-rr<N>-<reranker>_<split>.tsv` next to it (for example `B1-rr100-ce-minilm_train.tsv`). The reranker reads
+the request as written (constraint sentence included), never the Boolean query. The rerankers are entries in
+`RERANKERS`; the only one now is a free local cross-encoder (`cross-encoder/ms-marco-MiniLM-L6-v2`, revision pinned),
+for development. Which reranker the confirmatory runs use (Jev and/or a cross-encoder) is not decided; until an
+entry is marked as fixed in hypotheses.md, the script reranks train runs only. Scores are cached in
+`results/work/rerank_cache/`. On this laptop's CPU it scores about 19 pairs a second, so 809 train queries at
+N = 100 take a bit over an hour; N = 30 afterwards comes from the cache.
 
 ### 9.4 The targeted constraint query set
 SciFact's own queries rarely contain exclusions or exact identifiers, which are exactly where Boolean should
