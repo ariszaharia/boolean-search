@@ -51,35 +51,46 @@ Query language (prefix notation; every operator goes inside parentheses):
 Words are matched exactly, ignoring case: there is no stemming and there are no synonyms, so write the variants you need with OR, for example (+ tumor tumors tumour tumours). Hyphens and other punctuation separate words, so "g to a" matches G-to-A. Write Greek letters as their names (alpha, beta, kappa).
 
 How to write a good query:
-  1. Pick the 2 to 4 concepts that matter most and join them with AND. Leave out common words (effect, patients, increase, study).
-  2. Write each concept as one word or a short fixed term of 2 or 3 words, with OR of its variants: plural forms, spellings, abbreviations, close synonyms. Never put a long part of the sentence in quotes.
-  3. A negation inside the claim ("does not", "no", "lacks", "fails to") is part of what the claim says: documents that discuss it are the ones wanted, so it is never an exclusion.
-  4. Use (- ...) only when the request explicitly rules something out of the results, and then exclude every common form of it.
-  5. If the request requires a specific term to appear, make that term one of the AND operands.
-Answer with the query only, on one line, and nothing else."""
+  1. Use 2 or 3 concepts, never more than 3, joined with AND. A concept is a specific thing: a gene, protein, drug, disease, organism, cell type, method or measured quantity.
+  2. Never use a general word as a concept on its own, not even inside an OR: effect, role, development, increase, decrease, reduce, upregulation, expression, regulation, level, levels, risk, acute, severe, patients, study, cells, function, activity.
+  3. Write each concept as one word, or as an established name of 2 or 3 words that an abstract would use word for word ("nitric oxide", "embryonic stem cells"), with OR of its variants: plural forms, spellings, abbreviations, synonyms. Words that can be written with or without a hyphen or space need both forms: (+ proinflammatory "pro inflammatory"), (+ pd1 "pd 1"). Never put wording copied from the request in quotes.
+  4. The claim may say that something does not happen. Words like no, not, lack, absence, without, fails, deficiency, less, lower, negatively are part of the claim: keep the concept they apply to as a normal AND operand, and never write (- ...) for them.
+  5. Write (- ...) only when the request adds a separate sentence that rules something out of the results, and then exclude every common form of it. Otherwise the query has no (- ...) at all.
+  6. If the request requires a specific term to appear, make that term one of the AND operands (it counts as one of the concepts).
+Answer in exactly three lines and nothing else:
+  Concepts: the 2 or 3 concepts you chose, separated by ;
+  Exclude: what the request explicitly rules out of the results, or none
+  Query: the query, on one line (with (- ...) only if Exclude is not none)"""
 
-# (train claim id, request, query). Constraint sentences worded unlike the targeted set's phrasings.
+# (train claim id, request, concepts, exclude, query). Constraint sentences worded unlike the targeted set's phrasings.
 EXAMPLES = [
     ('1125', 'Systemic immunosuppressive (IS) therapy does not enhance the chance of cancer mortality in patients '
              'with inflammatory eye disease (IED)',
-     '(^ (+ immunosuppressive immunosuppression) (+ cancer malignancy) mortality '
-     '(+ "eye disease" "ocular inflammation" uveitis))'),
+     'immunosuppressive therapy; cancer; inflammatory eye disease', 'none',
+     '(^ (+ immunosuppressive immunosuppression) (+ cancer malignancy) (+ "eye disease" "ocular inflammation" uveitis))'),
     ('334', 'Depletion of nitric oxide is responsible for vasospasm.',
+     'nitric oxide; vasospasm', 'none',
      '(^ "nitric oxide" vasospasm)'),
+    ('566', 'In S. cerevisiae, the absence of RNA surveillance pathways reduces sensitivity to high iron conditions.',
+     'RNA surveillance; iron; S. cerevisiae', 'none',
+     '(^ "rna surveillance" iron (+ cerevisiae yeast))'),
     ('326', 'Deletion of ATM and Rad3 related protein leads to acute tissue loss. Ignore any work done in rats.',
+     'ATR (ATM and Rad3 related); deletion', 'rats',
      '(- (^ (+ atr "atm and rad3 related") (+ deletion knockout)) (+ rat rats))'),
     ('1209', 'The deamination of cytidine to uridine on the minus strand of viral DNA can inactivate the viral genome '
              'by inducing G-to-A mutations. The paper has to discuss APOBEC3G.',
+     'deamination; G-to-A mutation; APOBEC3G (required)', 'none',
      '(^ (+ deamination deaminase) (+ "g to a" hypermutation) apobec3g)'),
 ]
-EXAMPLE_CLAIMS = [claim_id for claim_id, _, _ in EXAMPLES]
+EXAMPLE_CLAIMS = [example[0] for example in EXAMPLES]
 
 
 def base_messages():
     """The shared start of every conversation: the system prompt and the examples as earlier turns."""
     messages = [{'role': 'system', 'content': SYSTEM_PROMPT}]
-    for _, request, query in EXAMPLES:
-        messages += [{'role': 'user', 'content': request}, {'role': 'assistant', 'content': query}]
+    for _, request, concepts, exclude, query in EXAMPLES:
+        answer = f'Concepts: {concepts}\nExclude: {exclude}\nQuery: {query}'
+        messages += [{'role': 'user', 'content': request}, {'role': 'assistant', 'content': answer}]
     return messages
 
 
@@ -143,9 +154,12 @@ class LLM:
 
 
 def clean(answer):
-    """The query from a model answer: code fences removed, the first non-empty line, Greek letters as names."""
+    """The query from a model answer: code fences removed; the text after "Query:" if there is such a line,
+    otherwise the first non-empty line; Greek letters as names."""
     text = re.sub(r'```[a-zA-Z]*', '', answer).strip()
-    line = next((l.strip() for l in text.splitlines() if l.strip()), '')
+    lines = [l.strip() for l in text.splitlines() if l.strip()]
+    query_lines = [l for l in lines if l.lower().startswith('query:')]
+    line = query_lines[0][len('query:'):].strip() if query_lines else (lines[0] if lines else '')
     return greek_to_names(line)
 
 
@@ -164,6 +178,15 @@ def parse_failures(pairs, boolean_cli):
                    check=True, capture_output=True)
     with open(paths['failures'], encoding='utf-8') as f:
         return {line.split('\t')[0]: line.rstrip('\n').split('\t', 2)[2] for line in f if line.strip()}
+
+
+def retry_hint(error):
+    """A short fixed explanation for the engine errors a model most often cannot fix from the message alone."""
+    if "'-' needs at least two operands" in error:
+        return 'If the request does not ask to rule anything out, remove the (- ...) part entirely. '
+    if 'unexpected text after the query' in error:
+        return 'The whole query must be one expression: wrap all parts in one (^ ...), and write nothing after it. '
+    return ''
 
 
 def plan(requests, llm, boolean_cli, max_retries=MAX_RETRIES):
@@ -190,7 +213,8 @@ def plan(requests, llm, boolean_cli, max_retries=MAX_RETRIES):
                 conversations[qid] += [
                     {'role': 'assistant', 'content': result[qid]['attempts'][-1]['answer']},
                     {'role': 'user', 'content': f'The engine rejected this query: {failures[qid]}. '
-                                                'Write a corrected query, on one line.'}]
+                                                f'{retry_hint(failures[qid])}Answer again in the same three lines, '
+                                                'with a corrected query.'}]
                 next_pending.append(qid)
             else:
                 result[qid]['ok'] = True

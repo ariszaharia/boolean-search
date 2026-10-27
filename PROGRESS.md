@@ -225,8 +225,21 @@ test runs NOT made yet, they come at the end with the final runs):
         (not committed; reproducible from the cache). The prompt is developed only this way.
       - First check, 10 dev claims: all parse, no retries, but 9 of 10 sets are empty and no relevant document
         is found: too many AND operands, the claim's wording in quotes, and "negatively related" turned into a
-        NOT. Next: improve the prompt on a dev sample (measure the empty-set rate and relevant-in-top-100), decide
-        E2's relaxation trigger, then decide whether a 7B model is enough.
+        NOT.
+      - Prompt development 2026-10-27 (log: `results/prompt_dev_log.tsv`, committed). Two fixed development
+        parts of 30 train claims each (shuffled once, seed 20261015, without targeted base claims and the first
+        examples): tuned on part a only, final prompt checked once on part b. Results (empty sets, relevant doc
+        found in the top 100, out of 30):
+        v1 first prompt: 19 empty (+3 failed), 4 found | v2 concrete rules, banned general words, negation word
+        list, example 566, retry hints: 19, 6 (failures 3 -> 0) | v3 three-line answer (Concepts, Exclude,
+        Query): 20, 5, but false NOTs 6 -> 1 | v4 = v3 + hyphen/space variants: 20, 6 | v4 on part b: 18, 6
+        (3 false NOTs). Plateau from v2 on (differences of 1 claim are noise): stopped, to avoid fitting the
+        prompt to part a. Current prompt: v4 (fingerprint e3eff158...).
+      - What is left is mostly vocabulary, not the prompt: e.g. the relevant document says "macrolides" where
+        the claim says "erythromycin"; abstracts write "proinflammatory" more often than "pro-inflammatory".
+        A strict AND cannot recover from that by itself: this is what relaxation (E2) is for.
+      - NEXT: decide E2's relaxation trigger (clarification in hypotheses.md before any E2 run), build E2, then
+        decide whether a 7B model is enough (E1 + E2 on the parts, compared with a stronger model if available).
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.

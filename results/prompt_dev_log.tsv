@@ -1,0 +1,6 @@
+time	model	prompt_sha256	part	n	failed	retried	empty	median_size	relevant_top10	relevant_top100	note
+2026-10-27T22:18:30	qwen2.5-7b	77fb924c36b4f486	a	30	3	3	19	1.0	4	4	v1: first prompt (committed 9309c3d)
+2026-10-27T22:22:25	qwen2.5-7b	f646ce3285b3f78b	a	30	0	3	19	1	5	6	v2: concrete rules (max 3 concepts, banned general words, quotes only for names, negation word list), example 566, 1125 shortened, retry hints
+2026-10-27T22:26:59	qwen2.5-7b	5ea37fba75d45c8f	a	30	0	3	20	2.0	5	5	v3: answer in three lines (Concepts, Exclude, Query); examples in that form
+2026-10-27T22:31:22	qwen2.5-7b	e3eff158c463657f	a	30	0	3	20	1.5	6	6	v4: v3 + hyphen/space variants rule
+2026-10-27T22:34:47	qwen2.5-7b	e3eff158c463657f	b	30	0	1	18	1.0	6	6	v4 checked once on part b (no tuning on b)

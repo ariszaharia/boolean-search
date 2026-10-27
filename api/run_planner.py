@@ -7,9 +7,11 @@ Writes  results/runs/E1_<split>.tsv            the run: top 100 by BM25 inside t
         results/runs/E1_<split>_plans.jsonl    every request with all its attempts and the model's raw answers
         results/runs/E1_<split>.json           the settings: model and version, prompt fingerprint, git commit, ...
 
-Development: --sample N runs a fixed random sample (seed 20261015) of N train claims that are neither base claims
-of the targeted set nor prompt examples, writes to results/dev/ instead, and prints a short summary. The prompt is
-developed only this way: never on the targeted set or on test.
+Development: --sample N runs N train claims that are neither base claims of the targeted set nor prompt examples,
+writes to results/dev/ instead, prints a short summary and adds it to results/prompt_dev_log.tsv (committed: the
+history of the prompt). The eligible claims are shuffled once (seed 20261015); --part a takes the first N, --part b
+the next N, so the two never overlap: tune on a, check the final prompt once on b. The prompt is developed only
+this way: never on the targeted set or on test.
 
 Run from the project folder (Ollama running; the engine built with CMake):
     venv\\Scripts\\python.exe api/run_planner.py --split train --sample 30
@@ -29,6 +31,10 @@ from planner import (EXAMPLE_CLAIMS, LLM, MAX_RETRIES, MAX_TOKENS, MODELS, SEED,
 from run_baselines import BOOLEAN_CLI, K, git_commit, git_dirty, load_queries, queries_path, run_boolean
 
 SAMPLE_SEED = 20261015
+# Claims kept out of the development pool before it is shuffled: the examples of the first prompt (9309c3d). Fixed,
+# so parts a and b stay the same claims when the prompt's examples change. A new example must come from outside
+# both parts (main() stops if one is inside the part being run).
+DEV_EXCLUDED = ['1125', '334', '326', '1209']
 
 
 def targeted_base_claims():
@@ -55,14 +61,32 @@ def dev_summary(out_path, sizes_path, plans, split):
             ranked[qid].append(doc)
     n = len(plans)
     non_empty = [s for s in sizes.values() if s > 0]
-    top10 = sum(1 for q in plans if relevant[q] & set(ranked[q][:10]))
-    top100 = sum(1 for q in plans if relevant[q] & set(ranked[q]))
-    retried = sum(1 for p in plans.values() if len(p['attempts']) > 1)
-    print(f'\n{n} requests: {n - len(sizes)} failed after retries ({retried} needed a retry), '
-          f'{sum(1 for s in sizes.values() if s == 0)} empty sets.')
+    summary = {'n': n, 'failed': n - len(sizes), 'retried': sum(1 for p in plans.values() if len(p['attempts']) > 1),
+               'empty': sum(1 for s in sizes.values() if s == 0),
+               'median_size': statistics.median(non_empty) if non_empty else 0,
+               'relevant_top10': sum(1 for q in plans if relevant[q] & set(ranked[q][:10])),
+               'relevant_top100': sum(1 for q in plans if relevant[q] & set(ranked[q]))}
+    print(f'\n{n} requests: {summary["failed"]} failed after retries ({summary["retried"]} needed a retry), '
+          f'{summary["empty"]} empty sets.')
     if non_empty:
-        print(f'Non-empty sets: median size {statistics.median(non_empty):g}, largest {max(non_empty)}.')
-    print(f'A relevant document in the top 10: {top10} / {n}; in the top {K}: {top100} / {n}.')
+        print(f'Non-empty sets: median size {summary["median_size"]:g}, largest {max(non_empty)}.')
+    print(f'A relevant document in the top 10: {summary["relevant_top10"]} / {n}; '
+          f'in the top {K}: {summary["relevant_top100"]} / {n}.')
+    return summary
+
+
+def log_dev(summary, args, note):
+    """One line per development run in results/prompt_dev_log.tsv."""
+    path = os.path.join(ROOT, 'results', 'prompt_dev_log.tsv')
+    columns = ['time', 'model', 'prompt_sha256', 'part', 'n', 'failed', 'retried', 'empty', 'median_size',
+               'relevant_top10', 'relevant_top100', 'note']
+    new = not os.path.isfile(path)
+    with open(path, 'a', encoding='utf-8', newline='\n') as f:
+        if new:
+            f.write('\t'.join(columns) + '\n')
+        row = {'time': datetime.datetime.now().isoformat(timespec='seconds'), 'model': args.model,
+               'prompt_sha256': prompt_sha256()[:16], 'part': args.part, 'note': note or '', **summary}
+        f.write('\t'.join(str(row[c]) for c in columns) + '\n')
 
 
 def main():
@@ -70,6 +94,8 @@ def main():
     ap.add_argument('--split', required=True, choices=['train', 'test', 'targeted'])
     ap.add_argument('--model', default='qwen2.5-7b', choices=sorted(MODELS))
     ap.add_argument('--sample', type=int, help='development: N random train claims (not targeted, not examples)')
+    ap.add_argument('--part', choices=['a', 'b'], default='a', help='development: first (a) or next (b) N claims')
+    ap.add_argument('--note', help='development: what this prompt version changes (goes into the log)')
     args = ap.parse_args()
     if args.sample and args.split != 'train':
         raise SystemExit('--sample is for development, on train only.')
@@ -80,9 +106,14 @@ def main():
     queries = load_queries(args.split, None)
     out_dir = os.path.join(ROOT, 'results', 'dev' if args.sample else 'runs')
     if args.sample:
-        excluded = targeted_base_claims() | set(EXAMPLE_CLAIMS)
+        excluded = targeted_base_claims() | set(DEV_EXCLUDED)
         pool = sorted((q for q in queries if q[0] not in excluded), key=lambda q: int(q[0]))
-        queries = sorted(random.Random(SAMPLE_SEED).sample(pool, args.sample), key=lambda q: int(q[0]))
+        random.Random(SAMPLE_SEED).shuffle(pool)
+        start = 0 if args.part == 'a' else args.sample
+        queries = sorted(pool[start:start + args.sample], key=lambda q: int(q[0]))
+        inside = sorted(set(EXAMPLE_CLAIMS) & {q[0] for q in queries})
+        if inside:
+            raise SystemExit(f'prompt examples {inside} are inside this development part; pick examples elsewhere')
     os.makedirs(out_dir, exist_ok=True)
     name = f'E1_{args.split}'
     out_path = os.path.join(out_dir, f'{name}.tsv')
@@ -109,7 +140,8 @@ def main():
     print(f'E1 on {args.split}: {len(queries)} requests -> {out_path} '
           f'({llm.calls} model calls, {llm.cache_hits} from the cache)')
     if args.sample:
-        dev_summary(out_path, os.path.splitext(out_path)[0] + '_sizes.tsv', plans, args.split)
+        summary = dev_summary(out_path, os.path.splitext(out_path)[0] + '_sizes.tsv', plans, args.split)
+        log_dev(summary, args, args.note)
 
 
 if __name__ == '__main__':
