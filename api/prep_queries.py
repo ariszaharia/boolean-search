@@ -1,12 +1,15 @@
 from datasets import load_dataset
 import os
 
+from greek import greek_to_names
+
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, '..', 'data')
 os.makedirs(data_dir, exist_ok=True)
 
 queries = load_dataset("BeIR/scifact", "queries", split="queries")
-text_of = {str(q['_id']): q['text'].replace('\t', ' ').replace('\n', ' ') for q in queries}
+# Greek letters become their names, exactly as in the corpus (api/greek.py).
+text_of = {str(q['_id']): greek_to_names(q['text'].replace('\t', ' ').replace('\n', ' ')) for q in queries}
 
 # Same splits as api/prep_qrels.py: a query belongs to a split if that split's qrels judge it.
 for split in ('train', 'test'):

@@ -13,13 +13,18 @@ Writes
 
 Run from the project folder:   python api/baseline_pyserini.py
 Needs Java 21, `pip install pyserini`. Building the index takes a few minutes the first time;
-an existing index in results/work/ is reused.
+an existing index in results/work/ is reused only if it was built from the current data/scifact.tsv
+(its stamp file <index>.corpus_sha256 says so); otherwise it is deleted and rebuilt.
 """
+import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+
+from greek import greek_to_names
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 CORPUS = os.path.join(ROOT, 'data', 'scifact.tsv')
@@ -36,8 +41,52 @@ B = 0.75
 
 
 def words_of(text):
-    """Same rule as the C++ tokenizer: lowercase, split on every non-alphanumeric character."""
-    return re.findall(r'[a-z0-9]+', text.lower())
+    """Same rule as the C++ tokenizer: lowercase, split on every non-alphanumeric character.
+    Greek letters become their names first, as in the corpus (no change for text that already went through
+    api/prep_queries.py)."""
+    return re.findall(r'[a-z0-9]+', greek_to_names(text).lower())
+
+
+def file_sha256(path):
+    with open(path, 'rb') as f:
+        return hashlib.sha256(f.read()).hexdigest()
+
+
+def corpus_sha256():
+    """Fingerprint of data/scifact.tsv. Every cache built from the corpus is reused only if it matches."""
+    return file_sha256(CORPUS)
+
+
+def index_is_current(index_dir):
+    """True if index_dir exists and was built from the current corpus (its stamp file says so)."""
+    stamp = index_dir + '.corpus_sha256'
+    if not (os.path.isdir(index_dir) and os.listdir(index_dir) and os.path.isfile(stamp)):
+        return False
+    with open(stamp, encoding='utf-8') as f:
+        return f.read().strip() == corpus_sha256()
+
+
+def build_lucene_index(index_dir, extra_args):
+    """Builds a Lucene index from data/scifact.tsv into index_dir, unless the one there is current.
+    A stale index (built from another version of the corpus, or without a stamp) is deleted and rebuilt."""
+    if index_is_current(index_dir):
+        print(f'Reusing {index_dir} (built from the current corpus)')
+        return
+    if os.path.isdir(index_dir):
+        print(f'Deleting {index_dir}: not built from the current corpus')
+        shutil.rmtree(index_dir)
+    write_jsonl()
+    cmd = [sys.executable, '-m', 'pyserini.index.lucene',
+           '--collection', 'JsonCollection',
+           '--input', JSONL_DIR,
+           '--index', index_dir,
+           '--generator', 'DefaultLuceneDocumentGenerator',
+           '--threads', '1',
+           '--storePositions', '--storeDocvectors', '--storeRaw'] + extra_args
+    print('Building the index:\n  ' + ' '.join(cmd))
+    subprocess.run(cmd, check=True)
+    with open(index_dir + '.corpus_sha256', 'w', encoding='utf-8') as f:
+        f.write(corpus_sha256() + '\n')
 
 
 def write_jsonl():
@@ -56,20 +105,7 @@ def write_jsonl():
 
 
 def build_index():
-    if os.path.isdir(INDEX_DIR) and os.listdir(INDEX_DIR):
-        print(f'Reusing existing index in {INDEX_DIR} (delete the folder to rebuild)')
-        return
-    write_jsonl()
-    cmd = [sys.executable, '-m', 'pyserini.index.lucene',
-           '--collection', 'JsonCollection',
-           '--input', JSONL_DIR,
-           '--index', INDEX_DIR,
-           '--generator', 'DefaultLuceneDocumentGenerator',
-           '--threads', '1',
-           '--storePositions', '--storeDocvectors', '--storeRaw',
-           '-stemmer', 'none', '-keepStopwords']
-    print('Building the index:\n  ' + ' '.join(cmd))
-    subprocess.run(cmd, check=True)
+    build_lucene_index(INDEX_DIR, ['-stemmer', 'none', '-keepStopwords'])
 
 
 def load_queries():

@@ -1,6 +1,8 @@
 from datasets import load_dataset
 import os
 
+from greek import greek_to_names
+
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(script_dir, '..', 'data')
 os.makedirs(data_dir, exist_ok=True)
@@ -19,7 +21,9 @@ with open(output_file, 'w', encoding='utf-8') as fout:
         text = doc['text']
         
         full_text = f"{title} {text}".replace('\t', ' ').replace('\n', ' ')
-        
+        # Greek letters become their names (TNF-α -> TNF-alpha), see api/greek.py.
+        full_text = greek_to_names(full_text)
+
         fout.write(f"{doc_id}\t{full_text}\n")
         count += 1
 

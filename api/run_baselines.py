@@ -18,7 +18,7 @@ matches BEIR's "flat" index (title and text joined).
 B3 gets the raw query text (with the query prefix the model card recommends for retrieval) and the same
 documents (title and text, as in data/scifact.tsv). Embedding = the first token's (CLS) vector, normalized,
 as the model card specifies; score = cosine similarity, computed against every document (no approximate search).
-Document embeddings are computed once and cached in results/work/.
+Document embeddings are computed once per model revision and corpus version and cached in results/work/.
 
 Writes   results/runs/<system>_<split>.tsv    query_id <TAB> rank <TAB> doc_id <TAB> score
          results/runs/<system>_<split>.json   the settings of the run (for the thesis and for reruns)
@@ -38,7 +38,7 @@ import subprocess
 import sys
 from importlib.metadata import version
 
-from baseline_pyserini import JSONL_DIR, ROOT, WORK, words_of, write_jsonl
+from baseline_pyserini import ROOT, WORK, build_lucene_index, corpus_sha256, file_sha256, words_of
 
 CORPUS = os.path.join(ROOT, 'data', 'scifact.tsv')
 INDEX_DEFAULT = os.path.join(WORK, 'lucene_index_default')   # stemmed; the unstemmed one is lucene_index
@@ -74,9 +74,13 @@ def git_dirty():
         return None
 
 
+def queries_path(split):
+    return os.path.join(ROOT, 'data', f'scifact_queries_{split}.tsv')
+
+
 def load_queries(split, limit):
     """[(query_id, text, [words])] in file order."""
-    path = os.path.join(ROOT, 'data', f'scifact_queries_{split}.tsv')
+    path = queries_path(split)
     if not os.path.isfile(path):
         sys.exit(f'Missing {path}. Run api/prep_queries.py first.')
     queries = []
@@ -90,21 +94,9 @@ def load_queries(split, limit):
 
 
 def build_default_index():
-    if os.path.isdir(INDEX_DEFAULT) and os.listdir(INDEX_DEFAULT):
-        print(f'Reusing existing index in {INDEX_DEFAULT} (delete the folder to rebuild)')
-        return
-    if not os.path.isfile(os.path.join(JSONL_DIR, 'docs.jsonl')):
-        write_jsonl()
     # No -stemmer and no -keepStopwords: Pyserini's default analyzer (Porter stemming, stopwords removed).
-    cmd = [sys.executable, '-m', 'pyserini.index.lucene',
-           '--collection', 'JsonCollection',
-           '--input', JSONL_DIR,
-           '--index', INDEX_DEFAULT,
-           '--generator', 'DefaultLuceneDocumentGenerator',
-           '--threads', '1',
-           '--storePositions', '--storeDocvectors', '--storeRaw']
-    print('Building the index:\n  ' + ' '.join(cmd))
-    subprocess.run(cmd, check=True)
+    # Rebuilt automatically if it was not built from the current data/scifact.tsv.
+    build_lucene_index(INDEX_DEFAULT, [])
 
 
 def run_b1(queries, out_path, k1, b, raw_text):
@@ -185,7 +177,9 @@ def run_b3(queries, out_path):
     model = AutoModel.from_pretrained(DENSE_MODEL, revision=DENSE_REVISION).eval()
 
     doc_ids, doc_texts = load_corpus()
-    cache = os.path.join(WORK, f'b3_docs_{DENSE_REVISION[:12]}.npz')
+    # One cache file per model revision and corpus version: after the corpus changes (for example D7, Greek
+    # letters -> names), the ids stay the same but the texts do not, so the ids alone cannot tell.
+    cache = os.path.join(WORK, f'b3_docs_{DENSE_REVISION[:12]}_{corpus_sha256()[:12]}.npz')
     if os.path.isfile(cache) and list(np.load(cache)['ids']) == doc_ids:
         print(f'Reusing document embeddings from {cache} (delete it to recompute)')
         docs = np.load(cache)['emb']
@@ -237,7 +231,8 @@ def main():
     else:
         settings = run_b2(queries, out_path, args.split)
     meta = {'system': args.system, 'split': args.split, 'n_queries': len(queries), 'limit': args.limit,
-            'k': K, 'corpus': 'data/scifact.tsv', **settings,
+            'k': K, 'corpus': 'data/scifact.tsv', 'corpus_sha256': corpus_sha256(),
+            'queries_sha256': file_sha256(queries_path(args.split)), **settings,
             'git_commit': commit, 'git_dirty': dirty,
             'run_at': datetime.datetime.now().isoformat(timespec='seconds')}
     with open(os.path.splitext(out_path)[0] + '.json', 'w', encoding='utf-8') as f:
