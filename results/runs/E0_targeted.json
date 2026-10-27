@@ -1,0 +1,23 @@
+{
+ "system": "E0",
+ "split": "targeted",
+ "n_queries": 100,
+ "limit": null,
+ "k": 100,
+ "corpus": "data/scifact.tsv",
+ "corpus_sha256": "7865b98eee15e30e10c32560ebd5840a7778842f4a96c25582ff2204791b66b9",
+ "queries_sha256": "81e7db5bb4220e647e6b7b20a78292fc80c48d2f6882baecc21140aa41edf8f5",
+ "k1": 1.2,
+ "b": 0.75,
+ "query_input": "engine words (lowercase, split on non-alphanumeric)",
+ "query": "(^ word1 word2 ...)",
+ "sizes_file": "results\\runs\\E0_targeted_sizes.tsv",
+ "failures_file": "results\\runs\\E0_targeted_failures.tsv",
+ "n_ran": 100,
+ "n_empty_set": 100,
+ "n_failed": 0,
+ "engine_binary": "cpp\\build\\boolean_cli.exe",
+ "git_commit": "50c17d3a7ae3ec9bc995cb7904f32de36697d66d",
+ "git_dirty": false,
+ "run_at": "2026-10-27T21:53:32"
+}

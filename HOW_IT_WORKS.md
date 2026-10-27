@@ -17,7 +17,7 @@ same answer key. All the code after the engine exists to make that comparison fa
         +--------------------------------+--------------------------------+
         |                                |                                |
   Baselines, no LLM                Boolean systems                   (later) reranker
-  B1 BM25 stemmed (Pyserini)       E0 flat OR of the words            reorders the top N
+  B1 BM25 stemmed (Pyserini)       E0 flat AND of the words           reorders the top N
   B2 BM25 exact (our engine)       E1 LLM writes a Boolean query      of every system
   B3 dense (embedding model)       E2 E1 + relaxation loop
         |                                |                                |
@@ -289,7 +289,7 @@ meaningful interval; it is there only so the split by kind is visible.
 | **B3** | Dense retrieval: one named embedding model turns questions and documents into vectors; the nearest vectors win | no | PLANNED, model not chosen |
 | **B4** | BM25 on the question plus extra words suggested by the LLM | yes | PLANNED |
 | **B5** | Dense retrieval on the same LLM-expanded question | yes | PLANNED |
-| **E0** | Engine, flat AND/OR of the question words, no LLM | no | PLANNED |
+| **E0** | Engine, flat AND of exactly B2's words (`(^ w1 w2 ...)`), no LLM | no | DONE (train, targeted) |
 | **E1** | The LLM writes one Boolean query (`(^ ...)`, `(- ...)`, phrases); the engine runs it | yes | PLANNED |
 | **E2** | E1 plus the relaxation loop (section 9.2) | yes | PLANNED |
 | **E3** | E1 ranked by SSR instead of BM25 (stretch) | yes | PLANNED |

@@ -199,7 +199,17 @@ test runs NOT made yet, they come at the end with the final runs):
    - Paraphrases: BM25 loses half the relevant documents (R@100 0.50), dense keeps them (0.98); B3 minus B1
      R@100 +0.48 (+0.30 to +0.66). Expected by construction (lexical overlap at least halved). Caveat for H2:
      the paraphrases were written by an LLM (Claude), and dense retrieval is also a neural model.
-   d. NEXT: the planner (step 3).
+   d. E0 DONE 2026-10-27 (`run_baselines.py --system E0`, runs from 50c17d3, clean). New program
+      `cpp/build/boolean_cli` runs any Boolean query and writes the run, `<run>_sizes.tsv` and
+      `<run>_failures.tsv` (ParseError with position; a failed query has no size line); E1/E2 will use it via
+      `run_baselines.run_boolean`. Checked: B2's (+ words) queries through boolean_cli reproduce B2_train.tsv
+      byte for byte. Results (descriptive, E0 is in no hypothesis):
+      - train: 787 of 809 claims (97.3%) match nothing. The 22 that match each find exactly 1 document, and 21
+        of the 22 are relevant (precision 0.95): an AND of every word finds the claim's own source abstract when
+        the wording matches, and nothing otherwise. Empty counted as 0: nDCG@10 0.026 (B2 0.667).
+      - targeted: all 100 match nothing (the constraint sentence's words are required too, "not", "mice", ...).
+      Strict Boolean without an LLM: near-perfect precision, almost no recall. This is what E1 has to fix.
+   e. NEXT: the planner (step 3).
 6. Ablations, error analysis (about 100 failures), auditability study.
 7. Stretch, cut from the bottom if time runs short: SSR ranking, TREC-COVID and latency, multi-call agent,
    end-to-end faithfulness.
