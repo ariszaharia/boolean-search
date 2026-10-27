@@ -1,6 +1,22 @@
-# Thesis progress summary (as of 2026-10-27)
+# Thesis progress summary (as of 2026-10-28)
 
 Plan: write the thesis text only after all the code and experiments are finished.
+
+## Next steps (written 2026-10-28, end of session)
+1. Push (commits up to ef42eb4: the MedCPT clarification d53a396 must be on GitHub before any reranked targeted
+   run, so its timestamp comes first).
+2. Rerank B1, B2, B3 on the targeted set with medcpt (N = 100 and 30), on Colab: colab/rerank.ipynb with
+   RERANKER = 'medcpt', SYSTEMS = ['B1', 'B2', 'B3'], SAMPLE = None, SPLIT = 'targeted' (about 15 minutes).
+   Then score by group (exclusion, phrase, identifier, paraphrase), with B3 unreranked as the reference line.
+3. Without a key: the final analysis script (all confirmatory comparisons + Holm), and the H5 sampling and
+   annotation-sheet tooling (needs final E1/E2 runs to sample from, but can be written now).
+4. With the OpenAI key ($5-10 first): MODELS entry with an exact dated model id; Sol vs Astra on dev parts a
+   and b (E1, E2); check the prompt on the chosen model (part a; part b was already used once with Qwen, state
+   it); fix model and prompt before any confirmatory E1/E2 run.
+5. Then: the confirmatory runs (E1/E2 on targeted and test, everything reranked with medcpt, test baselines,
+   B1-lit at the end), H5 annotation (Aris + a second annotator for 30 to 50 items: find that person early),
+   error analysis, thesis text.
+6. Open question to settle early: does the university require disclosing AI-written code?
 
 ## The thesis in one paragraph
 Strict Boolean retrieval versus dense vector search in agentic RAG. An LLM writes an S-expression
