@@ -6,3 +6,15 @@ time	system	model	prompt_sha256	part	n	failed	retried	empty	median_size	relevant
 2026-10-27T22:34:47	E1	qwen2.5-7b	e3eff158c463657f	b	30	0	1	18	1.0	6	6	v4 checked once on part b (no tuning on b)
 2026-10-27T23:50:45	E2	qwen2.5-7b	e3eff158c463657f	a	30	0	3	10	1.0	12	12	E2 first run: relax empty sets, max 2 rounds, exclusions kept
 2026-10-27T23:56:33	E2	qwen2.5-7b	e3eff158c463657f	b	30	0	1	13	1	10	11	E2 checked on part b
+2026-11-11T16:39:44	E1	gemini-3.5-flash-lite	e3eff158c463657f	a	30	0	0	17	1	6	6	gemini flash-lite, prompt v4
+2026-11-11T16:43:25	E2	gemini-3.5-flash-lite	e3eff158c463657f	a	30	0	0	4	2.0	13	13	gemini flash-lite, prompt v4
+2026-11-11T16:47:03	E1	gemini-3.5-flash-lite	e3eff158c463657f	b	30	0	0	13	1	16	16	gemini flash-lite, prompt v4
+2026-11-11T16:49:15	E2	gemini-3.5-flash-lite	e3eff158c463657f	b	30	0	0	3	1	24	24	gemini flash-lite, prompt v4
+2026-11-14T13:08:38	E2	gpt-6-sol	e3eff158c463657f	a	30	0	0	4	1.0	14	14	gpt-6-sol, prompt v4
+2026-11-14T13:09:45	E2	gpt-6-sol	e3eff158c463657f	b	30	0	0	6	1.0	19	19	gpt-6-sol, prompt v4
+2026-11-14T13:09:49	E1	gpt-6-sol	e3eff158c463657f	a	30	0	0	16	1.0	8	8	gpt-6-sol, prompt v4
+2026-11-14T13:09:52	E1	gpt-6-sol	e3eff158c463657f	b	30	0	0	12	1.0	17	17	gpt-6-sol, prompt v4
+2026-11-14T13:52:41	E2	gpt-6-luna	e3eff158c463657f	a	30	0	0	1	4	16	18	gpt-6-luna, prompt v4
+2026-11-14T13:53:52	E2	gpt-6-luna	e3eff158c463657f	b	30	0	0	3	2	25	25	gpt-6-luna, prompt v4
+2026-11-14T13:53:55	E1	gpt-6-luna	e3eff158c463657f	a	30	0	0	18	1.0	5	5	gpt-6-luna, prompt v4
+2026-11-14T13:53:59	E1	gpt-6-luna	e3eff158c463657f	b	30	0	0	16	1.0	13	13	gpt-6-luna, prompt v4

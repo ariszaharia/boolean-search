@@ -74,6 +74,13 @@ public:
     // How many times the words appear one after another in a document.
     int phrase_frequency(const std::vector<std::string>& tokens, int doc_id) const;
 
+    // The positions (word numbers, from 0) of one token in one document, or nullptr if it does not occur there.
+    // Used by the SSR scorer.
+    const std::vector<int>* positions(const std::string& token, int doc_id) const;
+
+    // Splits text into the engine's tokens (lowercase, alphanumeric runs), as queries and documents are split.
+    std::vector<std::string> tokenize(const std::string& text) const { return tokenizer.tokenize(text); }
+
     // why-not(doc, query): evaluates the query for one document only, and records for every part of the query
     // whether the document satisfies it and why. The top's holds is true exactly when search(query) contains
     // the document. Throws ParseError for a bad query, std::out_of_range for a document not in the index.

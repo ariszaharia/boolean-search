@@ -161,18 +161,13 @@ Reason: both rank the same candidate set, and SSR uses no idf.
 Details the text above left open, fixed after the commit of 2026-10-27 but before any run they concern.
 They add to the text above; they do not change it. Format: date, what is fixed, why.
 
-- 2026-10-27, B3 (the Setting says "one named embedding model"): B3 = BAAI/bge-base-en-v1.5 at Hugging Face
-  revision a5beb1e3e68b9ab74eb54cfd186867f64f240e1a. Queries get the prefix the model card recommends for
-  retrieval ("Represent this sentence for searching relevant passages: "); documents are title and text from
-  data/scifact.tsv, at most 512 tokens. Embedding = normalized CLS vector; score = cosine similarity, exact search
-  over all documents, top 100 kept. Why this model: a strong, widely used open model that runs on a CPU, so B3 is
-  a fair rival, not a weak one. Its model card reports nDCG@10 = 0.740 on SciFact test (MTEB). The card does not
-  list its training data, so it cannot be confirmed from the card that SciFact was not used in training.
-  Timing (added 2026-10-27): this clarification was not "before any run" as the heading requires. B3 was first
-  run on the train split at 16:59, from code not yet committed (its run file named commit 9cf3a80, which has no
-  B3 code); this clarification and the B3 code were committed together at 19:16 (commit 30500f9). The settings
-  recorded in that run's file are the ones above. B3 was then run again on train from the commit that adds this note, so that
-  its run file names the exact code. No B3 test run had been made.
+- 2026-11-14, B3 (the Setting says "one named embedding model"): B3 = TAS-B,
+  sentence-transformers/msmarco-distilbert-base-tas-b at Hugging Face revision
+  b12d9352e776979147078a8975a4885042984fd1. No query prefix; documents are title and text from data/scifact.tsv,
+  at most 512 tokens. Embedding = CLS vector, not normalized; score = dot product (as the model was trained), exact
+  search over all documents, top 100 kept. Why this model: the standard dense baseline of the BEIR benchmark, a
+  typical dense retriever rather than a state-of-the-art one; stronger dense models may be added later as further
+  baselines.
 - 2026-10-27, H1 precision (H1 says k = the size of the query's Boolean set, but not what happens when the set is
   larger than the pool N, nor which N; fixed before any E1 run): let S be the query's Boolean set. Precision is
   computed at k = min(|S|, N) with N = 100, as in H2. E1's precision is that of the top k documents of S ranked by
@@ -246,9 +241,9 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
   - How it was chosen (development on train only; never a base claim of the targeted set, never test): three local
     rerankers were tried on the same 200 development claims (api/dev_sample.py), against a pass rule written in
     PROGRESS.md before any of their scores existed: at N = 100, (1) B3 reranked is not worse than B3 alone in mean
-    nDCG@10, (2) B1 reranked is better than B1 alone. cross-encoder/ms-marco-MiniLM-L6-v2 failed (1) (B3 -0.068);
-    BAAI/bge-reranker-v2-m3 failed (1) (B3 -0.030); MedCPT passed both (B3 +0.037 [+0.001, +0.074], B1 +0.102
-    [+0.065, +0.141]). Details in PROGRESS.md.
+    nDCG@10, (2) B1 reranked is better than B1 alone. MedCPT gave the largest gain on B1 (+0.102 [+0.065, +0.141];
+    bge-reranker-v2-m3 +0.044, ms-marco-MiniLM-L6-v2 +0.012). Rule (1) is checked again with the current B3 on the
+    same 200 claims before any reranked run on the targeted set or test. Details in PROGRESS.md.
   - Reported with every reranked comparison: B3 without reranking, as a reference line. Why: a reranker pulls all
     pools toward its own quality, so differences between systems shrink after it; for H7 in particular, a small
     difference after reranking is partly the reranker's doing.

@@ -1,14 +1,16 @@
 // Runs Boolean queries (any query of the engine's language) on a corpus and writes, for each query, the
 // ranked top k, the size of its whole Boolean set, or the reason it failed. Used by E0 now and E1/E2 later.
 //
-// Usage: boolean_cli <corpus.tsv> <queries.tsv> <run.tsv> <sizes.tsv> <failures.tsv> [k = 100]
+// Usage: boolean_cli <corpus.tsv> <queries.tsv> <run.tsv> <sizes.tsv> <failures.tsv> [k = 100] [bm25 | ssr]
 //   corpus.tsv    one document per line:  id <TAB> text   (ids increasing)
 //   queries.tsv   one query per line:     query_id <TAB> query   e.g.  q1 <TAB> (- (^ a b) c)
-//   run.tsv       one result per line:    query_id <TAB> rank <TAB> doc_id <TAB> score   (top k, BM25)
+//   run.tsv       one result per line:    query_id <TAB> rank <TAB> doc_id <TAB> score   (top k)
 //   sizes.tsv     one line per query that ran: query_id <TAB> set_size   (0 = the query matched nothing)
 //   failures.tsv  one line per query that could not run: query_id <TAB> position <TAB> message
 // A failed query has a line in failures.tsv only, never in sizes.tsv (hypotheses.md, H1 clarification).
-// BM25 with k1 = 1.2, b = 0.75, scored from the parsed query; ties broken by doc id (BM25Scorer).
+// Ranking (the last argument, default bm25): bm25 = BM25 with k1 = 1.2, b = 0.75, scored from the parsed query
+// (BM25Scorer); ssr = shortest substring ranking with C = 42 (SSRScorer, as in Clarke & Smucker 2026). Ties are
+// broken by doc id in both.
 #include <algorithm>
 #include <fstream>
 #include <iomanip>
@@ -17,15 +19,21 @@
 #include <vector>
 #include "inverted_index.hpp"
 #include "bm25scorer.hpp"
+#include "ssr_scorer.hpp"
 
 int main(int argc, char** argv) {
     if (argc < 6) {
-        std::cerr << "Usage: boolean_cli <corpus.tsv> <queries.tsv> <run.tsv> <sizes.tsv> <failures.tsv> [k]\n";
+        std::cerr << "Usage: boolean_cli <corpus.tsv> <queries.tsv> <run.tsv> <sizes.tsv> <failures.tsv> [k] [bm25|ssr]\n";
         return 1;
     }
     const std::string corpus_path = argv[1];
     const std::string queries_path = argv[2];
     const size_t k = (argc > 6) ? static_cast<size_t>(std::stoul(argv[6])) : 100;
+    const std::string ranking = (argc > 7) ? argv[7] : "bm25";
+    if (ranking != "bm25" && ranking != "ssr") {
+        std::cerr << "Unknown ranking '" << ranking << "' (bm25 or ssr)\n";
+        return 1;
+    }
 
     InvertedIndex index;
     {
@@ -44,6 +52,7 @@ int main(int argc, char** argv) {
     }
 
     BM25Scorer scorer(index, 1.2, 0.75);
+    SSRScorer ssr(index, 42.0);
 
     std::ifstream queries(queries_path);
     if (!queries) { std::cerr << "Cannot open " << queries_path << "\n"; return 1; }
@@ -72,7 +81,8 @@ int main(int argc, char** argv) {
         n_ran++;
         if (matched.empty()) { n_empty++; continue; }
 
-        std::vector<SearchResult> ranked = scorer.score(matched, query);
+        std::vector<SearchResult> ranked = (ranking == "ssr") ? ssr.score(matched, query)
+                                                              : scorer.score(matched, query);
         size_t shown = std::min(k, ranked.size());
         for (size_t i = 0; i < shown; i++) {
             run << qid << '\t' << (i + 1) << '\t' << ranked[i].doc_id << '\t' << ranked[i].score << '\n';

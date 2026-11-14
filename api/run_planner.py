@@ -30,8 +30,9 @@ import statistics
 
 from baseline_pyserini import ROOT, corpus_sha256, file_sha256
 from dev_sample import SAMPLE_SEED, dev_sample
-from planner import (EXAMPLE_CLAIMS, LLM, MAX_RELAX_ROUNDS, MAX_RETRIES, MAX_TOKENS, MODELS, RELAX_MESSAGE, SEED,
-                     SYSTEM_PROMPT, TEMPERATURE, plan, prompt_sha256, relax)
+from planner import (DEFAULT_MAX_COST, EXAMPLE_CLAIMS, LLM, MAX_RELAX_ROUNDS, MAX_RETRIES, MAX_TOKENS, MODELS, RELAX_MESSAGE, SEED,
+                     SYSTEM_PROMPT, TEMPERATURE, DEV_SPEND_LIMIT, TOTAL_SPEND_LIMIT, base_messages, plan, prompt_sha256,
+                     relax, set_planner)
 from run_baselines import BOOLEAN_CLI, K, git_commit, git_dirty, load_queries, queries_path, run_boolean
 
 def dev_summary(out_path, sizes_path, qids, retried, split):
@@ -77,7 +78,8 @@ def log_dev(summary, args, note):
             f.write('\t'.join(columns) + '\n')
         row = {'time': datetime.datetime.now().isoformat(timespec='seconds'), 'system': args.system,
                'model': args.model,
-               'prompt_sha256': prompt_sha256()[:16], 'part': args.part, 'note': note or '', **summary}
+               'prompt_sha256': prompt_sha256()[:16], 'part': args.part,
+               'note': (f'planner {args.planner}; ' if args.planner != 'v4' else '') + (note or ''), **summary}
         f.write('\t'.join(str(row[c]) for c in columns) + '\n')
 
 
@@ -87,9 +89,14 @@ def main():
     ap.add_argument('--split', required=True, choices=['train', 'test', 'targeted'])
     ap.add_argument('--model', default='qwen2.5-7b', choices=sorted(MODELS))
     ap.add_argument('--sample', type=int, help='development: N random train claims (not targeted, not examples)')
-    ap.add_argument('--part', choices=['a', 'b'], default='a', help='development: first (a) or next (b) N claims')
+    ap.add_argument('--part', choices=['a', 'b', 'c'], default='a',
+                    help='development: first (a), next (b) or third (c) N claims')
+    ap.add_argument('--planner', choices=['v4', 'v5'], default='v4', help='planner version (planner.py)')
     ap.add_argument('--note', help='development: what this prompt version changes (goes into the log)')
+    ap.add_argument('--max-cost', type=float, help='paid models: dollars this run may spend (default '
+                                                   f'{DEFAULT_MAX_COST}); it stops before a call once reached')
     args = ap.parse_args()
+    set_planner(args.planner)
     if args.sample and args.split != 'train':
         raise SystemExit('--sample is for development, on train only.')
 
@@ -99,20 +106,23 @@ def main():
     queries = load_queries(args.split, None)
     out_dir = os.path.join(ROOT, 'results', 'dev' if args.sample else 'runs')
     if args.sample:
-        queries = dev_sample(queries, args.sample, 0 if args.part == 'a' else args.sample)
+        queries = dev_sample(queries, args.sample, 'abc'.index(args.part) * args.sample)
         inside = sorted(set(EXAMPLE_CLAIMS) & {q[0] for q in queries})
         if inside:
             raise SystemExit(f'prompt examples {inside} are inside this development part; pick examples elsewhere')
     os.makedirs(out_dir, exist_ok=True)
-    name = f'{args.system}_{args.split}'
+    # Development runs of another model get its alias in the name, so they do not overwrite the default model's.
+    other = args.sample and (args.model != ap.get_default('model') or args.planner != 'v4')
+    tag = args.model + (f'-{args.planner}' if args.planner != 'v4' else '')
+    name = f'{args.system}-{tag}_{args.split}' if other else f'{args.system}_{args.split}'
     out_path = os.path.join(out_dir, f'{name}.tsv')
 
-    llm = LLM(args.model)
+    llm = LLM(args.model, args.max_cost, DEV_SPEND_LIMIT if args.sample else TOTAL_SPEND_LIMIT)
     print(f'{args.system}: {len(queries)} requests, model {args.model} ({MODELS[args.model]["description"]})')
     e1, conversations = plan([(qid, text) for qid, text, _ in queries], llm, BOOLEAN_CLI)
     retried = sum(1 for r in e1.values() if len(r['attempts']) > 1)
     if args.system == 'E2':
-        plans = relax(e1, conversations, llm, BOOLEAN_CLI)
+        plans = relax(e1, conversations, llm, BOOLEAN_CLI, requests={qid: text for qid, text, _ in queries})
         records = {qid: {'e1_attempts': e1[qid]['attempts'], **plans[qid]} for qid in plans}
         relaxed = [qid for qid in plans if plans[qid]['rounds']]
         recovered = [qid for qid in relaxed if (plans[qid]['rounds'][-1]['size'] or 0) > 0]
@@ -133,14 +143,16 @@ def main():
             'corpus_sha256': corpus_sha256(), 'queries_sha256': file_sha256(queries_path(args.split)),
             'model_alias': args.model, 'model': MODELS[args.model]['model'],
             'model_version': MODELS[args.model]['version'], 'model_description': MODELS[args.model]['description'],
-            'temperature': TEMPERATURE, 'seed': SEED, 'max_tokens': MAX_TOKENS, 'max_retries': MAX_RETRIES,
-            'prompt_sha256': prompt_sha256(), 'system_prompt': SYSTEM_PROMPT, 'example_claims': EXAMPLE_CLAIMS,
-            'model_calls': llm.calls, 'cache_hits': llm.cache_hits, 'k1': 1.2, 'b': 0.75, **relax_info, **settings,
+            'request_settings': llm.request_settings(), 'max_retries': MAX_RETRIES,
+            'planner': args.planner, 'prompt_sha256': prompt_sha256(), 'system_prompt': base_messages()[0]['content'], 'example_claims': EXAMPLE_CLAIMS,
+            'model_calls': llm.calls, 'cache_hits': llm.cache_hits, 'cost_usd': round(llm.cost, 4),
+            'new_prompt_tokens': llm.prompt_tokens, 'new_completion_tokens': llm.completion_tokens, 'k1': 1.2, 'b': 0.75, **relax_info, **settings,
             'git_commit': commit, 'git_dirty': dirty, 'run_at': datetime.datetime.now().isoformat(timespec='seconds')}
     with open(os.path.join(out_dir, f'{name}.json'), 'w', encoding='utf-8') as f:
         json.dump(meta, f, indent=1)
     print(f'{args.system} on {args.split}: {len(queries)} requests -> {out_path} '
-          f'({llm.calls} model calls, {llm.cache_hits} from the cache)')
+          f'({llm.calls} model calls, {llm.cache_hits} from the cache'
+          + (f', about ${llm.cost:.3f}' if 'price' in MODELS[args.model] else '') + ')')
     if args.sample:
         summary = dev_summary(out_path, os.path.splitext(out_path)[0] + '_sizes.tsv', [q[0] for q in queries],
                               retried, args.split)

@@ -12,7 +12,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(engine
     src/tokenizer.cpp
     src/inverted_index.cpp
-    src/bm25scorer.cpp)
+    src/bm25scorer.cpp
+    src/ssr_scorer.cpp)
 target_include_directories(engine PUBLIC include)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(engine PRIVATE -Wall -Wextra)
@@ -36,7 +37,7 @@ add_executable(demo src/main.cpp)
 target_link_libraries(demo engine)
 
 enable_testing()
-foreach(name test_engine-v1 test_phrase test_scoring test_index_io test_why_not)
+foreach(name test_engine-v1 test_phrase test_scoring test_index_io test_why_not test_ssr)
     add_executable(${name} tests/${name}.cpp)
     target_link_libraries(${name} engine)
     add_test(NAME ${name} COMMAND ${name})

@@ -3,7 +3,8 @@ Runs the baselines without an LLM on one split and writes their run files.
 
   B1      BM25 with Pyserini's default analyzer (Porter stemming, English stopwords removed)
   B2      BM25 exact match: the C++ engine with (+ word1 word2 ...)
-  B3      dense retrieval: BAAI/bge-base-en-v1.5 (pinned revision), exact cosine search over all documents
+  B3      dense retrieval: TAS-B (sentence-transformers/msmarco-distilbert-base-tas-b, pinned revision), exact
+          dot-product search over all documents
   E0      the engine with (^ word1 word2 ...): an AND of exactly B2's words, BM25 ranked; no LLM. Also writes
           E0_<split>_sizes.tsv and E0_<split>_failures.tsv (cpp/build/boolean_cli, which E1/E2 will use too)
   B1-lit  a check, not a system: B1 set up like Pyserini's published BEIR baseline, to show that the setup
@@ -55,9 +56,11 @@ B = 0.75
 K1_LIT = 0.9   # Pyserini's BM25 setting for its BEIR baselines
 B_LIT = 0.4
 
-DENSE_MODEL = 'BAAI/bge-base-en-v1.5'
-DENSE_REVISION = 'a5beb1e3e68b9ab74eb54cfd186867f64f240e1a'   # Hugging Face commit, pinned 2026-10-27
-DENSE_QUERY_PREFIX = 'Represent this sentence for searching relevant passages: '   # from the model card
+# TAS-B (Hofstätter et al., SIGIR 2021): the standard dense baseline of BEIR. CLS pooling and 512 tokens from the
+# model's sentence-transformers config; trained for dot-product scoring, so the vectors are not normalized.
+DENSE_MODEL = 'sentence-transformers/msmarco-distilbert-base-tas-b'
+DENSE_REVISION = 'b12d9352e776979147078a8975a4885042984fd1'   # Hugging Face commit, pinned 2026-11-14
+DENSE_QUERY_PREFIX = ''   # TAS-B uses no prefix
 DENSE_MAX_TOKENS = 512
 DENSE_BATCH = 32
 
@@ -199,7 +202,7 @@ def load_corpus():
 
 
 def encode(texts, tokenizer, model):
-    """Normalized CLS embeddings, one row per text."""
+    """CLS embeddings (not normalized: TAS-B scores by dot product), one row per text."""
     import numpy as np
     import torch
     rows = []
@@ -208,7 +211,7 @@ def encode(texts, tokenizer, model):
             batch = tokenizer(texts[start:start + DENSE_BATCH], padding=True, truncation=True,
                               max_length=DENSE_MAX_TOKENS, return_tensors='pt')
             cls = model(**batch).last_hidden_state[:, 0]
-            rows.append(torch.nn.functional.normalize(cls, dim=-1).numpy())
+            rows.append(cls.numpy())
             if len(texts) > 1000 and (start // DENSE_BATCH) % 20 == 0:
                 print(f'  encoded {start + len(rows[-1])} / {len(texts)}', flush=True)
     return np.concatenate(rows).astype(np.float32)
@@ -235,7 +238,7 @@ def run_b3(queries, out_path):
         np.savez(cache, ids=np.array(doc_ids), emb=docs)
 
     q_emb = encode([DENSE_QUERY_PREFIX + text for _, text, _ in queries], tokenizer, model)
-    scores = q_emb @ docs.T   # cosine similarity, since every vector has length 1
+    scores = q_emb @ docs.T   # dot product, as TAS-B was trained
     n_truncated = sum(len(tokenizer(t)['input_ids']) > DENSE_MAX_TOKENS for t in doc_texts)
     with open(out_path, 'w', encoding='utf-8') as out:
         for (qid, _, _), row in zip(queries, scores):
@@ -243,8 +246,8 @@ def run_b3(queries, out_path):
             for rank, j in enumerate(np.argsort(-row, kind='stable')[:K], start=1):
                 out.write(f'{qid}\t{rank}\t{doc_ids[j]}\t{row[j]:.9g}\n')
     return {'model': DENSE_MODEL, 'revision': DENSE_REVISION, 'query_prefix': DENSE_QUERY_PREFIX,
-            'query_input': 'raw query text with the prefix', 'pooling': 'CLS, L2-normalized',
-            'similarity': 'cosine, exact search over all documents', 'max_tokens': DENSE_MAX_TOKENS,
+            'query_input': 'raw query text, no prefix', 'pooling': 'CLS, not normalized',
+            'similarity': 'dot product, exact search over all documents', 'max_tokens': DENSE_MAX_TOKENS,
             'documents_truncated': n_truncated, 'transformers_version': version('transformers'),
             'torch_version': version('torch')}
 

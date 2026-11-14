@@ -178,6 +178,16 @@ std::vector<int> InvertedIndex::search(const std::string& query) const {
     return evaluate_ast(parse(query));
 }
 
+const std::vector<int>* InvertedIndex::positions(const std::string& token, int doc_id) const {
+    auto it = index.find(token);
+    if (it == index.end()) return nullptr;
+    const std::vector<Posting>& postings = it->second;   // sorted by doc_id
+    auto p = std::lower_bound(postings.begin(), postings.end(), doc_id,
+                              [](const Posting& x, int id) { return x.doc_id < id; });
+    if (p == postings.end() || p->doc_id != doc_id) return nullptr;
+    return &p->positions;
+}
+
 int InvertedIndex::phrase_frequency(const std::vector<std::string>& tokens, int doc_id) const {
     if (tokens.empty()) return 0;
 

@@ -287,7 +287,7 @@ meaningful interval; it is there only so the split by kind is visible.
 |---|---|---|---|
 | **B1** | BM25 with Pyserini's default analyzer (stemming and stopword removal), on an index built from our own `data/scifact.tsv` | no | built (`api/run_baselines.py`); full run waits for the predictions |
 | **B2** | BM25 exact match: our engine with `(+ all question words)` | no | built (`api/run_baselines.py`); full run waits for the predictions |
-| **B3** | Dense retrieval: one named embedding model turns questions and documents into vectors; the nearest vectors win | no | PLANNED, model not chosen |
+| **B3** | Dense retrieval: TAS-B (`msmarco-distilbert-base-tas-b`) turns questions and documents into vectors; the nearest vectors win | no | model chosen 2026-11-14, not run yet |
 | **B4** | BM25 on the question plus extra words suggested by the LLM | yes | PLANNED |
 | **B5** | Dense retrieval on the same LLM-expanded question | yes | PLANNED |
 | **E0** | Engine, flat AND of exactly B2's words (`(^ w1 w2 ...)`), no LLM | no | DONE (train, targeted) |
@@ -379,7 +379,7 @@ Built (2026-10-28): `api/rerank.py` reranks the top N (30 or 100) of any run fil
 `<run>-rr<N>-<reranker>_<split>.tsv` next to it (for example `B1-rr100-ce-minilm_train.tsv`). The reranker reads
 the request as written (constraint sentence included), never the Boolean query. The rerankers are entries in
 `RERANKERS`, all free local cross-encoders for development, revisions pinned: `ce-minilm`
-(`cross-encoder/ms-marco-MiniLM-L6-v2`; on train it makes B3 worse, see PROGRESS.md), `bge-m3`
+(`cross-encoder/ms-marco-MiniLM-L6-v2`; weak on SciFact, see PROGRESS.md), `bge-m3`
 (`BAAI/bge-reranker-v2-m3`, much bigger) and `medcpt` (`ncbi/MedCPT-Cross-Encoder`, trained on PubMed
 searches). `--sample 200` reranks only 200 development claims (`api/dev_sample.py`, never a base claim of the
 targeted set) into `results/dev/`, to try a reranker quickly against the pass rule in PROGRESS.md.

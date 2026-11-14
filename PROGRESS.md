@@ -1,22 +1,23 @@
-# Thesis progress summary (as of 2026-10-28)
+# Thesis progress summary (as of 2026-11-14)
 
 Plan: write the thesis text only after all the code and experiments are finished.
 
-## Next steps (written 2026-10-28, end of session)
-1. Push (commits up to ef42eb4: the MedCPT clarification d53a396 must be on GitHub before any reranked targeted
-   run, so its timestamp comes first).
-2. Rerank B1, B2, B3 on the targeted set with medcpt (N = 100 and 30), on Colab: colab/rerank.ipynb with
+## Next steps (written 2026-11-14)
+1. Fix the planner model (GPT-6 Luna, see e. below) and write it into hypotheses.md as a clarification before any
+   confirmatory E1/E2 run.
+2. MedCPT rule (1) again with the new B3 (TAS-B): rerank.py --sample 200 on Colab (free), same 200 claims.
+3. Rerank B1, B2, B3 on the targeted set with medcpt (N = 100 and 30), on Colab: colab/rerank.ipynb with
    RERANKER = 'medcpt', SYSTEMS = ['B1', 'B2', 'B3'], SAMPLE = None, SPLIT = 'targeted' (about 15 minutes).
    Then score by group (exclusion, phrase, identifier, paraphrase), with B3 unreranked as the reference line.
-3. Without a key: the final analysis script (all confirmatory comparisons + Holm), and the H5 sampling and
-   annotation-sheet tooling (needs final E1/E2 runs to sample from, but can be written now).
-4. With the OpenAI key ($5-10 first): MODELS entry with an exact dated model id; Sol vs Astra on dev parts a
-   and b (E1, E2); check the prompt on the chosen model (part a; part b was already used once with Qwen, state
-   it); fix model and prompt before any confirmatory E1/E2 run.
-5. Then: the confirmatory runs (E1/E2 on targeted and test, everything reranked with medcpt, test baselines,
+4. E4 (the search agent, api/agent.py) development on dev part a with Luna (about $0.05).
+5. The final analysis script (all confirmatory comparisons + Holm), and the H5 sampling and annotation-sheet
+   tooling.
+6. Then: the confirmatory runs (E1/E2/E4 on targeted and test, everything reranked with medcpt, test baselines,
    B1-lit at the end), H5 annotation (Aris + a second annotator for 30 to 50 items: find that person early),
-   error analysis, thesis text.
-6. Open question to settle early: does the university require disclosing AI-written code?
+   error analysis, thesis text. Optional: TREC-COVID as a second dataset for E4 (stretch, already in the Setting).
+7. Open question to settle early: does the university require disclosing AI-written code?
+Budget: $5 of OpenAI credit bought 2026-11-14; about $0.28 logged by 2026-11-14 (results/llm_cache/*.jsonl,
+cost_usd). planner.py stops development once all logged calls reach $1.80 and everything at $4.90.
 
 ## The thesis in one paragraph
 Strict Boolean retrieval versus dense vector search in agentic RAG. An LLM writes an S-expression
@@ -95,11 +96,12 @@ test runs NOT made yet, they come at the end with the final runs):
   and the raw query text, like Pyserini's published BEIR baseline. Run it on test at the end, to show the setup
   reproduces the published SciFact BM25 number (about 0.67 nDCG@10). Not in any hypothesis, not in Holm.
   Checked: runs on all 809 train and 300 test queries without errors (not scored).
-- B3: BAAI/bge-base-en-v1.5 at a pinned revision, query prefix from the model card, CLS vector normalized, exact
-  cosine search (`--system B3`). Fixed in the Clarifications of hypotheses.md. Needs `transformers` and `torch`
-  in the venv. Document embeddings are cached in `results/work/b3_docs_<revision>_<corpus hash>.npz`; 455 of
-  5,183 documents are longer than 512 tokens and are cut. The first B3 run used uncommitted code; it was rerun
-  from a commit (the timing is disclosed in the B3 clarification).
+- B3: TAS-B (`sentence-transformers/msmarco-distilbert-base-tas-b`) at a pinned revision, no query prefix, CLS
+  vector, dot product, exact search (`--system B3`). Fixed in the Clarifications of hypotheses.md. Needs
+  `transformers` and `torch` in the venv. Document embeddings are cached in
+  `results/work/b3_docs_<revision>_<corpus hash>.npz`. Chosen 2026-11-14 and run on train and targeted the same
+  day (CPU); 455 of 5,183 documents are longer than 512 tokens and are cut. First run from uncommitted code,
+  rerun from the commit that adds it (embeddings reused from the cache).
 - Every run file's .json has `git_dirty`: true means tracked files outside `results/` had uncommitted changes
   when the run started, so `git_commit` alone is not the code that ran. Commit before every run that counts.
   It also has `corpus_sha256` and `queries_sha256`, the fingerprints of the exact corpus and query file used.
@@ -112,12 +114,12 @@ test runs NOT made yet, they come at the end with the final runs):
   |---|---|---|---|---|
   | B1 | 0.699 | 0.869 | 0.933 | 0.697 |
   | B2 | 0.667 | 0.854 | 0.907 | 0.667 |
-  | B3 | 0.769 | 0.938 | 0.972 | 0.771 |
+  | B3 (TAS-B, 2026-11-14) | 0.644 | 0.854 | 0.905 | - |
+  B3 minus B1 nDCG@10 -0.055 (-0.076 to -0.033), R@100 -0.029 (-0.049 to -0.009): with TAS-B, BM25 is ahead
+  on SciFact, as in BEIR.
   After D7 (rerun 2026-10-27, corpus_sha256 7865b98e...): B1 minus B2 nDCG@10 +0.032 (95% interval +0.020 to
-  +0.044); B3 minus B1 +0.071 (+0.049 to +0.092). D7 moved 9 queries for B1, 12 for B2 and 14 for B3, both ways.
-  It helps BM25 slightly and costs dense slightly: on claim 846 ("IL-1beta") B1 went 0.631 -> 1.0 and B3
-  1.0 -> 0.631 (the embedding model presumably learned the Greek letter itself). Small, but worth one sentence
-  in the thesis: the Greek-letter choice interacts with the system type.
+  +0.044). D7 moved 9 queries for B1 and 12 for B2, both ways. It helps BM25 slightly: on claim 846 ("IL-1beta")
+  B1 went 0.631 -> 1.0.
   B1 returns fewer than 100 documents for a few queries (80,827 rows instead of 80,900).
 - Output names (fixed 2026-10-27): the split appears once. evaluate/compare drop a trailing `_<split>` from the
   run file name and add it back once: `results/runs/B1_train.tsv` -> `results/metrics/B1_train.json`, and
@@ -206,20 +208,20 @@ test runs NOT made yet, they come at the end with the final runs):
    runs on the frozen set). Descriptive only: no hypothesis compares baselines with each other.
    | group | B1 nDCG@10 | B2 | B3 | B1 R@100 | B2 | B3 |
    |---|---|---|---|---|---|---|
-   | constraint (75) | 0.731 | 0.705 | 0.749 | 0.980 | 0.960 | 0.987 |
-   | exclusion | 0.363 | 0.352 | 0.518 | 0.940 | 0.880 | 1.000 |
-   | phrase | 0.895 | 0.817 | 0.763 | 1.000 | 1.000 | 0.960 |
-   | identifier | 0.935 | 0.945 | 0.965 | 1.000 | 1.000 | 1.000 |
-   | paraphrase | 0.328 | 0.286 | 0.659 | 0.500 | 0.480 | 0.980 |
+   | constraint (75) | 0.731 | 0.705 | 0.645 | 0.980 | 0.960 | 0.913 |
+   | exclusion | 0.363 | 0.352 | 0.414 | 0.940 | 0.880 | 0.820 |
+   | phrase | 0.895 | 0.817 | 0.703 | 1.000 | 1.000 | 0.960 |
+   | identifier | 0.935 | 0.945 | 0.817 | 1.000 | 1.000 | 0.960 |
+   | paraphrase | 0.328 | 0.286 | 0.464 | 0.500 | 0.480 | 0.760 |
+   B3 = TAS-B (run 2026-11-14). B3 minus B1 nDCG@10: constraint -0.086 (-0.156 to -0.019), exclusion +0.051
+   (-0.072 to +0.176), phrase -0.192 (-0.312 to -0.089); dense still wins the paraphrases.
    - Exclusions are hard for every baseline, as designed: a trap is ranked above the document that stays
-     relevant in 15/25 (B1), 14/25 (B2), 11/25 (B3) queries; that document is first in only 4 to 5 of 25. BM25
-     is worst because the constraint sentence adds the excluded word ("mice") to its query. B3 minus B1 nDCG@10
-     +0.155 (95% interval +0.048 to +0.260).
-   - Phrases and identifiers are easy (0.76 to 0.97): they are almost all no-trap, so there is little room for
-     a Boolean system to gain there (H3 already expects a small identifier gain). B3 is below B1 on phrases
-     (-0.131, interval -0.267 to -0.015): exact wording favours BM25.
-   - Paraphrases: BM25 loses half the relevant documents (R@100 0.50), dense keeps them (0.98); B3 minus B1
-     R@100 +0.48 (+0.30 to +0.66). Expected by construction (lexical overlap at least halved). Caveat for H2:
+     relevant in 15/25 (B1), 14/25 (B2) queries; that document is first in only 4 to 5 of 25. BM25 suffers because
+     the constraint sentence adds the excluded word ("mice") to its query.
+   - Phrases and identifiers are easy (0.82 to 0.95): they are almost all no-trap, so there is little room for
+     a Boolean system to gain there (H3 already expects a small identifier gain).
+   - Paraphrases: BM25 loses half the relevant documents (R@100 0.50). Expected by construction (lexical overlap
+     at least halved). Caveat for H2:
      the paraphrases were written by an LLM (Claude), and dense retrieval is also a neural model.
    d. E0 DONE 2026-10-27 (`run_baselines.py --system E0`, runs from 50c17d3, clean). New program
       `cpp/build/boolean_cli` runs any Boolean query and writes the run, `<run>_sizes.tsv` and
@@ -272,8 +274,34 @@ test runs NOT made yet, they come at the end with the final runs):
         set of 783 documents): the precision cost H4 expects. Side effect of the exclusion check: it cannot tell
         a requested exclusion from a false one, so E1's false NOTs (from "no relation" claims) are kept; on
         part b 3 relaxed queries were rejected for that. It protects the targeted set's real exclusions.
-      - NEXT: decide whether a 7B model is enough: compare Sol and Astra on parts a and b (E1 and E2, about $1
-        with Astra) when the API key exists; then fix the model and prompt before any confirmatory run.
+      - Planner models compared 2026-11-11 to 2026-11-14 (same prompt v4, parts a + b = 60 dev claims, no
+        reranking; harness on the 60 claims; part b has now been seen with four models). Models: Qwen2.5-7B
+        (local), Gemini 3.5 Flash-Lite (free tier, reasoning minimal, no seed), GPT-6 Sol and GPT-6 Luna (OpenAI,
+        reasoning none, temperature 0; no dated snapshot exists, so each is pinned by id + created time).
+        | | nDCG@10 | R@100 | P@min(|S|,100) | empty | cost per call |
+        |---|---|---|---|---|---|
+        | E1 Qwen / Flash-Lite / Sol / Luna | 0.175 / 0.328 / 0.365 / 0.268 | 0.187 / 0.347 / 0.392 / 0.289 | 0.151 / 0.281 / 0.298 / 0.223 | 38 / 30 / 28 / 34 | 0 / 0 / $0.0026 / $0.00013 |
+        | E2 Qwen / Flash-Lite / Sol / Luna | 0.310 / 0.522 / 0.487 / 0.604 | 0.351 / 0.587 / 0.526 / 0.693 | 0.273 / 0.384 / 0.416 / 0.366 | 23 / 7 / 10 / 4 | |
+        Same 60 claims: B1 0.696 / 0.958, B3 (TAS-B) 0.654 / 0.961 (nDCG@10 / R@100).
+        Paired: E2 Luna minus Sol nDCG@10 +0.117 (+0.019 to +0.217); E1 Luna minus Sol -0.097 (-0.175 to -0.031).
+        Reading: 7B is not enough; beyond a small hosted model the planner matters little for E1, and Luna's
+        bolder relaxation (5 sets over 100 documents, largest 1,525) makes it the best E2. Miss analysis of
+        Flash-Lite's 23 E2 misses with why_not (all filtering failures, none ranking): 11 vocabulary (the relevant
+        abstract uses other words), 3 claim terms absent from the corpus (refuted claims), 3 borderline, 6 model
+        errors; Sol fixed 1 of the 6. Relaxation sometimes answers a prompt example instead of the request
+        (Flash-Lite 2 of 45 rounds, Qwen 1 of 64). Proposed planner: Luna (step 1 of Next steps).
+      - Set aside 2026-11-14: planner v5 in planner.py (BM25 peek, corpus counts in relaxation, relax sets < 2,
+        any-2-of-3). Written, not run; E4 does what it aimed at.
+   g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
+      - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
+        per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per
+        document, as in the engine. boolean_cli takes a last argument bm25 (default, unchanged output) or ssr.
+        cpp/tests/test_ssr.cpp: 15 checks computed by hand; all 6 test programs pass.
+      - api/agent.py + api/run_agent.py: E4 in the style of the paper's Vole. Each step one JSON action (search,
+        more, read, stop); every document shown is graded 0-3; final ranking by grade, then discovery order;
+        results ranked by SSR. Adapted to SciFact: 3 results per view as 60-word snippets, at most 10 calls and 30
+        grades per request; one run at budget 10 also gives the runs at budgets 3 and 5 (H8). Tested offline with
+        a scripted model; a Flash-Lite dev run was stopped (not used).
    f. Reranker (step 4), 2026-10-28: for now an open cross-encoder (free, runs locally), because there is no
       budget for an API yet. Which reranker the confirmatory runs use is NOT decided: candidates are Jev
       (TypeSafe AI, a "System One" classification model used as a reranker; about $0.04 per million input
@@ -284,17 +312,17 @@ test runs NOT made yet, they come at the end with the final runs):
       refuses targeted and test until a RERANKERS entry is marked as fixed in hypotheses.md. Uses the GPU when
       there is one; long runs go to Google Colab (colab/rerank.ipynb), since the laptop's CPU does ~19 pairs/s.
       First runs (development, train, 2026-10-28; Colab T4 from 5cf45f6, about 25 minutes). nDCG@10, 809 claims:
-        B1 0.699 -> rr100 0.711, rr30 0.708 | B2 0.667 -> 0.702, 0.703 | B3 0.769 -> 0.716, 0.727.
-      Paired, rr100 minus the run it reranked: B1 +0.012 [-0.005, +0.028]; B2 +0.035 [+0.018, +0.051];
-      B3 -0.054 [-0.072, -0.036]. B1-rr100 minus B3-rr100: -0.005. The same without the 100 targeted base
-      claims (709 claims): B1 +0.009, B2 +0.036, B3 -0.059. GPU and CPU scores differ by at most 0.000007.
-      Reading: this cross-encoder is weaker than B3's dense model on SciFact (as in BEIR, where it moves BM25
-      from 0.665 to 0.688). It makes every pool score about the same, and it makes B3 worse. With it, H3 and H7
+        B1 0.699 -> rr100 0.711, rr30 0.708 | B2 0.667 -> 0.702, 0.703.
+      Paired, rr100 minus the run it reranked: B1 +0.012 [-0.005, +0.028]; B2 +0.035 [+0.018, +0.051].
+      The same without the 100 targeted base claims (709 claims): B1 +0.009, B2 +0.036. GPU and CPU scores
+      differ by at most 0.000007.
+      Reading: this cross-encoder is weak on SciFact (as in BEIR, where it moves BM25 from 0.665 to 0.688). It
+      makes every pool score about the same. With it, H3 and H7
       would mostly measure the reranker's ceiling, not what each system's pool contains. A stronger reranker
       (Jev, or a bigger open one) should be tried on train before the choice is fixed.
       Fingerprints (2026-10-28): file_sha256 now ignores line endings (Colab has LF, this laptop CRLF), so both
       record the same value. data/scifact.tsv is 8003e6c7...; run files written before this change recorded the
-      Windows copy, 7865b98e..., which is the same text. The B3 cache and the Lucene stamp were relabelled.
+      Windows copy, 7865b98e..., which is the same text. The Lucene stamp was relabelled.
       Pass rule for a reranker (written 2026-10-28, before any bge-m3 score exists; a development decision, not
       a confirmatory test). Data: the first 200 claims of the development sample (api/dev_sample.py: train,
       never a base claim of the targeted set), rerank.py --sample 200. A reranker passes if, at N = 100:
@@ -304,22 +332,18 @@ test runs NOT made yet, they come at the end with the final runs):
       every reranker tried later (Jev included). ce-minilm is scored on the same 200 claims from its train runs.
       First candidate: BAAI/bge-reranker-v2-m3 (bge-m3 in RERANKERS, 16-bit on the GPU), on Colab.
       Result (Colab T4 from c22c907, about 12 minutes; runs in results/dev/, not committed). nDCG@10 on the 200
-      claims: B1 0.713, B3 0.794 | ce-minilm: B1-rr100 0.725, B3-rr100 0.726 | bge-m3: B1-rr100 0.757,
-      B3-rr100 0.764, B1-rr30 0.749, B3-rr30 0.773. Paired, reranked minus not reranked:
-        bge-m3     B3 rr100 -0.030 [-0.065, +0.004]; B1 rr100 +0.044 [+0.005, +0.084]
-                   B3 rr30  -0.021 [-0.053, +0.011]; B1 rr30  +0.036 [-0.001, +0.074]
-        ce-minilm  B3 rr100 -0.068 [-0.103, -0.034]; B1 rr100 +0.012 [-0.021, +0.045]
-      bge-m3 FAILS rule (1) (B3 reranked is 0.030 lower; not significant, but the rule asks for >= 0) and passes
-      rule (2). It is much better than ce-minilm, but no reranker tried so far beats B3's dense model alone on
-      SciFact. 16-bit (GPU) and 32-bit (CPU) bge-m3 scores differ by at most 0.007 (60 shared pairs).
+      claims: B1 0.713 | ce-minilm: B1-rr100 0.725 | bge-m3: B1-rr100 0.757, B1-rr30 0.749. Paired, reranked
+      minus not reranked:
+        bge-m3     B1 rr100 +0.044 [+0.005, +0.084]; B1 rr30 +0.036 [-0.001, +0.074]
+        ce-minilm  B1 rr100 +0.012 [-0.021, +0.045]
+      bge-m3 passes rule (2); rule (1) is to be checked again with the current B3 (2026-11-14). 16-bit (GPU) and 32-bit (CPU) bge-m3 scores differ by at most 0.007 (60 shared pairs).
       Second candidate (added 2026-10-28, before any of its scores exist): ncbi/MedCPT-Cross-Encoder (medcpt in
       RERANKERS, 32-bit), trained on PubMed search logs, i.e. SciFact's domain. Same rule, same 200 claims.
-      Result (Colab T4 from 86b7b4c, about 15 minutes). nDCG@10 on the 200 claims: B1-rr100 0.815, B3-rr100
-      0.831, B1-rr30 0.795, B3-rr30 0.822 (B1 alone 0.713, B3 alone 0.794). Paired, reranked minus not reranked:
-        medcpt     B3 rr100 +0.037 [+0.001, +0.074]; B1 rr100 +0.102 [+0.065, +0.141]
-                   B3 rr30  +0.028 [-0.004, +0.061]; B1 rr30  +0.082 [+0.051, +0.115]
-      medcpt PASSES both rules, and beats bge-m3 at N = 100 on B3 (+0.067) and B1 (+0.058). After it, B1 and B3
-      are 0.016 apart (B1 lower). Weights: the pinned revision has only pytorch_model.bin; transformers also
+      Result (Colab T4 from 86b7b4c, about 15 minutes). nDCG@10 on the 200 claims: B1-rr100 0.815, B1-rr30 0.795
+      (B1 alone 0.713). Paired, reranked minus not reranked:
+        medcpt     B1 rr100 +0.102 [+0.065, +0.141]; B1 rr30 +0.082 [+0.051, +0.115]
+      medcpt passes rule (2) and beats bge-m3 at N = 100 on B1 (+0.058); rule (1) is to be checked again with the
+      current B3 (2026-11-14). Weights: the pinned revision has only pytorch_model.bin; transformers also
       fetched Hugging Face's converted model.safetensors during the run. All 201 tensors are bit-identical in
       both files, so the pinned revision describes exactly what ran.
       To note in the thesis: MedCPT was trained on PubMed search logs, and SciFact's documents are PubMed
