@@ -254,6 +254,29 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
   - Jev (TypeSafe AI) or any other reranker is not part of the confirmatory tests. If one is added later, it is
     exploratory: judged by the same rule on the same 200 claims, reported next to MedCPT, not in the Holm
     correction. Replacing MedCPT as the reranker of H3 and H7 would be a Deviation.
+- 2026-11-14, the planner (E1 and E2 need "an LLM"; D5 below requires a model from another family than the one
+  that drafted the targeted set, OpenAI; fixed before any E1/E2 run on the targeted set or test):
+  - Model: OpenAI GPT-6 Luna, id gpt-6-luna. OpenAI lists no dated snapshot for it, so it is pinned by its id and
+    the creation time OpenAI reports for it ("gpt-6-luna created 1789406102"), checked before every run; a model
+    replaced under the same id gets a new creation time, and the run stops. Every call also records the model name
+    the response reports.
+  - Settings: reasoning effort none, temperature 0, seed 1, at most 200 answer tokens (max_completion_tokens),
+    at most 2 parse retries, at most 2 relaxation rounds (E2 as in the clarification of 2026-10-27).
+  - Prompt: v4, fingerprint e3eff158c463657f18b849ea4147b75184fce4ca8ac4834ab15d1f5ebfe153da (api/planner.py,
+    SYSTEM_PROMPT and EXAMPLES). It is not changed after this entry.
+  - How it was chosen (development on train only: parts a and b of the development sample, 60 claims, never a base
+    claim of the targeted set, never test): four models with the same prompt, E1 and E2, no reranking. nDCG@10 /
+    R@100: E1 Qwen2.5-7B 0.175 / 0.187, Gemini 3.5 Flash-Lite 0.328 / 0.347, GPT-6 Sol 0.365 / 0.392, GPT-6 Luna
+    0.268 / 0.289; E2 0.310 / 0.351, 0.522 / 0.587, 0.487 / 0.526, 0.604 / 0.693. E2 Luna minus Sol nDCG@10
+    +0.117 [+0.019, +0.217]. Luna was chosen for the best E2 (the system of H3, H4 and H7) at about 1/20 of Sol's
+    cost per call. Details in PROGRESS.md.
+  - Known weakness, stated with H1: Luna's single-shot queries (E1) are weaker than Sol's on the same claims
+    (nDCG@10 -0.097 [-0.175, -0.031]; precision at k = min(|S|, 100) -0.034 [-0.085, -0.001]). H1 is tested with
+    Luna's E1 as fixed here. E1 with GPT-6 Sol (same prompt and settings, pinned "gpt-6-sol created 1789405937")
+    may be reported on the targeted set as a sensitivity check: exploratory, not in the Holm correction.
+  - Part b of the development sample has been seen with all four models, so it is no longer a clean held-out
+    check for the prompt; the prompt was not changed after any of these runs.
+  - Every call is logged and cached in results/llm_cache/gpt-6-luna.jsonl (answer, token counts, cost).
 
 ## Deviations
 Format: date, what changed, why, what the original text said.

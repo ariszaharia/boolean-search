@@ -15,7 +15,7 @@ Plan: write the thesis text only after all the code and experiments are finished
 6. Then: the confirmatory runs (E1/E2/E4 on targeted and test, everything reranked with medcpt, test baselines,
    B1-lit at the end), H5 annotation (Aris + a second annotator for 30 to 50 items: find that person early),
    error analysis, thesis text. Optional: TREC-COVID as a second dataset for E4 (stretch, already in the Setting).
-7. Open question to settle early: does the university require disclosing AI-written code?
+7. Settled 2026-11-14 (Aris): AI-written code is allowed.
 Budget: $5 of OpenAI credit bought 2026-11-14; about $0.28 logged by 2026-11-14 (results/llm_cache/*.jsonl,
 cost_usd). planner.py stops development once all logged calls reach $1.80 and everything at $4.90.
 
