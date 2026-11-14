@@ -1,0 +1,23 @@
+{
+ "system": "B3",
+ "split": "train",
+ "n_queries": 809,
+ "limit": null,
+ "k": 100,
+ "corpus": "data/scifact.tsv",
+ "corpus_sha256": "8003e6c7fb02dff96092f38bab07d26aa625f066f7c3b1fbfcd78fa50d35b723",
+ "queries_sha256": "e50fe87fb523bb0f404b323b9a5eedb6483522b07059163e977089ce2a3e87cd",
+ "model": "sentence-transformers/msmarco-distilbert-base-tas-b",
+ "revision": "b12d9352e776979147078a8975a4885042984fd1",
+ "query_prefix": "",
+ "query_input": "raw query text, no prefix",
+ "pooling": "CLS, not normalized",
+ "similarity": "dot product, exact search over all documents",
+ "max_tokens": 512,
+ "documents_truncated": 455,
+ "transformers_version": "5.19.0",
+ "torch_version": "2.14.1",
+ "git_commit": "2ea624ccf24e7b6ea35ca8538683953af7b75565",
+ "git_dirty": false,
+ "run_at": "2026-11-14T14:04:43"
+}
