@@ -1,0 +1,51 @@
+{
+ "system": "E4",
+ "split": "targeted",
+ "n_queries": 100,
+ "sample": null,
+ "part": null,
+ "sample_seed": null,
+ "corpus": "data/scifact.tsv",
+ "corpus_sha256": "8003e6c7fb02dff96092f38bab07d26aa625f066f7c3b1fbfcd78fa50d35b723",
+ "queries_sha256": "81e7db5bb4220e647e6b7b20a78292fc80c48d2f6882baecc21140aa41edf8f5",
+ "model_alias": "gpt-6-luna",
+ "model": "gpt-6-luna",
+ "model_version": "gpt-6-luna created 1789406102",
+ "request_settings": {
+  "temperature": 0,
+  "max_completion_tokens": 400,
+  "seed": 1,
+  "reasoning_effort": "none"
+ },
+ "budget": 10,
+ "budgets_reported": [
+  3,
+  5,
+  10
+ ],
+ "show_n": 5,
+ "snippet_words": 60,
+ "max_judged": 30,
+ "engine_ranking": "ssr",
+ "prompt_sha256": "c784af145add8410e1bfbdafc5bd739f68aafe988dc48def877dd6ee4e1ddc81",
+ "agent_prompt": "You are a search agent. You look for the scientific abstracts that are evidence for or against a request (a claim about a scientific finding, sometimes with an extra sentence about which papers to leave out), in a corpus of about 5,000 abstracts (title and abstract). Usually only one or two abstracts are the evidence, and they may word things differently from the request.\n\nYour only search tool is an exact-match Boolean engine. Query language (prefix notation; every operator goes inside parentheses):\n  (^ A B ...)      AND: documents that contain all of A, B, ...\n  (+ A B ...)      OR: documents that contain at least one of A, B, ...\n  (- A B ...)      NOT: documents that match A but none of B, ...; at least two operands, the first one is what you want\n  \"nitric oxide\"   an exact phrase, in double quotes\n  vasospasm        one exact word\nWords are matched exactly, ignoring case: no stemming and no synonyms, so write the variants you need with OR, for example (+ tumor tumors tumour tumours). Hyphens and other punctuation separate words, so \"g to a\" matches G-to-A. Write Greek letters as their names (alpha, beta, kappa). The results of a query are ranked by its matches in each document: documents where the parts of the query occur close together, and often, come first.\n\nHow to search well:\n  - Start broad: AND only the 2 most specific concepts of the request (a gene, protein, drug, disease, organism, cell type, method or measured quantity), each as a large OR of its variants: plurals, spellings, abbreviations, synonyms, broader names (a drug class for a drug). For example (^ urease (+ helicobacter pylori)), not (^ urease (+ helicobacter pylori) (+ subunit subunits) (+ pentamer pentameric)).\n  - A search that matches no documents wastes a step. Add a third AND part only when a search matches more than about 50 documents. When a search matches nothing or only a few documents, make the next one broader, never narrower: drop an AND part, add variants, shorten phrases, or use the wording you saw in the abstracts.\n  - Look at the results before searching again: \"more\" shows the next results of a search that worked. Do not repeat a query.\n  - If the request rules papers out (for example \"Ignore studies in mice\"), write (- ...) with every common form of it, and grade such papers 0. A claim that says something does not happen (\"no\", \"not\", \"lack of\") rules nothing out.\n\nGrades, for every document you are shown:\n  3  the abstract reports the finding the request is about (it supports or refutes it)\n  2  about the same specific question, but not clearly that finding\n  1  the same topic only\n  0  not relevant, or ruled out by the request\n\nAnswer every step with exactly one JSON object and nothing else:\n  {\"judgments\": {\"<doc id>\": [<grade>, \"<reason, at most 10 words>\"], ...}, \"action\": \"search\", \"query\": \"<Boolean query>\"}\n  {\"judgments\": {...}, \"action\": \"more\", \"search\": <number of an earlier search>}\n  {\"judgments\": {...}, \"action\": \"read\", \"doc\": \"<doc id>\"}\n  {\"judgments\": {...}, \"action\": \"stop\"}\n\"judgments\" grades every document shown to you since your last answer (use {} when there are none). \"more\" shows the next results of that search; \"read\" shows a whole abstract. Stop when you have found the evidence (grade 3) and more searching is unlikely to find another, or when you cannot find anything more. You have a limited number of steps, so do not waste them.",
+ "model_calls": 514,
+ "cache_hits": 0,
+ "calls_per_request_mean": 5.14,
+ "stop_reasons": {
+  "model stopped": 93,
+  "budget of 10 calls": 2,
+  "30 documents graded": 5
+ },
+ "cost_usd": 0.1047,
+ "new_prompt_tokens": 904234,
+ "new_completion_tokens": 28548,
+ "runs": {
+  "3": "results\\runs\\E4-b3-gpt-6-luna_targeted.tsv",
+  "5": "results\\runs\\E4-b5-gpt-6-luna_targeted.tsv",
+  "10": "results\\runs\\E4-b10-gpt-6-luna_targeted.tsv"
+ },
+ "git_commit": "f1377c8b859ffac95ff555e06ea0b04f09b3f296",
+ "git_dirty": false,
+ "run_at": "2026-11-24T22:33:11"
+}

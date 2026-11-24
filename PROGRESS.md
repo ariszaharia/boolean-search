@@ -311,6 +311,22 @@ test runs NOT made yet, they come at the end with the final runs):
         the relevant abstract is missing from the set in 12 of 25. The NOT works; the loss is recall of the claim
         part (vocabulary), the problem E4 addresses. One relaxed query lost its claim part entirely (t024:
         (- (+ tuberculosis tb) women ...)).
+   i. E4 (agent v2, Luna) on the targeted set, 2026-11-24 (from f1377c8, clean; 514 calls, $0.105, 5.1 calls per
+      request; reported, not a test: H3 tests E2 and H8 is on test). nDCG@10 / R@100, not reranked:
+      | group | B1 | B3 | E2 | E4 (10 calls) |
+      |---|---|---|---|---|
+      | constraint (75) | 0.731 / 0.980 | 0.645 / 0.913 | 0.571 / 0.649 | 0.678 / 0.789 |
+      | exclusion | 0.363 / 0.940 | 0.414 / 0.820 | 0.358 / 0.507 | 0.517 / 0.727 |
+      | phrase | 0.895 / 1.000 | 0.703 / 0.960 | 0.610 / 0.680 | 0.780 / 0.800 |
+      | identifier | 0.935 / 1.000 | 0.817 / 0.960 | 0.745 / 0.760 | 0.737 / 0.840 |
+      | paraphrase | 0.328 / 0.500 | 0.464 / 0.760 | 0.676 / 0.780 | 0.785 / 0.800 |
+      E4 minus B1 nDCG@10: exclusion +0.155 [-0.005, +0.307] p 0.052, paraphrase +0.457 [+0.243, +0.659],
+      phrase -0.115 [-0.249, +0.000], identifier -0.198 [-0.362, -0.058]. E4 minus B3: exclusion +0.104
+      [-0.062, +0.260], paraphrase +0.322 [+0.115, +0.514]. E4 minus E2: constraint +0.107 [+0.008, +0.207].
+      Exclusions in detail: the relevant abstract is found in 20 of 25 (E2: 13) and ranked first in 9; but the
+      agent used a NOT in only 2 of 25 queries and the trap is in its output in 17 of 25 (top 3 in 12). Its gain
+      on exclusions comes from recall, not from obeying the exclusion; E2 obeys it (trap out in 24 of 25) but
+      finds less. Possible exploratory follow-up: E4's output filtered by E2's model-written exclusion.
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per
