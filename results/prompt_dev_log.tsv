@@ -18,3 +18,4 @@ time	system	model	prompt_sha256	part	n	failed	retried	empty	median_size	relevant
 2026-11-14T13:53:52	E2	gpt-6-luna	e3eff158c463657f	b	30	0	0	3	2	25	25	gpt-6-luna, prompt v4
 2026-11-14T13:53:55	E1	gpt-6-luna	e3eff158c463657f	a	30	0	0	18	1.0	5	5	gpt-6-luna, prompt v4
 2026-11-14T13:53:59	E1	gpt-6-luna	e3eff158c463657f	b	30	0	0	16	1.0	13	13	gpt-6-luna, prompt v4
+2026-11-24T22:15:03	E2	gpt-6-luna	e3eff158c463657f	c	30	0	0	1	1	21	21	gpt-6-luna, prompt v4, part c (comparison for E4)

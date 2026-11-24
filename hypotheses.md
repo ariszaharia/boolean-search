@@ -277,6 +277,38 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
   - Part b of the development sample has been seen with all four models, so it is no longer a clean held-out
     check for the prompt; the prompt was not changed after any of these runs.
   - Every call is logged and cached in results/llm_cache/gpt-6-luna.jsonl (answer, token counts, cost).
+- 2026-11-24, E4 (the Setting says "E2 as a multi-call agent" and H8 compares E2 with E4 "at several call
+  budgets", without fixing the agent; fixed before any E4 run on the targeted set or test):
+  - What E4 is: a search agent in the style of Clarke & Smucker, "Boolean queries are all you need?" (arXiv
+    2607.11362, their Vole), api/agent.py and api/run_agent.py. It uses the same engine, query language and model as
+    E1/E2 but does not start from E2's query: in each call the model answers with one JSON action (run a new
+    Boolean query, see more results of an earlier one, read a whole abstract, or stop) and grades 0-3, with a short
+    reason, every abstract it has been shown. Abstracts already graded are skipped. The transcript only grows at
+    the end. This is how "E2 as a multi-call agent" is read: the single shot and the relaxation loop become an
+    open loop in which the model sees results.
+  - Model and settings: GPT-6 Luna as pinned in the planner clarification above (reasoning none, temperature 0,
+    seed 1), at most 400 answer tokens. Prompt: AGENT_PROMPT, fingerprint
+    c784af145add8410e1bfbdafc5bd739f68aafe988dc48def877dd6ee4e1ddc81 (version 2). It is not changed after this
+    entry.
+  - What it is shown: each search or "more" shows the next 5 abstracts not yet graded, each as its first 60 words.
+    The results of a query are ranked by SSR (shortest substring ranking, C = 42, cpp/src/ssr_scorer.cpp), as in
+    the paper; the engine's top 100 of each query can be paged through.
+  - Limits: at most 10 calls and 30 graded abstracts per request. The model is not told how many calls are left,
+    so the state after b calls is what a budget of b gives; one run at 10 calls also gives the budgets 3 and 5.
+  - Output: the graded abstracts, by grade and then by the order they were found (the paper's ranking). The
+    relevance judgments are never shown to the model; they are used only by the harness afterwards.
+  - H8, fixed here: on SciFact test (the standard queries, as H7), nDCG@10 of E2 divided by nDCG@10 of E4 at the
+    budgets 3, 5 and 10 calls, both without the reranker (E2 ranked by BM25 in its set, E4 by its grades); the
+    primary budget is 10. Calls per request are reported for both. The targeted set is reported the same way, not
+    tested. Reranked versions of both are reported as well, not tested.
+  - How it was developed (train only; parts a and c of the development sample; never a base claim of the targeted
+    set, never test; log in results/agent_dev_log.tsv): version 1 searched too narrowly (74 of 144 searches empty,
+    3.7 abstracts graded per claim); version 2 tells the model to start broad and narrow only above about 50
+    results, shows 5 results instead of 3 and allows more calls. Version 2 on part a (tuned on it): nDCG@10 0.680
+    at 10 calls (B1 0.620, B3 0.582, E2 0.488). Held-out check on part c (version 2 unchanged): 0.792 at 10 calls
+    (B1 0.778, B3 0.696, E2 0.688); E4 minus B1 +0.014 [-0.089, +0.135], minus B3 +0.096 [-0.003, +0.214]. At 10
+    and 20 calls the results were the same (the model stops by itself after about 5 to 6 calls), so 10 is the limit.
+  - Cost: about $0.0015 per request on development (Luna).
 
 ## Deviations
 Format: date, what changed, why, what the original text said.

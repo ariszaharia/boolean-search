@@ -28,8 +28,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--split', required=True, choices=['train', 'test', 'targeted'])
     ap.add_argument('--model', default='gpt-6-sol', choices=sorted(MODELS))
-    ap.add_argument('--budget', type=int, default=20, help='model calls per request (the largest budget)')
-    ap.add_argument('--report', default='3,5,10,20', help='budgets to write runs for (each at most --budget)')
+    # Defaults = hypotheses.md, clarification of 2026-11-24 (E4): at most 10 calls; budgets 3, 5 and 10 reported.
+    ap.add_argument('--budget', type=int, default=10, help='model calls per request (the largest budget)')
+    ap.add_argument('--report', default='3,5,10', help='budgets to write runs for (each at most --budget)')
     ap.add_argument('--note', help='development: what this version changes (goes into results/agent_dev_log.tsv)')
     ap.add_argument('--sample', type=int, help='development: N train claims (not targeted, not examples)')
     ap.add_argument('--part', choices=['a', 'b', 'c'], default='a')

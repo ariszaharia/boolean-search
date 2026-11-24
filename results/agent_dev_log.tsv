@@ -1,3 +1,4 @@
 time	model	prompt_sha256	part	n	show_n	budget	found_top10_by_budget	calls_mean	searches	empty_searches	graded_per_request	cost_usd	note
 2026-11-24T21:46:00	gpt-6-luna	1093e6c3124e25b0	a	30	3	10	b3=12 b5=18 b10=20	7.0	144	74	3.7	0.0316	v1: first version (2 or 3 concepts, 3 results per view)
 2026-11-24T21:52:57	gpt-6-luna	c784af145add8410	a	30	5	20	b3=16 b5=21 b10=24 b20=24	6.4	113	36	9.2	0.0444	v2: start broad (2 concepts, narrow only above ~50 results), 5 results per view, up to 20 calls
+2026-11-24T22:13:40	gpt-6-luna	c784af145add8410	c	30	5	20	b3=21 b5=26 b10=26 b20=26	5.3	80	21	7.1	0.0335	v2 unchanged: held-out check on part c
