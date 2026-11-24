@@ -326,7 +326,20 @@ test runs NOT made yet, they come at the end with the final runs):
       Exclusions in detail: the relevant abstract is found in 20 of 25 (E2: 13) and ranked first in 9; but the
       agent used a NOT in only 2 of 25 queries and the trap is in its output in 17 of 25 (top 3 in 12). Its gain
       on exclusions comes from recall, not from obeying the exclusion; E2 obeys it (trap out in 24 of 25) but
-      finds less. Possible exploratory follow-up: E4's output filtered by E2's model-written exclusion.
+      finds less.
+      - EXPLORATORY, decided after seeing the E4 result above (not in any hypothesis, not in Holm), 2026-11-24:
+        E4+NOT = E4's ranking minus every abstract that matches an excluded operand of E2's final query (the
+        model's own (- ...), run on the whole corpus; no new model call, no relevance judgments). api/
+        combine_e4_not.py -> results/exploratory/E4-not-b10-gpt-6-luna_targeted.tsv (+ .json: per request what was
+        excluded and how many abstracts were removed). E2 has a top-level NOT in all 25 exclusion requests and in no
+        other request, so only the exclusions change; 56 abstracts removed in all.
+        Exclusions: nDCG@10 0.570 (E4 0.517, B3 0.414, B1 0.363); R@100 0.727 (unchanged: the removed abstracts
+        are not relevant); relevant abstract found in 20 of 25 and first in 11 (E4: 9); trap left in 1 of 25
+        (E4: 17). E4+NOT minus B1 +0.208 [+0.042, +0.368] p 0.013; minus B3 +0.157 [-0.023, +0.327] p 0.078; minus
+        E4 +0.053 [+0.011, +0.106]. Constraint group 0.696 (E4 0.678). Not reranked.
+        Reading: the two halves combine as hoped: the agent finds the abstract, the single-shot query supplies an
+        exclusion that holds. Being post hoc and on 25 requests, it is a lead for the thesis's discussion (and a
+        candidate system for future work), not a confirmed result.
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per
