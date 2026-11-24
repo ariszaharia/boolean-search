@@ -343,6 +343,30 @@ test runs NOT made yet, they come at the end with the final runs):
         Reading: the two halves combine as hoped: the agent finds the abstract, the single-shot query supplies an
         exclusion that holds. Being post hoc and on 25 requests, it is a lead for the thesis's discussion (and a
         candidate system for future work), not a confirmed result.
+   j. H3 SCORED, 2026-11-24. MedCPT reranking of B1, B2, B3 and E2 on the targeted set (Colab T4, all from baec927,
+      clean; zip again unpacked into a "rerank_results (1)" subfolder, files moved to results/runs/, cache appended).
+      N: H3 does not name one; following the H1 clarification (one primary N = 100, "as in H2"), N = 100 is primary
+      and N = 30 is reported. Empty sets as in the Setting (primary: requests where E2 is non-empty).
+      nDCG@10 after reranking, N = 100 (B3 without reranking in brackets):
+      | group | B1 | B2 | B3 | E2 |
+      |---|---|---|---|---|
+      | exclusion | 0.465 | 0.448 | 0.433 (0.414) | 0.416 |
+      | identifier | 0.970 | 0.970 | 0.945 (0.817) | 0.760 |
+      | phrase | 0.910 | 0.925 | 0.893 (0.703) | 0.642 |
+      | paraphrase | 0.470 | 0.445 | 0.630 (0.464) | 0.725 |
+      | constraint (75) | 0.782 | 0.781 | 0.757 (0.645) | 0.606 |
+      - H3 (E2 minus B1, primary): exclusion -0.048 [-0.167, +0.065] p 0.42 (n = 25, no empty); identifier -0.103
+        [-0.273, +0.038] p 0.21 (n = 22 of 25). No significant gain in either category already before Holm, so H3
+        is FALSIFIED (prediction: exclusions about +0.15). Second analysis (empty = 0): identifier -0.210 [-0.396,
+        -0.046]. E2 minus B3 (reported): exclusion -0.016, identifier -0.074, both not significant. N = 30: exclusion
+        E2 minus B1 +0.005, identifier -0.120.
+      - Why: reranking lifts BM25 on exclusions from 0.363 to 0.465 (MedCPT reads the whole request, including
+        "Ignore studies in mice"), while it cannot bring back the relevant abstract E2's set does not contain (12 of
+        25 missing). E2's NOT holds; its recall loses the comparison.
+      - Paraphrase (reported): E2 minus B1 +0.255 [+0.065, +0.450] p 0.011; E2 is still the best system there.
+      - Context, exploratory (not reranked, E4's ranking is the model's own grades): E4+NOT on exclusions 0.570, above
+        every reranked baseline (B1 0.465, B3 0.433). Not a test; the fair confirmatory comparison would need E4 and
+        E4+NOT reranked too.
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per
