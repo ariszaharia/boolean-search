@@ -28,8 +28,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--split', required=True, choices=['train', 'test', 'targeted'])
     ap.add_argument('--model', default='gpt-6-sol', choices=sorted(MODELS))
-    ap.add_argument('--budget', type=int, default=10, help='model calls per request (the largest budget)')
-    ap.add_argument('--report', default='3,5,10', help='budgets to write runs for (each at most --budget)')
+    ap.add_argument('--budget', type=int, default=20, help='model calls per request (the largest budget)')
+    ap.add_argument('--report', default='3,5,10,20', help='budgets to write runs for (each at most --budget)')
+    ap.add_argument('--note', help='development: what this version changes (goes into results/agent_dev_log.tsv)')
     ap.add_argument('--sample', type=int, help='development: N train claims (not targeted, not examples)')
     ap.add_argument('--part', choices=['a', 'b', 'c'], default='a')
     ap.add_argument('--max-cost', type=float, help='paid models: dollars this run may spend')
@@ -93,10 +94,25 @@ def main():
         sys.path.insert(0, ROOT)
         from harness.data import load_qrels
         qrels = load_qrels('train')
+        found = {}
         for b in budgets:
-            found = sum(1 for qid, _, _ in queries
-                        if any(doc in qrels.get(qid, {}) for doc, _ in ranking(sessions[qid], b)[:10]))
-            print(f'  budget {b:2d}: a relevant document in the top 10 for {found} / {len(queries)}')
+            found[b] = sum(1 for qid, _, _ in queries
+                           if any(doc in qrels.get(qid, {}) for doc, _ in ranking(sessions[qid], b)[:10]))
+            print(f'  budget {b:2d}: a relevant document in the top 10 for {found[b]} / {len(queries)}')
+        searches = [x for s in sessions.values() for x in s.searches]
+        row = {'time': meta['run_at'], 'model': args.model, 'prompt_sha256': prompt_sha256()[:16], 'part': args.part,
+               'n': len(queries), 'show_n': SHOW_N, 'budget': args.budget,
+               'found_top10_by_budget': ' '.join(f'b{b}={found[b]}' for b in budgets),
+               'calls_mean': f'{meta["calls_per_request_mean"]:.1f}',
+               'searches': len(searches), 'empty_searches': sum(1 for x in searches if x['size'] == 0),
+               'graded_per_request': f'{sum(len(s.judged) for s in sessions.values()) / len(queries):.1f}',
+               'cost_usd': meta['cost_usd'], 'note': args.note or ''}
+        log = os.path.join(ROOT, 'results', 'agent_dev_log.tsv')
+        new = not os.path.isfile(log)
+        with open(log, 'a', encoding='utf-8', newline='\n') as f:
+            if new:
+                f.write('\t'.join(row) + '\n')
+            f.write('\t'.join(str(v) for v in row.values()) + '\n')
 
 
 if __name__ == '__main__':

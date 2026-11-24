@@ -14,6 +14,9 @@ Adapted to SciFact (a claim has 1 or 2 relevant abstracts, not dozens; abstracts
   - A query or "more" shows SHOW_N results at a time, each as its first SNIPPET_WORDS words (title and start), not one
     200-word snippet per call.
   - At most max_calls model calls (the run's budget) and MAX_JUDGED graded documents per request.
+  - Development (train only, results/agent_dev_log.tsv): v1 searched too narrowly (74 of 144 searches empty, 3.7
+    documents graded per claim); v2 tells the model to start broad and narrow only on many results, shows 5 results
+    instead of 3, and runs up to 20 calls.
   - The model is not told the number of calls left, so the state after b calls is what a budget of b would have
     given: one run at the largest budget also gives the runs at smaller budgets (H8 compares several budgets).
   - A query's results are ranked by shortest substring ranking (SSR, C = 42), as in the paper (cpp/src/ssr_scorer.cpp,
@@ -27,7 +30,7 @@ import subprocess
 
 from baseline_pyserini import CORPUS, WORK
 
-SHOW_N = 3
+SHOW_N = 5          # development v1 (2026-11-24): 3
 SNIPPET_WORDS = 60
 MAX_JUDGED = 30
 ENGINE_K = 100
@@ -45,8 +48,9 @@ Your only search tool is an exact-match Boolean engine. Query language (prefix n
 Words are matched exactly, ignoring case: no stemming and no synonyms, so write the variants you need with OR, for example (+ tumor tumors tumour tumours). Hyphens and other punctuation separate words, so "g to a" matches G-to-A. Write Greek letters as their names (alpha, beta, kappa). The results of a query are ranked by its matches in each document: documents where the parts of the query occur close together, and often, come first.
 
 How to search well:
-  - Start with the 2 or 3 most specific concepts of the request (a gene, protein, drug, disease, organism, cell type, method or measured quantity), each with OR of its variants: plurals, spellings, abbreviations, synonyms, broader names (a drug class for a drug).
-  - If a query finds nothing or nothing useful, change it: fewer AND parts, more variants, shorter phrases, or the wording you saw in the abstracts. Do not repeat a query.
+  - Start broad: AND only the 2 most specific concepts of the request (a gene, protein, drug, disease, organism, cell type, method or measured quantity), each as a large OR of its variants: plurals, spellings, abbreviations, synonyms, broader names (a drug class for a drug). For example (^ urease (+ helicobacter pylori)), not (^ urease (+ helicobacter pylori) (+ subunit subunits) (+ pentamer pentameric)).
+  - A search that matches no documents wastes a step. Add a third AND part only when a search matches more than about 50 documents. When a search matches nothing or only a few documents, make the next one broader, never narrower: drop an AND part, add variants, shorten phrases, or use the wording you saw in the abstracts.
+  - Look at the results before searching again: "more" shows the next results of a search that worked. Do not repeat a query.
   - If the request rules papers out (for example "Ignore studies in mice"), write (- ...) with every common form of it, and grade such papers 0. A claim that says something does not happen ("no", "not", "lack of") rules nothing out.
 
 Grades, for every document you are shown:
