@@ -292,6 +292,25 @@ test runs NOT made yet, they come at the end with the final runs):
         (Flash-Lite 2 of 45 rounds, Qwen 1 of 64). Proposed planner: Luna (step 1 of Next steps).
       - Set aside 2026-11-14: planner v5 in planner.py (BM25 peek, corpus counts in relaxation, relax sets < 2,
         any-2-of-3). Written, not run; E4 does what it aimed at.
+   h. FIRST CONFIRMATORY RUNS, 2026-11-24: E1 and E2 with GPT-6 Luna on the targeted set (runs from 8b4c1fd,
+      clean; 164 calls, $0.022). E1: 46 of 100 sets empty; E2: 8. Harness, primary analysis = queries with a
+      non-empty E1 set (Setting); second analysis = empty counts as 0. Holm not applied yet (analysis script).
+      - H1 (precision at k = min(|S|, 100), constraint queries): E1 minus B1 +0.069 [-0.015, +0.167], p 0.14,
+        n = 41 of 75 (34 empty). The interval includes 0: H1 is FALSIFIED as stated (prediction +0.15 to +0.30 not
+        met). Also reported: E1 minus B3 +0.118 [+0.021, +0.232], p 0.031. Second analysis: E1 minus B1 +0.033
+        [-0.012, +0.087]; E1 minus B3 +0.060 [+0.007, +0.126].
+      - H2 (recall@100, paraphrase queries): E1 minus B1 +0.346 [+0.115, +0.615], p 0.008, n = 13 of 25 (12
+        empty). Positive, so H2 is FALSIFIED: where E1 returns a set, it finds MORE than BM25 (the LLM writes the
+        synonyms the paraphrase replaced). Second analysis: -0.100 [-0.360, +0.160]. E1 minus B3: 0.000 (primary),
+        -0.360 [-0.560, -0.160] (second). Caveat: the paraphrases were written by an LLM (Claude), so another LLM may
+        find the original words more easily than a person would.
+      - E2 preview, not reranked (H3 is tested after MedCPT; not a test): nDCG@10 E2 / B1 / B3 by group: exclusion
+        0.358 / 0.363 / 0.414, phrase 0.610 / 0.895 / 0.703, identifier 0.745 / 0.935 / 0.817, paraphrase
+        0.676 / 0.328 / 0.464 (E2 minus B1 +0.348 [+0.140, +0.552]).
+      - Exclusions diagnosed (E2): every one of the 25 queries has the (- ...) and the trap is out of the set in 24;
+        the relevant abstract is missing from the set in 12 of 25. The NOT works; the loss is recall of the claim
+        part (vocabulary), the problem E4 addresses. One relaxed query lost its claim part entirely (t024:
+        (- (+ tuberculosis tb) women ...)).
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per
