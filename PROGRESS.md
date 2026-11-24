@@ -5,7 +5,10 @@ Plan: write the thesis text only after all the code and experiments are finished
 ## Next steps (written 2026-11-14)
 1. Fix the planner model (GPT-6 Luna, see e. below) and write it into hypotheses.md as a clarification before any
    confirmatory E1/E2 run.
-2. MedCPT rule (1) again with the new B3 (TAS-B): rerank.py --sample 200 on Colab (free), same 200 claims.
+2. DONE 2026-11-24: MedCPT rule (1) again with the new B3 (TAS-B), same 200 claims, Colab T4 from d43e7cc:
+   B3 reranked minus B3 +0.168 [+0.124, +0.214] at N = 100 (0.633 -> 0.801), +0.146 [+0.106, +0.188] at N = 30.
+   Passes. (Colab zip unpacked into a rerank_results/ subfolder again; files moved to results/dev/ and the
+   Colab cache appended to results/work/rerank_cache/medcpt_71caf65d4927_cuda.tsv, not overwritten.)
 3. Rerank B1, B2, B3 on the targeted set with medcpt (N = 100 and 30), on Colab: colab/rerank.ipynb with
    RERANKER = 'medcpt', SYSTEMS = ['B1', 'B2', 'B3'], SAMPLE = None, SPLIT = 'targeted' (about 15 minutes).
    Then score by group (exclusion, phrase, identifier, paraphrase), with B3 unreranked as the reference line.

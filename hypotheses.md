@@ -244,6 +244,9 @@ They add to the text above; they do not change it. Format: date, what is fixed, 
     nDCG@10, (2) B1 reranked is better than B1 alone. MedCPT gave the largest gain on B1 (+0.102 [+0.065, +0.141];
     bge-reranker-v2-m3 +0.044, ms-marco-MiniLM-L6-v2 +0.012). Rule (1) is checked again with the current B3 on the
     same 200 claims before any reranked run on the targeted set or test. Details in PROGRESS.md.
+    Checked 2026-11-24 (Colab T4, from d43e7cc, before any reranked run on the targeted set or test): B3 (TAS-B)
+    reranked minus B3 alone at N = 100 +0.168 [+0.124, +0.214] (0.633 -> 0.801); at N = 30 +0.146 [+0.106,
+    +0.188]. Rule (1) holds; MedCPT stays the reranker.
   - Reported with every reranked comparison: B3 without reranking, as a reference line. Why: a reranker pulls all
     pools toward its own quality, so differences between systems shrink after it; for H7 in particular, a small
     difference after reranking is partly the reranker's doing.
