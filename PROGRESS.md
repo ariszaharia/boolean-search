@@ -412,6 +412,18 @@ test runs NOT made yet, they come at the end with the final runs):
         within 0.02, BM25 slightly ahead; SSR is in fact very slightly ahead on test). Caveat for the thesis: E1's
         sets are mostly tiny (median 1 to 2 documents), so the order inside them can hardly matter; H9 says little
         about SSR on large sets. SSR's real use in this project is inside E4, where the agent pages through results.
+      - H7, 2026-11-26. MedCPT reranking of B1, B3, E2 and E4 (10 calls) on test (Colab T4 from 0c9cb44, clean; E2
+        has 285 requests, 15 stayed empty; E4 297). N = 100 primary, as for H1 to H3. nDCG@10 (all 300, empty = 0):
+        B1 0.787, B3 0.751, E2 0.635, E4 0.741 (N = 30: 0.774, 0.731, 0.629, 0.741).
+        Equivalence margin M = 0.03. E2 minus B1 -0.122 [-0.164, -0.082] (primary, n = 285); E2 minus B3 -0.090
+        [-0.133, -0.048]. Neither interval lies inside +-0.03, so equivalence is NOT shown; neither lies above +0.03,
+        so H7 is NOT FALSIFIED (Boolean is not ahead). The prediction (E2 about -0.02 against B1, H7 not falsified,
+        equivalence probably not shown) has the right verdict but the gap is six times larger. B1 minus B3 +0.036
+        [+0.013, +0.059]: after reranking BM25 is also ahead of dense.
+        Reported, not tested: E4 reranked minus B1 -0.039 [-0.072, -0.008] p 0.017; minus B3 -0.006 [-0.042, +0.030]
+        p 0.75; minus E2 +0.107 [+0.069, +0.148]. Reranking lifts BM25 from 0.684 to 0.787 and the agent only from
+        0.725 to 0.741 (the agent's list is at most 30 abstracts, already ordered by its own grades), so the agent's
+        lead over BM25 before reranking (+0.042) becomes a small deficit after it; the agent ends level with dense.
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per
