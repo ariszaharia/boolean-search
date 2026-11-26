@@ -1,0 +1,101 @@
+query_id	title	top_doc	top_relevant	ratio	known
+t001			False	0.0	False
+t002			False	0.0	False
+t003			False	0.0	False
+t004	PrimPol is required for replication fork progression and preservation of genome integrity in cells lacking BRCA2-associated protein PALB2	15077696	False	0.388	False
+t005			False	0.0	False
+t006			False	0.0	False
+t007	Birth weight and breast cancer risk: a meta-analysis of 18 epidemiological studies	17450673	True	0.516	False
+t008			False	0.0	False
+t009			False	0.0	False
+t010			False	0.0	False
+t011			False	0.0	False
+t012	The C. elegans DAF-16 protein is required for the normal lifespan and stress resistance of daf-2 mutants, but not for the development of dauer larvae	9393969	True	0.357	False
+t013			False	0.0	False
+t014			False	0.0	False
+t015	PrimPol is required for replication fork progression and preservation of genome integrity in the absence of BRCA2 and RAD51-associated protein 1 (RAD51AP1) repair pathways	15077696	False	0.366	False
+t016			False	0.0	False
+t017			False	0.0	False
+t018			False	0.0	False
+t019			False	0.0	False
+t020			False	0.0	False
+t021			False	0.0	False
+t022			False	0.0	False
+t023	EBI2 guides germinal centre development and contributes to the positioning of follicular helper T cells	38587347	False	0.257	False
+t024			False	0.0	False
+t025	RAD52 promotes break-induced replication repair of collapsed replication forks in mammalian cells.	14332945	False	0.746	False
+t026	Enhancer RNAs regulate the transcriptional activity of p53 in response to DNA damage and tumor suppression	43880096	False	0.573	False
+t027	Pharmacist participation on physician rounds and adverse drug events in the intensive care unit: a prospective, randomized, controlled trial	12258338	True	0.779	True
+t028			False	0.0	False
+t029			False	0.0	False
+t030			False	0.0	False
+t031			False	0.0	False
+t032			False	0.0	False
+t033			False	0.0	False
+t034	Structural basis of phospholipid transfer by the Ups1-Mdm35 complex of the mitochondrial intermembrane space	26283293	True	0.652	False
+t035	A mouse model of Hutchinson-Gilford progeria syndrome with a lamin A mutation	22544171	True	0.388	False
+t036			False	0.0	False
+t037	Genetic variants in the 6q21 region are associated with radiation therapy-induced second malignant neoplasms in pediatric Hodgkin lymphoma patients	1649738	True	0.475	False
+t038			False	0.0	False
+t039			False	0.0	False
+t040			False	0.0	False
+t041	Progerin induces premature aging of human induced pluripotent stem cell-derived mesenchymal stem cells	11659421	True	0.283	False
+t042			False	0.0	False
+t043			False	0.0	False
+t044	LRBA deficiency in humans with recurrent infections and autoimmunity: a phenotype linked to defective CTLA4 expression and function	857189	True	0.332	False
+t045			False	0.0	False
+t046			False	0.0	False
+t047			False	0.0	False
+t048			False	0.0	False
+t049			False	0.0	False
+t050			False	0.0	False
+t051			False	0.0	False
+t052			False	0.0	False
+t053	Induced hepatic stem cells possess the potential to differentiate into hepatocytic cells.	20033112	True	0.393	False
+t054			False	0.0	False
+t055			False	0.0	False
+t056			False	0.0	False
+t057			False	0.0	False
+t058			False	0.0	False
+t059			False	0.0	False
+t060			False	0.0	False
+t061			False	0.0	False
+t062			False	0.0	False
+t063			False	0.0	False
+t064	Effect of evolocumab on lipoprotein(a) and low-density lipoprotein cholesterol in patients with hypercholesterolemia: a randomized clinical trial (LAPLACE-TIMI 57)	7150238	False	0.297	False
+t065			False	0.0	False
+t066	Erythromycin and the risk of infantile hypertrophic pyloric stenosis	21239672	True	0.228	False
+t067			False	0.0	False
+t068			False	0.0	False
+t069			False	0.0	False
+t070	Interleukin-18 deficiency leads to decreased atherosclerosis in apolipoprotein E-knockout mice: brief communication	24384587	False	0.473	False
+t071			False	0.0	False
+t072			False	0.0	False
+t073			False	0.0	False
+t074	Diminished ovarian reserve is not associated with reduced fecundability in a prospective cohort of women with a history of pregnancy loss: the EAGeR trial	13497630	True	0.396	False
+t075			False	0.0	False
+t076			False	0.0	False
+t077			False	0.0	False
+t078			False	0.0	False
+t079	Oxidative DNA damage inhibits the STING pathway and suppresses type I interferon production in human cells	40044800	False	0.38	False
+t080			False	0.0	False
+t081	GNB1 mutations cause oncogenic transformation by activating the MAPK and PI3K pathways in hematopoietic cells and solid tumors	33387953	True	0.45	False
+t082			False	0.0	False
+t083			False	0.0	False
+t084			False	0.0	False
+t085			False	0.0	False
+t086			False	0.0	False
+t087			False	0.0	False
+t088			False	0.0	False
+t089	Helicobacter pylori induces activation of the human DNA methyltransferase 1 gene in gastric epithelial cells via NF-κB signaling pathway	22703082	True	0.492	False
+t090	Pioglitazone use and risk of prostate cancer: a systematic review and meta-analysis of observational studies	31229233	False	0.322	False
+t091			False	0.0	False
+t092			False	0.0	False
+t093			False	0.0	False
+t094			False	0.0	False
+t095	Intestinal microbiota metabolism of L-carnitine, a nutrient in red meat, promotes atherosclerosis	14803797	True	1.0	True
+t096	Bile acids drive thermogenesis and improve glucose metabolism via the brown fat G protein-coupled bile acid receptor TGR5	1568684	True	0.179	False
+t097			False	0.0	False
+t098			False	0.0	False
+t099	Epithelial NEMO prevents steatohepatitis and hepatocellular carcinoma by inhibiting RIPK1 kinase activity	18956141	True	0.314	False
+t100			False	0.0	False

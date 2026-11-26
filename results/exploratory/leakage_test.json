@@ -1,0 +1,34 @@
+{
+ "model": "gpt-6-luna",
+ "prompt": "You are an expert on the biomedical literature. Without searching anything, give the exact title of the published paper (a PubMed abstract) that is the evidence for or against the claim you are given. If you do not know it, answer unknown. Answer with exactly one line: Title: <the title, or unknown>",
+ "match_threshold": 0.7,
+ "n": 300,
+ "n_known": 6,
+ "n_answered": 102,
+ "n_top_relevant": 62,
+ "scores": {
+  "known": {
+   "n": 6,
+   "B1": 1.0,
+   "B3": 1.0,
+   "E2": 1.0,
+   "E4": 1.0,
+   "B1 reranked": 1.0,
+   "B3 reranked": 1.0,
+   "E2 reranked": 1.0,
+   "E4 reranked": 1.0
+  },
+  "unknown": {
+   "n": 294,
+   "B1": 0.6770044677642552,
+   "B3": 0.6353480968921136,
+   "E2": 0.5728180236460989,
+   "E4": 0.7196839091201493,
+   "B1 reranked": 0.7829436515063037,
+   "B3 reranked": 0.7460743231546451,
+   "E2 reranked": 0.6272291239443082,
+   "E4 reranked": 0.7352060476135311
+  }
+ },
+ "cost_usd": 0.0049
+}

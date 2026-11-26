@@ -445,6 +445,14 @@ test runs NOT made yet, they come at the end with the final runs):
         E4 minus B1 and E2 minus B1 differences in each. Reading fixed in advance: if the Boolean systems' advantages
         also hold on the unknown requests, leakage is not what drives them; if they appear only on known requests,
         it may be.
+        RESULT (from 24c6d09; 400 calls, $0.007): test: a title was given for 102 of 300 claims, its BM25 top hit was
+        relevant for 62, and only 6 (2%) are KNOWN; targeted: 25 titles, 16 relevant top hits, 2 KNOWN. On the 294
+        unknown test claims nDCG@10 is B1 0.677, B3 0.635, E2 0.573, E4 0.720 (reranked 0.783, 0.746, 0.627, 0.735),
+        the same pattern as on all 300. Targeted, unknown only: paraphrase (24) B1 0.300, B3 0.441, E2 0.662, E4
+        0.776; exclusion (25, none known) unchanged. Reading: near-verbatim recall of the evidence paper is rare, and
+        every Boolean advantage holds on the requests the model does not know, so this form of leakage does not
+        drive the results. Limit, for the thesis: the probe detects knowing the paper by its title, not vaguer
+        familiarity with the topic (62 of 300 guessed titles led BM25 to a relevant abstract, mostly by topic).
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per

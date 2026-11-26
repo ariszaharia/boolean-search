@@ -1,0 +1,301 @@
+query_id	title	top_doc	top_relevant	ratio	known
+1			False	0.0	False
+3	A map of human genome variation from population-scale sequencing	19058822	False	0.374	False
+5	Prevalent abnormal prion protein in human appendixes after bovine spongiform encephalopathy epizootic: large scale survey	13734012	True	1.0	True
+13			False	0.0	False
+36	Vitamin B12 deficiency and hyperhomocysteinemia in older adults: a population-based study	42441846	False	0.348	False
+42			False	0.0	False
+48			False	0.0	False
+49			False	0.0	False
+50			False	0.0	False
+51			False	0.0	False
+53	Aldehyde dehydrogenase 1 expression is associated with poor prognosis in breast cancer: a meta-analysis	45638119	True	0.217	False
+54			False	0.0	False
+56			False	0.0	False
+57			False	0.0	False
+70	Wip1 phosphatase is a negative regulator of p53-mediated growth arrest and apoptosis	5254463	False	0.497	False
+72			False	0.0	False
+75			False	0.0	False
+94			False	0.0	False
+99			False	0.0	False
+100			False	0.0	False
+113	Angiotensin-converting enzyme inhibitors and risk of functional renal insufficiency in elderly patients	6157837	True	0.493	False
+115			False	0.0	False
+118	Antibiotic-induced alterations in the gut microbiota decrease resistance to Clostridium difficile infection in mice and increase susceptibility to toxin-mediated disease in hamsters	6372244	True	0.574	False
+124	Effect of antiretroviral therapy on the incidence of tuberculosis: a systematic review and meta-analysis of the literature	4883040	True	0.677	False
+127			False	0.0	False
+128			False	0.0	False
+129			False	0.0	False
+130			False	0.0	False
+132	Aspirin inhibits prostaglandin production by human endothelial cells and reduces their interaction with neutrophils in vitro.	3866315	False	0.312	False
+133			False	0.0	False
+137			False	0.0	False
+141	Multisensory integration of congruent and incongruent audiovisual speech in the human brain: a high-density electrical mapping study	14437255	True	0.315	False
+142			False	0.0	False
+143			False	0.0	False
+146			False	0.0	False
+148	Autophagy and aging: the importance of maintaining “clean” cells	33569870	False	0.375	False
+163			False	0.0	False
+171	Basophils contribute to the development of lupus nephritis through autoantibody production and enhancement of immune complex deposition in the kidney.	12670680	True	0.433	False
+179	Birth weight and breast cancer risk: a meta-analysis of 18 epidemiological studies	17450673	True	0.516	False
+180			False	0.0	False
+183	Bone marrow-derived cells contribute to the maintenance of alveolar macrophages in the lung of irradiated mice, but not in the steady state of unirradiated mice	12827098	True	0.091	False
+185			False	0.0	False
+198			False	0.0	False
+208			False	0.0	False
+212			False	0.0	False
+213			False	0.0	False
+216			False	0.0	False
+217			False	0.0	False
+218			False	0.0	False
+219			False	0.0	False
+230	Alcohol and aldehyde dehydrogenase genotypes and alcoholism in Chinese men	3067015	True	0.338	False
+232			False	0.0	False
+233			False	0.0	False
+236			False	0.0	False
+237	The ClpC ATPase is required for stress tolerance and is a regulator of the heat shock response in Bacillus subtilis	12881593	False	0.382	False
+238			False	0.0	False
+239			False	0.0	False
+248			False	0.0	False
+249			False	0.0	False
+261	Exercise training improves flow-mediated dilation in patients with coronary artery disease: a meta-analysis of randomized controlled trials	35271381	False	0.477	False
+268	Cold exposure induces recruitment of brown adipose tissue in humans	29381091	False	0.374	False
+269			False	0.0	False
+274			False	0.0	False
+275			False	0.0	False
+279			False	0.0	False
+294			False	0.0	False
+295			False	0.0	False
+298			False	0.0	False
+300	Iron-responsive element-binding proteins: a family of regulatory proteins that control mRNA translation and stability in response to iron availability	16120395	False	0.226	False
+303			False	0.0	False
+312			False	0.0	False
+314	APOBEC3G cytidine deaminase induces hypermutation in newly synthesized HIV-1 DNA	2638387	False	0.879	False
+324			False	0.0	False
+327			False	0.0	False
+338			False	0.0	False
+343			False	0.0	False
+350	Discrimination between initiator and elongator tRNAs by the translation initiation factor IF3	16927286	True	0.543	False
+354	Scribble is required for normal epithelial cell-cell contacts and lumen formation and is a tumour suppressor in breast cancer	2576811	False	0.375	False
+362	Oxysterols direct immune cell migration via EBI2	15058155	False	0.431	False
+380			False	0.0	False
+384			False	0.0	False
+385			False	0.0	False
+386			False	0.0	False
+388			False	0.0	False
+399	Long-term exposure to fine particulate matter and anxiety prevalence in the United States	791050	True	0.57	False
+410	Febrile seizures and the development of epilepsy: a prospective study	14924526	True	0.563	False
+411	Febrile seizures and the risk of epilepsy: a systematic review and meta-analysis	14924526	True	0.404	False
+415			False	0.0	False
+421			False	0.0	False
+431	Reactive oxygen species mediate the activation of FoxO3a in neuronal cells	23887844	False	0.365	False
+436			False	0.0	False
+437			False	0.0	False
+439	Prickle1 promotes neural crest specification by modulating Wnt/PCP signaling in zebrafish embryos	4423559	True	0.254	False
+440			False	0.0	False
+443	GATA-3 is essential for the self-renewal of long-term hematopoietic stem cells	10165258	True	0.374	False
+452	Stochastic gene expression in a single cell	8290760	False	0.481	False
+475			False	0.0	False
+478	Golli proteins modulate T-cell activation by regulating calcium influx into the cytosol during T-cell receptor signaling	14767844	True	0.508	False
+491	Maturity-onset diabetes of the young (MODY) in the United States: genetic and clinical characteristics of 47 families.	17695748	False	0.246	False
+501			False	0.0	False
+502			False	0.0	False
+507	Helminth-induced IL-4 impairs macrophage control of Mycobacterium tuberculosis by promoting alternative activation and reducing autophagy	7433668	False	0.473	False
+508			False	0.0	False
+513			False	0.0	False
+514	Calcium intake and serum 25-hydroxyvitamin D in relation to risk of secondary hyperparathyroidism in the elderly: a population-based study	16256507	True	0.277	False
+516	C-reactive protein and risk of COPD exacerbations: a systematic review and meta-analysis	29564505	True	0.239	False
+517	Copeptin, a stable peptide derived from the vasopressin precursor, is associated with diabetes and microalbuminuria in the general population: results from the prospective KORA F4 study.	19658917	False	0.358	False
+521	High-sensitivity cardiac troponin T in the evaluation of patients with suspected acute coronary syndrome: a systematic review and meta-analysis	34873974	True	0.273	False
+525	Histone demethylation is required for ligand-dependent recruitment of nuclear receptors to target genes in vivo	13639330	True	0.584	False
+527			False	0.0	False
+528			False	0.0	False
+532			False	0.0	False
+533			False	0.0	False
+535			False	0.0	False
+536	Hypocretin (orexin) neurons induce panic-like behavior in rats	16056514	True	0.481	False
+539	Hypoglycemic Episodes and Risk of Dementia in Older Patients With Type 2 Diabetes Mellitus	13282296	True	1.0	True
+540	Glutamate in the hypothalamus: from hunger to satiety and beyond	1070920	False	0.203	False
+544	IFIT1 is an antiviral protein that recognizes 5′-triphosphate RNA	15419873	False	0.508	False
+549			False	0.0	False
+551			False	0.0	False
+552			False	0.0	False
+554			False	0.0	False
+560			False	0.0	False
+569			False	0.0	False
+575			False	0.0	False
+577			False	0.0	False
+578			False	0.0	False
+587			False	0.0	False
+589	ADHD Medications and Risk of Serious Cardiovascular Events in Young and Middle-Aged Adults	10984005	True	1.0	True
+593			False	0.0	False
+597	Trends in cervical cancer incidence and mortality in the United States, 1975-2000: a population-based study of racial/ethnic differences	25742130	True	0.407	False
+598			False	0.0	False
+613			False	0.0	False
+619			False	0.0	False
+623	Vitamin D and risk of multiple sclerosis: a Mendelian randomization study	22843838	False	0.533	False
+628			False	0.0	False
+636			False	0.0	False
+637			False	0.0	False
+641	Cognitive behavioral therapy for insomnia: a systematic review and meta-analysis of randomized controlled trials	5912283	True	0.481	False
+644			False	0.0	False
+649			False	0.0	False
+659	Ivermectin treatment of bancroftian filariasis: a review of clinical trials and long-term effects	2328272	False	0.385	False
+660	Ivermectin in the treatment of onchocerciasis: a review of the literature and an overview of the therapeutic potential of ivermectin in onchocerciasis control programs	1215116	True	0.246	False
+674	Low-density lipoproteins cause atherosclerotic cardiovascular disease. Evidence from genetic, epidemiologic, and clinical studies.	970012	False	0.344	False
+684	The ClpC ATPase is required for stress tolerance and is a regulator of the heat shock response in Bacillus subtilis	12881593	False	0.382	False
+690			False	0.0	False
+691	Leukemia-associated Rho guanine nucleotide exchange factor (LARG) is a RhoA-specific guanine nucleotide exchange factor that promotes RhoA-dependent signaling in response to Src activation	10991183	True	0.329	False
+692	Leukoreduced blood transfusions and risk of postoperative infection: a meta-analysis of randomized controlled trials	36288526	False	0.468	False
+693	Leukoreduction of blood transfusions does not decrease postoperative infections in patients undergoing cardiac surgery	24088502	True	0.222	False
+700			False	0.0	False
+702			False	0.0	False
+715			False	0.0	False
+716			False	0.0	False
+718			False	0.0	False
+721			False	0.0	False
+723	Ly49Q directs the organization of neutrophil migration to inflammatory sites by regulating membrane raft functions	5531479	True	0.516	False
+727			False	0.0	False
+728			False	0.0	False
+729			False	0.0	False
+742	Macrolide antibiotics and the risk of myocardial infarction: a systematic review and meta-analysis of observational studies	32159283	True	0.52	False
+743			False	0.0	False
+744	Macropinocytosis of protein is an amino acid supply route in Ras-transformed cells	4138659	False	1.0	False
+756			False	0.0	False
+759			False	0.0	False
+768			False	0.0	False
+770			False	0.0	False
+775			False	0.0	False
+781			False	0.0	False
+783			False	0.0	False
+784	MicroRNAs in neural stem cells: a regulatory role for miR-124 in promoting neuronal differentiation and migration of neural progenitor cells in the adult brain.	2356950	True	0.396	False
+785			False	0.0	False
+793	Mitochondria and apoptosis: a critical review of the role of mitochondria in apoptosis in the heart and other tissues	8551160	True	0.293	False
+800			False	0.0	False
+805	Inhibition of N-cadherin-mediated adhesion by an anti-N-cadherin antibody suppresses metastasis in a mouse model of tumor progression	22180793	True	0.389	False
+808			False	0.0	False
+811			False	0.0	False
+814			False	0.0	False
+820			False	0.0	False
+821			False	0.0	False
+823			False	0.0	False
+830			False	0.0	False
+831	The tumor suppressor Merlin regulates the Hippo pathway in Drosophila	12737132	False	0.209	False
+832			False	0.0	False
+834			False	0.0	False
+837			False	0.0	False
+839	Aptamer-Targeted Lipid Nanoparticles for siRNA Delivery to the Tumor	1469751	True	0.531	False
+845	Neutrophil extracellular traps in ANCA-associated vasculitis: a potential therapeutic target?	17741440	True	0.455	False
+847	The penetration of anti-tuberculosis drugs into pulmonary lesions in tuberculosis patients: a systematic review	16787954	True	0.443	False
+852			False	0.0	False
+859			False	0.0	False
+870			False	0.0	False
+873			False	0.0	False
+879	Ribosome profiling reveals the prevalence of uORFs and small ORFs in the human transcriptome	37677954	False	0.284	False
+880			False	0.0	False
+882	Gut microbiota metabolism of L-carnitine promotes atherosclerosis in mice	14803797	True	0.667	False
+887			False	0.0	False
+903			False	0.0	False
+904	Podoplanin promotes efficient migration of dendritic cells along stromal surfaces by regulating the actin cytoskeleton through the C-type lectin receptor CLEC-2	7370282	True	0.527	False
+907	Prostaglandin E2 promotes intestinal tumor growth by altering the expression of tumor suppressing and DNA repair genes	6923961	True	0.498	False
+911			False	0.0	False
+913			False	0.0	False
+914			False	0.0	False
+921			False	0.0	False
+922			False	0.0	False
+936			False	0.0	False
+956	Pleiotropic coupling of the GLP-1 receptor to intracellular effectors promotes distinct profiles of cellular signaling	12956194	True	0.467	False
+957			False	0.0	False
+960	The Polymeal: a more natural, safer, and probably tastier (than the Polypill) strategy to reduce cardiovascular disease by more than 75%	8780599	True	1.0	True
+967			False	0.0	False
+971	Human papillomavirus testing versus conventional cytology in primary cervical cancer screening: results of the randomized controlled trial POBASCAM after 5 years of screening	27446873	False	0.347	False
+975			False	0.0	False
+982			False	0.0	False
+985	PTENP1, a natural sponge of miR-21, modulates PTEN expression and regulates the progression of human prostate cancer.	6828370	True	0.378	False
+993			False	0.0	False
+1012	Radioiodine therapy for non-toxic multinodular goitre: a systematic review and meta-analysis of the literature.	9745001	True	0.5	False
+1014			False	0.0	False
+1019	Rapid phosphotransfer rates govern fidelity in two-component systems	1225513	False	0.386	False
+1020	Interferon-induced genes mediate protection against West Nile virus infection in human neuronal cells	10559501	False	0.515	False
+1021	Interferon-induced genes restrict West Nile virus infection and modulate cell survival in neuronal cells	10559501	False	0.566	False
+1024			False	0.0	False
+1029			False	0.0	False
+1041			False	0.0	False
+1049			False	0.0	False
+1062	S-nitrosylation of GAPDH initiates apoptotic cell death by nuclear translocation following Siah1 binding	20381484	True	0.472	False
+1086	Sildenafil treatment of men with antidepressant-associated sexual dysfunction: a randomized controlled trial.	39281140	True	0.798	True
+1088	Silencing of BCL2 is important for the maintenance and progression of tumors	11915280	False	0.201	False
+1089			False	0.0	False
+1099			False	0.0	False
+1100			False	0.0	False
+1104			False	0.0	False
+1107			False	0.0	False
+1110			False	0.0	False
+1121	Synaptic activity enhances the release of brain-derived neurotrophic factor from dendrites as well as from axons in hippocampal neurons in culture	4456756	True	0.428	False
+1130			False	0.0	False
+1132			False	0.0	False
+1137			False	0.0	False
+1140	Vitamin E and the risk of prostate cancer: the Selenium and Vitamin E Cancer Prevention Trial (SELECT)	12009265	True	0.576	False
+1144			False	0.0	False
+1146	Teaching status and quality of care in U.S. hospitals: a review of the literature and implications for policy	13906581	True	0.408	False
+1150			False	0.0	False
+1163	DdrB, a novel single-stranded DNA-binding protein, promotes DNA repair and genome maintenance in Deinococcus radiodurans	15305881	True	0.545	False
+1175	The MDA5 signaling pathway: the role of the helicase domain and a GTPase-independent activity of MDA5 and LGP2	10627801	False	0.297	False
+1179			False	0.0	False
+1180	The RNA helicase RIG-I has an essential function in double-stranded RNA-induced innate antiviral responses	44366096	False	0.429	False
+1185			False	0.0	False
+1187			False	0.0	False
+1191			False	0.0	False
+1194			False	0.0	False
+1196			False	0.0	False
+1197			False	0.0	False
+1199	Colchicine in Patients with Chronic Coronary Disease (LoDoCo2)	12561083	False	0.417	False
+1200	Structural basis of ML-SA1 activation of the human TRPML2 channel and its modulation by PI(3,5)P2 and PI(4,5)P2	24294572	False	0.265	False
+1202			False	0.0	False
+1204			False	0.0	False
+1207			False	0.0	False
+1213			False	0.0	False
+1216			False	0.0	False
+1221			False	0.0	False
+1225	Genome-wide association study of colorectal cancer identifies a new susceptibility locus at 13q22.1 (COLCA1/COLCA2) and a risk locus at 3q26.2 (TP63) in the Japanese population	9650982	True	0.485	False
+1226	TET proteins and 5-methylcytosine oxidation in hematological cancers: a review of human and mouse studies.	24731248	False	0.481	False
+1232			False	0.0	False
+1241			False	0.0	False
+1245			False	0.0	False
+1259	CYP2D6 genotype, antidepressant use, and tamoxifen metabolism during adjuvant breast cancer treatment: a prospective cohort study	24341590	True	0.424	False
+1262	DNA repair by nonhomologous end joining and homologous recombination during CRISPR-Cas9 genome editing in human cells	21561474	False	0.322	False
+1266	Placental weight and risk of breast cancer in the offspring: a prospective study of 1.5 million births in Sweden	37480103	True	0.459	False
+1270	Suicide in prisoners: a systematic review of risk factors	13900610	True	0.32	False
+1271	Assessment of cardiac amyloidosis with cardiovascular magnetic resonance imaging: a systematic review and meta-analysis	13768432	True	0.478	False
+1272	The b-wave of the mammalian electroretinogram is not a pure ‘ON’ response	24760136	False	0.346	False
+1273	Kinesin-8 promotes bipolar spindle assembly by sliding microtubules	11041152	True	0.409	False
+1274			False	0.0	False
+1278			False	0.0	False
+1279			False	0.0	False
+1280			False	0.0	False
+1281			False	0.0	False
+1282			False	0.0	False
+1290	Statin use and risk of hip fracture: a population-based case-control study in Denmark	4687948	True	0.52	False
+1292	HNF4A mutations in maturity-onset diabetes of the young and early-onset type 2 diabetes: a systematic review and meta-analysis	56893404	True	0.189	False
+1298	Effectiveness of thigh-length graduated compression stockings to reduce the risk of deep vein thrombosis after stroke (CLOTS trial 1): a multicentre, randomised controlled trial	11718220	True	1.0	True
+1303	Tirasemtiv amplifies skeletal muscle response to nerve activation in humans with amyotrophic lateral sclerosis: a randomized, placebo-controlled, crossover trial	12631697	True	0.295	False
+1316			False	0.0	False
+1319	Human glial chimeric mice reveal a novel role for human astrocytes in the regulation of synaptic plasticity and learning	16284655	True	0.444	False
+1320	Human glial progenitor cells can integrate and function in the adult mammalian brain	5395426	False	0.305	False
+1332			False	0.0	False
+1335			False	0.0	False
+1336			False	0.0	False
+1337			False	0.0	False
+1339			False	0.0	False
+1344			False	0.0	False
+1352			False	0.0	False
+1359			False	0.0	False
+1362			False	0.0	False
+1363			False	0.0	False
+1368			False	0.0	False
+1370			False	0.0	False
+1379	Birth weight and breast cancer risk: a meta-analysis of 18 epidemiological studies	17450673	True	0.516	False
+1382			False	0.0	False
+1385			False	0.0	False
+1389			False	0.0	False
+1395			False	0.0	False

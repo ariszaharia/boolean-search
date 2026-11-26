@@ -1,0 +1,78 @@
+{
+ "model": "gpt-6-luna",
+ "prompt": "You are an expert on the biomedical literature. Without searching anything, give the exact title of the published paper (a PubMed abstract) that is the evidence for or against the claim you are given. If you do not know it, answer unknown. Answer with exactly one line: Title: <the title, or unknown>",
+ "match_threshold": 0.7,
+ "n": 100,
+ "n_known": 2,
+ "n_answered": 25,
+ "n_top_relevant": 16,
+ "scores": {
+  "known": {
+   "n": 2,
+   "B1": 1.0,
+   "B3": 0.8154648767857288,
+   "E2": 1.0,
+   "E4": 1.0,
+   "B1 reranked": 1.0,
+   "B3 reranked": 1.0,
+   "E2 reranked": 1.0,
+   "E4 reranked": 1.0
+  },
+  "unknown": {
+   "n": 98,
+   "B1": 0.6224843238513736,
+   "B3": 0.5948941753218707,
+   "E2": 0.5891246707638114,
+   "E4": 0.6987473426725307,
+   "B1 reranked": 0.6977105153017056,
+   "B3 reranked": 0.7197241454806039,
+   "E2 reranked": 0.6284782333365688,
+   "E4 reranked": 0.6891266986052983
+  },
+  "exclusion, known": {
+   "n": 0,
+   "B1": null,
+   "B3": null,
+   "E2": null,
+   "E4": null,
+   "B1 reranked": null,
+   "B3 reranked": null,
+   "E2 reranked": null,
+   "E4 reranked": null
+  },
+  "exclusion, unknown": {
+   "n": 25,
+   "B1": 0.3626473632951664,
+   "B3": 0.4135790269085271,
+   "E2": 0.3579307013164266,
+   "E4": 0.5171920621334538,
+   "B1 reranked": 0.4646220667690465,
+   "B3 reranked": 0.43266844710388175,
+   "E2 reranked": 0.41640707636374436,
+   "E4 reranked": 0.4411392003935763
+  },
+  "paraphrase, known": {
+   "n": 1,
+   "B1": 1.0,
+   "B3": 1.0,
+   "E2": 1.0,
+   "E4": 1.0,
+   "B1 reranked": 1.0,
+   "B3 reranked": 1.0,
+   "E2 reranked": 1.0,
+   "E4 reranked": 1.0
+  },
+  "paraphrase, unknown": {
+   "n": 24,
+   "B1": 0.29974246901576473,
+   "B3": 0.44135823750149344,
+   "E2": 0.6622150392178531,
+   "E4": 0.7762887397321441,
+   "B1 reranked": 0.4476698727640382,
+   "B3 reranked": 0.6150774794642881,
+   "E2 reranked": 0.7132951519268871,
+   "E4 reranked": 0.7393365394307048
+  }
+ },
+ "cost_usd": 0.0016
+}
