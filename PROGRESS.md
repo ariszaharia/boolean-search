@@ -367,6 +367,22 @@ test runs NOT made yet, they come at the end with the final runs):
       - Context, exploratory (not reranked, E4's ranking is the model's own grades): E4+NOT on exclusions 0.570, above
         every reranked baseline (B1 0.465, B3 0.433). Not a test; the fair confirmatory comparison would need E4 and
         E4+NOT reranked too.
+      - Done 2026-11-26, exploratory: E4 (budgets 3, 5, 10) reranked with MedCPT (Colab T4 from 3f3bfbb, clean), and
+        E4+NOT on the reranked E4 (api/combine_e4_not.py --rerank rr100-medcpt; filtering and reranking commute).
+        All systems reranked, N = 100, nDCG@10:
+        | group | B1 | B3 | E2 | E4 | E4+NOT |
+        |---|---|---|---|---|---|
+        | exclusion | 0.465 | 0.433 | 0.416 | 0.441 | 0.526 |
+        | paraphrase | 0.470 | 0.630 | 0.725 | 0.750 | 0.750 |
+        | phrase | 0.910 | 0.893 | 0.642 | 0.765 | 0.765 |
+        | identifier | 0.970 | 0.945 | 0.760 | 0.825 | 0.825 |
+        | constraint (75) | 0.782 | 0.757 | 0.606 | 0.677 | 0.705 |
+        E4+NOT minus B1: exclusion +0.061 [-0.064, +0.176] p 0.32 (not significant); paraphrase +0.280 [+0.060,
+        +0.500] p 0.013. E4 minus B1: paraphrase +0.280, constraint -0.105 [-0.186, -0.028].
+        Reading: with the same reranker for everyone, E4+NOT is still the best system on exclusions, but its lead
+        over reranked BM25 is small and not significant; the unreranked 0.570 came partly from the agent's own grades,
+        which rank its results better than MedCPT does on exclusions (0.570 vs 0.526). On paraphrases the agent stays
+        clearly best. Phrases and identifiers stay BM25's.
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per

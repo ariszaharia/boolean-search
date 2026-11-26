@@ -10,7 +10,10 @@ top-level NOT keep E4's ranking unchanged. The order of the remaining abstracts 
 
     venv\\Scripts\\python.exe api/combine_e4_not.py            (targeted, budget 10)
 
-Writes results/exploratory/E4-not-b<B>-<model>_targeted.tsv and a .json with, per request, what was excluded and
+With --rerank rr100-medcpt it filters the reranked E4 run instead (filtering and reranking commute: the reranker
+scores each abstract on its own, so removing some does not change the order of the others).
+
+Writes results/exploratory/E4-not-b<B>-<model>[-<rerank>]_targeted.tsv and a .json with, per request, what was excluded and
 how many abstracts were removed.
 """
 import argparse
@@ -57,6 +60,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--model', default='gpt-6-luna')
     ap.add_argument('--budget', type=int, default=10)
+    ap.add_argument('--rerank', default='', help='e.g. rr100-medcpt: filter that reranked E4 run')
     args = ap.parse_args()
     runs = os.path.join(ROOT, 'results', 'runs')
     e2 = {}
@@ -65,7 +69,9 @@ def main():
             p = json.loads(line)
             e2[p['query_id']] = p['query'] if p.get('ok') else ''
     e4 = {}
-    with open(os.path.join(runs, f'E4-b{args.budget}-{args.model}_targeted.tsv'), encoding='utf-8') as f:
+    tag = f'-{args.rerank}' if args.rerank else ''
+    source = f'E4-b{args.budget}-{args.model}{tag}_targeted.tsv'
+    with open(os.path.join(runs, source), encoding='utf-8') as f:
         for line in f:
             qid, rank, doc, score = line.rstrip('\n').split('\t')
             e4.setdefault(qid, []).append((int(rank), doc, score))
@@ -78,7 +84,7 @@ def main():
 
     out_dir = os.path.join(ROOT, 'results', 'exploratory')
     os.makedirs(out_dir, exist_ok=True)
-    out = os.path.join(out_dir, f'E4-not-b{args.budget}-{args.model}_targeted.tsv')
+    out = os.path.join(out_dir, f'E4-not-b{args.budget}-{args.model}{tag}_targeted.tsv')
     record = {}
     with open(out, 'w', encoding='utf-8') as f:
         for qid in sorted(e4, key=lambda q: q):
@@ -90,7 +96,7 @@ def main():
                            'removed': len(e4[qid]) - len(kept)}
     with open(os.path.splitext(out)[0] + '.json', 'w', encoding='utf-8') as f:
         json.dump({'what': 'E4 ranking minus abstracts matching E2\'s excluded operands (exploratory)',
-                   'e4_run': f'results/runs/E4-b{args.budget}-{args.model}_targeted.tsv',
+                   'e4_run': f'results/runs/{source}',
                    'e2_plans': 'results/runs/E2_targeted_plans.jsonl', 'requests': record}, f, indent=1)
     n_not = sum(1 for v in record.values() if v['excluded'])
     print(f'{out}: {n_not} requests with an E2 exclusion, {sum(v["removed"] for v in record.values())} abstracts '
