@@ -434,6 +434,17 @@ test runs NOT made yet, they come at the end with the final runs):
         $0.630, Luna $0.034 (about 19x). Decision (Aris, rule agreed beforehand: switch only if Sol is clearly
         better): Luna stays the model of E1, E2 and E4. For the thesis: a model about 20x more expensive gave no
         measurable gain for the agent (30 claims, exploratory).
+      - Knowledge-leakage probe, PLAN FIXED BEFORE RUNNING (2026-11-26; exploratory, not in Holm): does the planner
+        already know SciFact? For every test claim and every targeted request, GPT-6 Luna (pinned, same settings,
+        no search) is asked for the exact title of the paper that is the evidence for it, or "unknown"
+        (api/leakage_probe.py). A request counts as KNOWN if both hold: (1) BM25 (B1's index and settings) with the
+        given title as query ranks a relevant abstract first, and (2) the given title matches the start of that
+        abstract (difflib ratio >= 0.7 between the lowercased title words and the abstract's first as many words,
+        where SciFact puts the title). Everything else, "unknown" included, counts as UNKNOWN. Then nDCG@10 of B1,
+        B3, E2 and E4 (not reranked and reranked) is reported on known and unknown requests separately, with the
+        E4 minus B1 and E2 minus B1 differences in each. Reading fixed in advance: if the Boolean systems' advantages
+        also hold on the unknown requests, leakage is not what drives them; if they appear only on known requests,
+        it may be.
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per
