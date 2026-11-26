@@ -383,6 +383,17 @@ test runs NOT made yet, they come at the end with the final runs):
         over reranked BM25 is small and not significant; the unreranked 0.570 came partly from the agent's own grades,
         which rank its results better than MedCPT does on exclusions (0.570 vs 0.526). On paraphrases the agent stays
         clearly best. Phrases and identifiers stay BM25's.
+   k. TEST SPLIT, 2026-11-26 (all from e65199e, clean). Baselines, nDCG@10 / R@100: B1 0.684 / 0.928, B2 0.663 /
+      0.883, B3 (TAS-B) 0.643 / 0.891, E0 0.018 / 0.018. B1-lit (the check against Pyserini's published BEIR
+      BM25 for SciFact) 0.679: the setup reproduces it. E1 and E2 with Luna: 500 calls, $0.065; E1 empty on 158 of
+      300, E2 on 15 (143 recovered by relaxation).
+      - H4 (recall@100 of the pool, E2 minus E1, primary = requests where E2 is non-empty): test +0.334 [+0.280,
+        +0.390] p 0.0001 (n = 285; 0.387 -> 0.721); targeted +0.288 [+0.201, +0.380] p 0.0001 (n = 92). Second
+        analysis: test +0.317, targeted +0.265. H4 HOLDS (p far below any Holm threshold for about 11 tests); the
+        gain is about three times the prediction (+0.08 to +0.15). Precision change, reported next to it: +0.108
+        [+0.079, +0.139] on test, +0.092 on targeted, i.e. no precision cost as measured: in this comparison an E1
+        query with an empty set has precision 0, so recovering it raises both recall and precision. The predicted
+        cost (3 to 8 points) does not appear.
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per

@@ -1,0 +1,19 @@
+{
+ "system": "B1",
+ "split": "test",
+ "n_queries": 300,
+ "limit": null,
+ "k": 100,
+ "corpus": "data/scifact.tsv",
+ "corpus_sha256": "8003e6c7fb02dff96092f38bab07d26aa625f066f7c3b1fbfcd78fa50d35b723",
+ "queries_sha256": "9085aa4fdbe7862fc508fdd4af3a3051e304ef2ccb05f6d2f3d65ebd72fdc0e5",
+ "k1": 1.2,
+ "b": 0.75,
+ "query_input": "engine words (lowercase, split on non-alphanumeric)",
+ "analyzer": "Pyserini default (Porter stemming, English stopwords removed)",
+ "index": "results\\work\\lucene_index_default",
+ "pyserini_version": "2.4.0",
+ "git_commit": "e65199ea7ccb5f232e6e9f2dd4a93e6642ef245b",
+ "git_dirty": false,
+ "run_at": "2026-11-26T22:04:34"
+}
