@@ -424,6 +424,13 @@ test runs NOT made yet, they come at the end with the final runs):
         p 0.75; minus E2 +0.107 [+0.069, +0.148]. Reranking lifts BM25 from 0.684 to 0.787 and the agent only from
         0.725 to 0.741 (the agent's list is at most 30 abstracts, already ordered by its own grades), so the agent's
         lead over BM25 before reranking (+0.042) becomes a small deficit after it; the agent ends level with dense.
+      - Exploratory robustness check, 2026-11-26: the agent (v2, unchanged; prompt developed with Luna) with GPT-6 Sol
+        on development part c (the same 30 claims as Luna's held-out check). nDCG@10 Sol / Luna: 3 calls 0.705 /
+        0.659, 5 calls 0.771 / 0.801, 10 calls 0.800 / 0.792; Sol minus Luna at 10 calls +0.009 [-0.112, +0.133]
+        p 0.90. Same behaviour (5.3 calls per claim; relevant abstract in the top 10 for 27 vs 26 of 30). Cost: Sol
+        $0.630, Luna $0.034 (about 19x). Decision (Aris, rule agreed beforehand: switch only if Sol is clearly
+        better): Luna stays the model of E1, E2 and E4. For the thesis: a model about 20x more expensive gave no
+        measurable gain for the agent (30 claims, exploratory).
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per
