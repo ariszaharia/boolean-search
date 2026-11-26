@@ -405,6 +405,13 @@ test runs NOT made yet, they come at the end with the final runs):
         Bootstrap 95% interval of the ratio at 10 calls (paired, 10,000 resamples, seed 20261015): [0.746, 0.857];
         46% of resamples fall below 0.80, so the verdict is a coin flip and is reported as such. nDCG@10 keeps
         rising with the budget (0.637 -> 0.694 -> 0.725), but more slowly.
+      - H9 (E3 = E1's queries ranked by SSR, C = 42; api/run_e3.py, from 16ad991, clean; same sets as E1, checked).
+        The split is not named in H9; test is used as primary, as for H7 and H8, the targeted set is reported.
+        nDCG@10, E3 minus E1, primary (E1 non-empty): test +0.005 [-0.014, +0.024] p 0.60 (n = 142); targeted
+        -0.003 [-0.023, +0.014] p 0.80 (n = 54). H9 HOLDS: within 0.02 either way and not significant (prediction:
+        within 0.02, BM25 slightly ahead; SSR is in fact very slightly ahead on test). Caveat for the thesis: E1's
+        sets are mostly tiny (median 1 to 2 documents), so the order inside them can hardly matter; H9 says little
+        about SSR on large sets. SSR's real use in this project is inside E4, where the agent pages through results.
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per

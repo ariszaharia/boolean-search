@@ -1,0 +1,14 @@
+{
+ "system": "E3",
+ "split": "targeted",
+ "what": "E1 queries ranked by SSR (C = 42)",
+ "e1_plans": "results\\runs\\E1_targeted_plans.jsonl",
+ "n_queries": 100,
+ "k": 100,
+ "ranking": "ssr",
+ "corpus_sha256": "8003e6c7fb02dff96092f38bab07d26aa625f066f7c3b1fbfcd78fa50d35b723",
+ "engine_binary": "cpp\\build\\boolean_cli.exe",
+ "git_commit": "16ad991764ab704ff31888558fc3e6b643d42af1",
+ "git_dirty": false,
+ "run_at": "2026-11-26T22:55:33"
+}
