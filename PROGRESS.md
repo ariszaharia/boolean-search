@@ -13,8 +13,11 @@ Plan: write the thesis text only after all the code and experiments are finished
    RERANKER = 'medcpt', SYSTEMS = ['B1', 'B2', 'B3'], SAMPLE = None, SPLIT = 'targeted' (about 15 minutes).
    Then score by group (exclusion, phrase, identifier, paraphrase), with B3 unreranked as the reference line.
 4. E4 (the search agent, api/agent.py) development on dev part a with Luna (about $0.05).
-5. The final analysis script (all confirmatory comparisons + Holm), and the H5 sampling and annotation-sheet
-   tooling.
+5. DONE 2026-11-26: the final analysis, `python -m harness.final_analysis` -> results/analysis/confirmatory.md
+   and .json (all confirmatory tests, Holm over H1, H2, H3 x 2, H4 x 2, H9; H7 and H8 by their own rules;
+   exploratory kept apart). Holm changes no verdict: H1, H2, H3 falsified; H4, H8, H9 hold; H7 not falsified,
+   equivalence not shown. H2's reversal (Boolean recall higher on paraphrases) stays significant after Holm
+   (p 0.040). Left: H5 sampling and annotation-sheet tooling; rerun the analysis when H5 (and H6) exist.
 6. Then: the confirmatory runs (E1/E2/E4 on targeted and test, everything reranked with medcpt, test baselines,
    B1-lit at the end), H5 annotation (Aris + a second annotator for 30 to 50 items: find that person early),
    error analysis, thesis text. Optional: TREC-COVID as a second dataset for E4 (stretch, already in the Setting).
