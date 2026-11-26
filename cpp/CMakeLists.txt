@@ -33,8 +33,6 @@ target_link_libraries(boolean_cli engine)
 add_executable(why_not_cli src/why_not_cli.cpp)
 target_link_libraries(why_not_cli engine)
 
-add_executable(demo src/main.cpp)
-target_link_libraries(demo engine)
 
 enable_testing()
 foreach(name test_engine-v1 test_phrase test_scoring test_index_io test_why_not test_ssr)

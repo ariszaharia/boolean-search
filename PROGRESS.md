@@ -157,8 +157,6 @@ test runs NOT made yet, they come at the end with the final runs):
 
 ## Things to remember / unresolved
 - `bm25scorer.hpp` now defaults to k1 = 1.2 (was 1.5 until 2026-10-27); experiments still pass it explicitly.
-- `_phase0_reference/` holds an older, bigger version of the engine (Porter stemmer, stopwords, positions with gaps,
-  save format v4, 139 tests). Not part of the build. Use it only if stemming/stopwords are wanted later.
 - Something outside Claude removed comments from `inverted_index.hpp/.cpp` while editing. Cause unknown (editor
   plugin or formatter?). Happened again before 2026-10-27 (comments put back by hand). Still unexplained.
 - `.git` contains harmless leftover files named `stale-index-lock-claude*` (can be deleted).
@@ -296,8 +294,9 @@ test runs NOT made yet, they come at the end with the final runs):
         abstract uses other words), 3 claim terms absent from the corpus (refuted claims), 3 borderline, 6 model
         errors; Sol fixed 1 of the 6. Relaxation sometimes answers a prompt example instead of the request
         (Flash-Lite 2 of 45 rounds, Qwen 1 of 64). Proposed planner: Luna (step 1 of Next steps).
-      - Set aside 2026-11-14: planner v5 in planner.py (BM25 peek, corpus counts in relaxation, relax sets < 2,
-        any-2-of-3). Written, not run; E4 does what it aimed at.
+      - Set aside 2026-11-14: a planner v5 (BM25 peek, corpus counts in relaxation, relax sets < 2, any-2-of-3).
+        Written, never run, removed from the code on 2026-11-27 (it is in git history, commit 2ea624c); E4 does what
+        it aimed at.
    h. FIRST CONFIRMATORY RUNS, 2026-11-24: E1 and E2 with GPT-6 Luna on the targeted set (runs from 8b4c1fd,
       clean; 164 calls, $0.022). E1: 46 of 100 sets empty; E2: 8. Harness, primary analysis = queries with a
       non-empty E1 set (Setting); second analysis = empty counts as 0. Holm not applied yet (analysis script).

@@ -61,12 +61,6 @@ MODELS = {
                    'version': 'gpt-6-luna created 1789406102', 'params': {'reasoning_effort': 'none'},
                    'price': (0.10, 0.50), 'max_tokens_param': 'max_completion_tokens',
                    'description': 'OpenAI GPT-6 Luna, reasoning effort none, temperature 0'},
-    # GPT-6.1 Sol has no 'none' effort and then takes no temperature; it needs max_completion_tokens, with room
-    # for the reasoning tokens.
-    'gpt-6.1-sol': {'model': 'gpt-6.1-sol', 'base_url': 'https://api.openai.com/v1', 'api_key_env': 'OPENAI_API_KEY',
-                    'version': None, 'params': {'reasoning_effort': 'low'}, 'temperature': False,
-                    'max_tokens_param': 'max_completion_tokens', 'max_tokens': 2000, 'price': (2.0, 10.0),
-                    'description': 'OpenAI GPT-6.1 Sol, reasoning effort low, no temperature'},
 }
 GOOGLE_MODELS = 'https://generativelanguage.googleapis.com/v1beta/models/'
 OPENAI_MODELS = 'https://api.openai.com/v1/models/'
@@ -128,67 +122,12 @@ EXAMPLES = [
 EXAMPLE_CLAIMS = [example[0] for example in EXAMPLES]
 
 
-# --- Planner versions. v4: the prompt developed with Qwen and the E2 rule of hypotheses.md (clarification of
-# 2026-10-27). v5 (development, 2026-11-14): (a) the request comes with the first words of the top PEEK_K abstracts
-# BM25 finds for it, so the model can see the corpus's wording; (b) E2 also relaxes sets smaller than MIN_SET, keeps
-# E1's set (the E2 query is the OR of E1's and the relaxed one), restates the request, gives the document count of
-# every part of the query, and allows "any 2 of 3 concepts". v5 is a deviation and must be entered in hypotheses.md
-# before any run on the targeted set or test.
-PLANNER = 'v4'
-PEEK_K = 5
-PEEK_WORDS = 25
-MIN_SET = 2
-RULE_7 = ('\n  7. After the request you see the first words of the top abstracts a keyword search finds for it. They '
-          'are not necessarily relevant, but they show how abstracts word things: when they name one of your '
-          'concepts differently (a drug class, a broader term, a synonym, another spelling), add that wording as an OR '
-          'variant. Never add a concept only because it appears there.')
-
-
-def set_planner(version):
-    global PLANNER
-    if version not in ('v4', 'v5'):
-        raise ValueError(version)
-    PLANNER = version
-
-
-_peek_cache = {}
-
-
-def peek(text):
-    """v5: the first PEEK_WORDS words of the top PEEK_K BM25 abstracts for a request (B1's index and settings)."""
-    if text not in _peek_cache:
-        if 'searcher' not in _peek_cache:
-            from pyserini.search.lucene import LuceneSearcher
-            from run_baselines import B as BM25_B, INDEX_DEFAULT, K1, build_default_index
-            build_default_index()
-            searcher = LuceneSearcher(INDEX_DEFAULT)
-            searcher.set_bm25(K1, BM25_B)
-            docs = {}
-            with open(CORPUS, encoding='utf-8') as f:
-                for line in f:
-                    doc_id, body = line.rstrip('\n').split('\t', 1)
-                    docs[doc_id] = body
-            _peek_cache['searcher'], _peek_cache['docs'] = searcher, docs
-        hits = _peek_cache['searcher'].search(' '.join(words_of(text)), k=PEEK_K)
-        _peek_cache[text] = [' '.join(_peek_cache['docs'][h.docid].split()[:PEEK_WORDS]) for h in hits]
-    return _peek_cache[text]
-
-
-def request_message(text):
-    """The user turn for a request: the request alone (v4), or with the BM25 peek (v5)."""
-    if PLANNER == 'v4':
-        return text
-    lines = '\n'.join(f'{i}. {snippet} ...' for i, snippet in enumerate(peek(text), start=1))
-    return f'{text}\n\nTop abstracts of a keyword search for this request (first words):\n{lines}'
-
-
 def base_messages():
     """The shared start of every conversation: the system prompt and the examples as earlier turns."""
-    prompt = SYSTEM_PROMPT if PLANNER == 'v4' else SYSTEM_PROMPT.replace('\nAnswer in exactly', RULE_7 + '\nAnswer in exactly')
-    messages = [{'role': 'system', 'content': prompt}]
+    messages = [{'role': 'system', 'content': SYSTEM_PROMPT}]
     for _, request, concepts, exclude, query in EXAMPLES:
         answer = f'Concepts: {concepts}\nExclude: {exclude}\nQuery: {query}'
-        messages += [{'role': 'user', 'content': request_message(request)}, {'role': 'assistant', 'content': answer}]
+        messages += [{'role': 'user', 'content': request}, {'role': 'assistant', 'content': answer}]
     return messages
 
 
@@ -408,8 +347,7 @@ def write_queries(conversations, llm, boolean_cli, max_retries=MAX_RETRIES):
 def plan(requests, llm, boolean_cli, max_retries=MAX_RETRIES):
     """E1. requests: [(query_id, text)]. Returns (result, conversations): result as in write_queries, and the
     conversations (without the last answer), which E2 continues."""
-    conversations = {qid: base_messages() + [{'role': 'user', 'content': request_message(text)}]
-                     for qid, text in requests}
+    conversations = {qid: base_messages() + [{'role': 'user', 'content': text}] for qid, text in requests}
     return write_queries(conversations, llm, boolean_cli, max_retries), conversations
 
 
@@ -474,66 +412,30 @@ def set_sizes(pairs, boolean_cli):
         return {line.split('\t')[0]: int(line.split('\t')[1]) for line in f if line.strip()}
 
 
-RELAX_MESSAGE_V5 = ('This query matched {size} documents, too few. The request was: "{request}"\nDocuments in the '
-                    'corpus that contain each part of your query: {counts}.\nWrite a broader query for this request: '
-                    'replace or drop parts that occur in no or very few documents, add variants and synonyms, shorten '
-                    'phrases. With 3 concepts you may also require any 2 of them: (+ (^ A B) (^ A C) (^ B C)). Keep '
-                    'every exclusion (- ...) and every term the request requires. Answer again in the same three '
-                    'lines.')
-
-
 def to_query(node):
-    """parse_tree's lists back to query text."""
+    """parse_tree's lists back to query text (used by api/combine_e4_not.py)."""
     return node if isinstance(node, str) else '(' + ' '.join([node[0]] + [to_query(c) for c in node[1:]]) + ')'
 
 
-def part_counts(query, boolean_cli):
-    """v5 feedback: 'part: N' for every word or phrase of the query and every operand of its top AND (or of the
-    AND inside a top NOT), with N the number of corpus documents that match it."""
-    tree = parse_tree(query)
-    parts = []
-
-    def leaves(n):
-        return [n] if isinstance(n, str) else [leaf for child in n[1:] for leaf in leaves(child)]
-
-    top = tree[1] if isinstance(tree, list) and tree[0] == '-' else tree
-    if isinstance(top, list) and top[0] == '^':
-        parts += [to_query(c) for c in top[1:] if not isinstance(c, str)]
-    parts += [leaf for leaf in leaves(tree) if leaf not in parts]
-    sizes = set_sizes([(str(i), p) for i, p in enumerate(parts)], boolean_cli)
-    return '; '.join(f'{p}: {sizes.get(str(i), 0)}' for i, p in enumerate(parts))
-
-
-def relax(first, conversations, llm, boolean_cli, rounds=MAX_RELAX_ROUNDS, requests=None):
-    """E2 from E1's result and conversations (plan). v4: for each valid E1 query with an empty set, up to `rounds`
-    rounds in which the model is asked for a broader query; the first non-empty set ends them. v5: also sets smaller
-    than MIN_SET, with the v5 message (requests: {query_id: text}); the E2 query is the OR of E1's query and the
-    relaxed one, so E1's documents stay, and the rounds end once that has MIN_SET documents. Both: a relaxed query
-    that drops a word E1 excluded is rejected. Returns {query_id: {'query' (E2's), 'ok', 'e1_query', 'e1_size',
+def relax(first, conversations, llm, boolean_cli, rounds=MAX_RELAX_ROUNDS):
+    """E2 from E1's result and conversations (plan). For each valid E1 query with an empty set: up to `rounds`
+    rounds in which the model is asked for a broader query; the first non-empty set ends them. A relaxed query that
+    drops a word E1 excluded is rejected. Returns {query_id: {'query' (E2's), 'ok', 'e1_query', 'e1_size',
     'rounds': [{'attempts', 'query', 'ok', 'rejected', 'size'}]}}."""
-    v5 = PLANNER == 'v5'
-    target = MIN_SET if v5 else 1
     valid = [qid for qid in first if first[qid]['ok']]
     e1_sizes = set_sizes([(qid, first[qid]['query']) for qid in valid], boolean_cli)
     result = {qid: {'query': first[qid]['query'], 'ok': first[qid]['ok'], 'e1_query': first[qid]['query'],
                     'e1_size': e1_sizes.get(qid), 'rounds': []} for qid in first}
-    pending = [qid for qid in valid if e1_sizes[qid] < target]
+    pending = [qid for qid in valid if e1_sizes[qid] == 0]
     note = {qid: '' for qid in pending}
     last_answer = {qid: first[qid]['attempts'][-1]['answer'] for qid in pending}
-    last_query = {qid: first[qid]['query'] for qid in pending}
-    size_now = {qid: e1_sizes[qid] for qid in pending}
     for r in range(rounds):
         if not pending:
             break
-        print(f'  relaxation round {r + 1}: {len(pending)} queries with fewer than {target} documents', flush=True)
+        print(f'  relaxation round {r + 1}: {len(pending)} empty queries', flush=True)
         for qid in pending:
-            if v5:
-                message = RELAX_MESSAGE_V5.format(size=size_now[qid], request=requests[qid],
-                                                  counts=part_counts(last_query[qid], boolean_cli))
-            else:
-                message = RELAX_MESSAGE
             conversations[qid] += [{'role': 'assistant', 'content': last_answer[qid]},
-                                   {'role': 'user', 'content': note[qid] + message}]
+                                   {'role': 'user', 'content': note[qid] + RELAX_MESSAGE}]
         written = write_queries({qid: conversations[qid] for qid in pending}, llm, boolean_cli)
         accepted = []
         for qid in pending:
@@ -541,7 +443,6 @@ def relax(first, conversations, llm, boolean_cli, rounds=MAX_RELAX_ROUNDS, reque
             last_answer[qid] = w['attempts'][-1]['answer']
             entry = {'attempts': w['attempts'], 'query': w['query'], 'ok': w['ok'], 'rejected': None, 'size': None}
             if w['ok']:
-                last_query[qid] = w['query']
                 dropped = sorted(excluded_words(result[qid]['e1_query']) - excluded_words(w['query']))
                 if dropped:
                     entry['rejected'] = f'dropped the exclusion of: {" ".join(dropped)}'
@@ -550,21 +451,14 @@ def relax(first, conversations, llm, boolean_cli, rounds=MAX_RELAX_ROUNDS, reque
                     note[qid] = ''
                     accepted.append(qid)
             result[qid]['rounds'].append(entry)
-
-        def combined(qid):
-            q = written[qid]['query']
-            return f'(+ {result[qid]["e1_query"]} {q})' if v5 and e1_sizes[qid] > 0 else q
-
-        sizes = set_sizes([(qid, combined(qid)) for qid in accepted], boolean_cli)
+        sizes = set_sizes([(qid, written[qid]['query']) for qid in accepted], boolean_cli)
         next_pending = []
         for qid in pending:
             entry = result[qid]['rounds'][-1]
             if qid in sizes:
                 entry['size'] = sizes[qid]
-                if not v5 or sizes[qid] > e1_sizes[qid]:
-                    result[qid]['query'] = combined(qid)
-                size_now[qid] = sizes[qid]
-            if sizes.get(qid, size_now[qid]) < target:
+                result[qid]['query'] = written[qid]['query']
+            if sizes.get(qid, 0) == 0:
                 next_pending.append(qid)
         pending = next_pending
     return result

@@ -53,7 +53,6 @@ evaluated the same way, as long as it writes that file.
 | `results/pyserini_thresholds.md` | Pre-registration of the engine check, with its results | BUILT |
 | `results/` | Run files and result files | BUILT |
 | `api/agent.py` | The LLM planner (writes Boolean queries) | PLANNED (empty file) |
-| `_phase0_reference/` | An older, bigger engine (stemmer, stopwords). Not built, kept only for reference | — |
 | `venv/` | The Python environment to use: `venv\Scripts\python.exe` (has pyserini, ir_measures, numpy) | — |
 
 ---
