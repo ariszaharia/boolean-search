@@ -1,7 +1,8 @@
 # How the project works (everything after the engine)
 
-Written 2026-10-27. The C++ engine (parser, index, BM25) is assumed known and is not explained here.
-Each part is marked **BUILT** or **PLANNED**. For the order of the remaining work, see `PROGRESS.md`.
+Written 2026-10-27, brought up to date 2026-11-27. The C++ engine (parser, index, BM25) is assumed known and is
+not explained here, except for SSR (section 9.6). For the history of every decision and every result, see
+`PROGRESS.md`; for the final numbers, `results/analysis/confirmatory.md`.
 
 ---
 
@@ -16,10 +17,12 @@ same answer key. All the code after the engine exists to make that comparison fa
                                          |
         +--------------------------------+--------------------------------+
         |                                |                                |
-  Baselines, no LLM                Boolean systems                   (later) reranker
+  Baselines, no LLM                Boolean systems (GPT-6 Luna)       reranker (MedCPT)
   B1 BM25 stemmed (Pyserini)       E0 flat AND of the words           reorders the top N
   B2 BM25 exact (our engine)       E1 LLM writes a Boolean query      of every system
-  B3 dense (embedding model)       E2 E1 + relaxation loop
+  B3 dense (TAS-B)                 E2 E1 + relaxation loop
+                                   E3 E1 ranked by SSR
+                                   E4 search agent (many calls)
         |                                |                                |
         +---------------> run file (one ranked list per question) <-------+
                                          |
@@ -40,20 +43,59 @@ evaluated the same way, as long as it writes that file.
 
 ## 2. Where things are
 
-| Path | What it is | Status |
-|---|---|---|
-| `api/prep_scifact.py` | Downloads the SciFact documents and writes `data/scifact.tsv` | BUILT |
-| `api/prep_qrels.py` | Downloads the SciFact answer key and writes `data/scifact_qrels_{train,test}.tsv` | BUILT |
-| `api/baseline_pyserini.py` | Pyserini side of the engine check (unstemmed BM25) | BUILT |
-| `cpp/src/search_cli.cpp` | Runs the engine on a file of queries and writes a run file | BUILT |
-| `cpp/src/why_not_cli.cpp` | `why-not(doc, query)`: why a document is or is not in a query's result (H5) | BUILT |
-| `api/compare_runs.py` | Engine-versus-Pyserini check (agreement of rankings) | BUILT |
-| `harness/` | Scoring and statistics for every experiment | BUILT (partly) |
-| `hypotheses.md` | The pre-registration: what is tested and how, written before any experiment | BUILT, predictions still blank |
-| `results/pyserini_thresholds.md` | Pre-registration of the engine check, with its results | BUILT |
-| `results/` | Run files and result files | BUILT |
-| `api/agent.py` | The LLM planner (writes Boolean queries) | PLANNED (empty file) |
-| `venv/` | The Python environment to use: `venv\Scripts\python.exe` (has pyserini, ir_measures, numpy) | — |
+Everything below is built. Run Python from the project folder with `venv\Scripts\python.exe`.
+
+**Data and the engine check**
+
+| Path | What it is |
+|---|---|
+| `api/prep_scifact.py`, `api/prep_qrels.py`, `api/prep_queries.py` | Download SciFact and write `data/scifact.tsv`, the qrels and the query files |
+| `api/greek.py` | Greek letters written as names, in the corpus and in queries (decision D7) |
+| `api/baseline_pyserini.py`, `api/compare_runs.py` | The engine check against Pyserini (section 5); `baseline_pyserini.py` also holds shared paths and the tokenizer |
+| `results/pyserini_thresholds.md` | Pre-registration of the engine check, with its results |
+
+**The engine (`cpp/`, built with CMake, see the top of `cpp/CMakeLists.txt`)**
+
+| Path | What it is |
+|---|---|
+| `cpp/src/search_cli.cpp` | Runs `(+ words)` queries with BM25 (B2) |
+| `cpp/src/boolean_cli.cpp` | Runs any Boolean query: run file, set sizes, failures; ranking `bm25` (default) or `ssr` |
+| `cpp/src/ssr_scorer.cpp` | Shortest substring ranking (section 9.6) |
+| `cpp/src/why_not_cli.cpp` | `why-not(doc, query)` for many requests (section 9.5) |
+| `cpp/tests/` | Six test programs (`ctest --test-dir build`) |
+
+**Systems**
+
+| Path | What it is |
+|---|---|
+| `api/run_baselines.py` | B1, B2, B3, E0 and the B1-lit check |
+| `api/planner.py` | The planner: model entries, the cache, cost limits, the prompt, E1 (`plan`) and E2 (`relax`) |
+| `api/run_planner.py` | Runs E1 or E2 on a split (or a development sample) and writes the run files |
+| `api/run_e3.py` | E3: E1's queries ranked by SSR |
+| `api/agent.py`, `api/run_agent.py` | E4, the search agent (section 9.7) |
+| `api/rerank.py`, `colab/rerank.ipynb` | MedCPT reranking of any run file, locally or on a Colab GPU |
+| `api/dev_sample.py` | The development claims (train only, fixed shuffle, parts a, b, c) |
+| `api/targeted*.py` | How the targeted set was built (section 9.4) |
+
+**Analysis**
+
+| Path | What it is |
+|---|---|
+| `harness/` | Scoring and statistics (section 6); `harness/final_analysis.py` gives every confirmatory test with Holm |
+| `api/combine_e4_not.py`, `api/leakage_probe.py` | Two exploratory analyses (section 9.8) |
+| `hypotheses.md` | The pre-registration, with its clarifications and deviations |
+
+**Results (`results/`)**
+
+| Path | What it is |
+|---|---|
+| `runs/` | Every run file, with a `.json` of its settings and git commit; E runs also have set sizes, failures and plans |
+| `metrics/`, `comparisons/` | Output of `harness.evaluate` and `harness.compare` |
+| `analysis/confirmatory.md` | The final tables (regenerated by `harness.final_analysis`) |
+| `exploratory/` | Results that are not pre-registered tests |
+| `llm_cache/<model>.jsonl` | Every model call ever made: messages, answer, tokens, cost (also the record of spending) |
+| `prompt_dev_log.tsv`, `agent_dev_log.tsv` | One line per development run of the planner and of the agent |
+| `dev/`, `work/` | Development runs and caches (indexes, embeddings, reranker scores); not committed |
 
 ---
 
@@ -81,7 +123,8 @@ SciFact comes with two official sets of queries. The project uses them like this
   the relaxation rules, sanity checks. Looking at results here is fine.
 - **test (300 queries) = held out.** Only for the final numbers in the thesis, after everything is frozen.
   If you tune anything after looking at test results, the test numbers no longer show how well the method
-  works on unseen questions; they only show how well it was fitted to those 300.
+  works on unseen questions; they only show how well it was fitted to those 300. Test was used once, on
+  2026-11-26, after the planner, the agent and the reranker were fixed in `hypotheses.md`.
 
 ---
 
@@ -275,8 +318,16 @@ interval and p-value, and save them under `by_group`:
 The pooled numbers are still printed, labelled "not used by any hypothesis". A trap group with 1 query has no
 meaningful interval; it is there only so the split by kind is visible.
 
-### 6.11 Not built yet
-- **The final Holm script**, which collects the p-values of all confirmatory tests. Waits for the experiments.
+### 6.11 `harness/final_analysis.py`: every confirmatory test at once
+```
+venv\Scripts\python.exe -m harness.final_analysis
+```
+Recomputes every confirmatory test from the committed run files, exactly as `hypotheses.md` defines it (primary
+and second analysis, N = 100), applies Holm once over the tests decided by a p-value (H1, H2, H3 for exclusions and
+for identifiers, H4 on test and on the targeted set, H9), decides H7 by its equivalence interval and H8 by its ratio
+threshold (with a bootstrap interval of the ratio), and lists the exploratory comparisons separately, never in
+Holm. It writes `results/analysis/confirmatory.md` (tables) and `confirmatory.json` (every number). Rerunning it
+gives the same numbers. When H5 or H6 are run, they join the Holm family and the script is run again.
 
 ---
 
@@ -284,16 +335,19 @@ meaningful interval; it is there only so the split by kind is visible.
 
 | Name | What it is | Needs an LLM | Status |
 |---|---|---|---|
-| **B1** | BM25 with Pyserini's default analyzer (stemming and stopword removal), on an index built from our own `data/scifact.tsv` | no | built (`api/run_baselines.py`); full run waits for the predictions |
-| **B2** | BM25 exact match: our engine with `(+ all question words)` | no | built (`api/run_baselines.py`); full run waits for the predictions |
-| **B3** | Dense retrieval: TAS-B (`msmarco-distilbert-base-tas-b`) turns questions and documents into vectors; the nearest vectors win | no | model chosen 2026-11-14, not run yet |
-| **B4** | BM25 on the question plus extra words suggested by the LLM | yes | PLANNED |
-| **B5** | Dense retrieval on the same LLM-expanded question | yes | PLANNED |
-| **E0** | Engine, flat AND of exactly B2's words (`(^ w1 w2 ...)`), no LLM | no | DONE (train, targeted) |
-| **E1** | The LLM writes one Boolean query (`(^ ...)`, `(- ...)`, phrases); the engine runs it | yes | PLANNED |
-| **E2** | E1 plus the relaxation loop (section 9.2) | yes | PLANNED |
-| **E3** | E1 ranked by SSR instead of BM25 (stretch) | yes | PLANNED |
-| **E4** | E2 as a multi-call agent (stretch) | yes | PLANNED |
+| **B1** | BM25 with Pyserini's default analyzer (stemming and stopword removal), on an index built from our own `data/scifact.tsv` | no | run on train, targeted, test |
+| **B2** | BM25 exact match: our engine with `(+ all question words)` | no | run on train, targeted, test |
+| **B3** | Dense retrieval: TAS-B (`msmarco-distilbert-base-tas-b`, the standard BEIR dense baseline) turns questions and documents into vectors; the nearest (dot product) win | no | run on train, targeted, test |
+| **B4** | BM25 on the question plus extra words suggested by the LLM | yes | not built (no hypothesis uses it) |
+| **B5** | Dense retrieval on the same LLM-expanded question | yes | not built (no hypothesis uses it) |
+| **E0** | Engine, flat AND of exactly B2's words (`(^ w1 w2 ...)`), no LLM | no | run on train, targeted, test |
+| **E1** | The LLM writes one Boolean query (`(^ ...)`, `(- ...)`, phrases); the engine runs it | yes (Luna) | run on targeted, test |
+| **E2** | E1 plus the relaxation loop (section 9.2) | yes (Luna) | run on targeted, test |
+| **E3** | E1's queries ranked by SSR instead of BM25 (H9) | no new calls | run on targeted, test |
+| **E4** | The search agent (section 9.7; H8) | yes (Luna) | run on targeted, test |
+
+B1, B2, B3 and E2 are also reranked with MedCPT at N = 100 and 30 where a hypothesis needs it (the targeted set
+for H3, test for H7); E4 is reranked too, for reporting only.
 
 **Why B1 versus B2:** they get the same words, the same documents and the same BM25 settings, and differ only
 in the analyzer. B1 stems ("cells" = "cell") and ignores stopwords ("the", "of"); B2 does neither. The gap
@@ -330,8 +384,9 @@ pass criteria *before* running, and committing them to git (which timestamps the
 edited. Anything that has to change goes under "Deviations" at the bottom, with the date and the reason
 (as was done for Deviation 1 of the engine check).
 
-**Still to do before any experiment:** fill in every "MY PREDICTION" line, the margin M (H7), the kappa
-threshold (H5), the percentage in H8 and "Committed on"; add how the p-value is computed (section 6.5); commit.
+This was done: `hypotheses.md` was completed with every prediction and committed on 2026-10-27 (9cf3a80), before
+any experiment. Everything fixed later (the dense model, the reranker, the planner model, the agent) was added as a
+dated clarification before the runs it concerns, and pushed to GitHub so the timestamp is public.
 
 ### The hypotheses in one line each
 - **H1:** on constraint queries, the Boolean set is more precise than BM25 or dense.
@@ -346,28 +401,34 @@ threshold (H5), the percentage in H8 and "Committed on"; add how the p-value is 
 
 ---
 
-## 9. Planned components
+## 9. Components
 
-### 9.1 The planner ("the agent", `api/agent.py`)
-The part that turns a natural-language question into a Boolean query for the engine.
+### 9.1 The planner (`api/planner.py`, E1)
+The part that turns a natural-language request into a Boolean query for the engine.
 
-- **Input:** a question, e.g. *"Does vitamin D reduce fractures in elderly people, excluding studies on children?"*
+- **Input:** a request, e.g. *"Deletion of ATM and Rad3 related protein leads to acute tissue loss. Ignore any work
+  done in rats."*
 - **Output:** a query in the engine's language, e.g.
-  `(- (^ "vitamin d" (+ fracture fractures) (+ elderly aged)) children)`.
-- **How:** an OpenAI model with a **pinned version** (so it cannot change under you), **temperature 0** (as
-  repeatable as possible), and a prompt containing the grammar and a few worked examples.
-- **Retries:** if the engine rejects the query with a `ParseError`, the error message (which includes the
-  position) is sent back and the model tries again, a limited number of times. Failures are logged separately:
-  a query that never parsed must not look like a query with zero results.
-- **Caching and logging:** every prompt and answer is saved. Reruns cost nothing and are exactly reproducible,
-  and the logs are the evidence for the error analysis (H5).
-- **Tuning on train only.**
+  `(- (^ (+ atr "atm and rad3 related") (+ deletion knockout)) (+ rat rats))`. The model answers in three lines
+  (Concepts, Exclude, Query); only the query is used.
+- **Model:** OpenAI **GPT-6 Luna**, reasoning effort none, temperature 0, seed 1, at most 200 answer tokens. No dated
+  snapshot exists, so it is pinned by its id plus the creation time OpenAI reports, checked before every run.
+  Chosen on 60 development claims against Qwen2.5-7B, Gemini 3.5 Flash-Lite and GPT-6 Sol (hypotheses.md,
+  clarification of 2026-11-14).
+- **Prompt (v4, fixed):** the grammar, six rules (2 or 3 concepts, OR of variants, no general words, a negation in
+  the claim is not a NOT, NOT only when asked, a required term is ANDed) and five worked examples from train claims.
+- **Retries:** if the engine rejects the query (`ParseError`), the message is sent back, at most twice. A query
+  that never parses is a failed query, logged separately, never confused with an empty result.
+- **Caching and logging:** every call is saved in `results/llm_cache/<model>.jsonl` with its tokens and cost.
+  Reruns cost nothing and give exactly the same queries. `planner.py` also stops a run before it overspends: a cap
+  per run and a cap on everything ever logged.
 
 ### 9.2 The relaxation loop (E2)
-A strict Boolean query often matches nothing. The relaxation loop then loosens it step by step, for example
-by asking the LLM for a less strict version, turning an AND into an OR, or dropping the least important
-condition, until the result is non-empty. H4 measures how much recall this wins back and how much precision
-it costs.
+A strict Boolean query often matches nothing (on test: 158 of 300). E2 then continues the same conversation: the
+model is told that its valid query matched no documents and is asked for a broader one (fewer AND parts, more
+variants, shorter phrases), at most 2 rounds; the first non-empty set ends them. Every excluded word of E1's query
+must still be excluded, checked mechanically, or the relaxed query is rejected. Only empty sets are relaxed; where
+E1 found something, E2 = E1. H4 measures how much recall this wins back.
 
 ### 9.3 The reranker
 A model that reads the question and each candidate document together, and scores how well they match. It is
@@ -383,16 +444,20 @@ the request as written (constraint sentence included), never the Boolean query. 
 searches). `--sample 200` reranks only 200 development claims (`api/dev_sample.py`, never a base claim of the
 targeted set) into `results/dev/`, to try a reranker quickly against the pass rule in PROGRESS.md.
 **The reranker of H3 and H7 is `medcpt`**, the only one that passed the rule (fixed in hypotheses.md,
-clarification of 2026-10-28). Only an entry marked as fixed there may rerank the targeted set or test; the others
+clarification of 2026-10-28; rule (1) rechecked with B3 = TAS-B on 2026-11-24 and passed). Only an entry marked as fixed there may rerank the targeted set or test; the others
 rerank train only. Jev, if added later, is exploratory. Scores are cached in
 `results/work/rerank_cache/`, one file per device. On this laptop's CPU it scores about 19 pairs a second (809
 train queries at N = 100 take over an hour per system), so long runs go to a free Colab GPU: open
 `colab/rerank.ipynb` in Colab (push first; it clones the repository), run all, unzip the downloaded
-`rerank_results.zip` into the project folder. The run's `.json` records the device.
+`rerank_results.zip` into the project folder. The run's `.json` records the device. Windows usually unpacks
+the zip into a `rerank_results` subfolder: move the run files into `results/runs/` (or `results/dev/`) and
+append the cache file's lines to the local cache file rather than overwriting it.
 
 ### 9.4 The targeted constraint query set
 SciFact's own queries rarely contain exclusions or exact identifiers, which are exactly where Boolean should
-win. So about 100 extra queries are written, in four categories:
+win. So 100 extra queries were made from train claims (drafted by Claude with fixed mechanical rules for the first
+three categories, reviewed and frozen by Aris on 2026-10-27 before any system ran on them; hypotheses.md,
+Deviations, D5), 25 in each of four categories:
 
 1. **Exclusions** ("... but not in mice")
 2. **Exact phrases and entities** (a named gene, a drug name)
@@ -433,39 +498,68 @@ size and rank matched `boolean_cli`. A real example (dev E1, claim 43):
     [no]  infectivity  --  not in the document (it is in 12 documents of the corpus)
 ```
 
-### 9.6 Stretch items (cut from the bottom if time runs short)
-SSR ranking (E3, H9), TREC-COVID (a larger dataset, for latency and size), the multi-call agent (E4, H8),
-end-to-end answers and their faithfulness (H6).
+### 9.6 SSR ranking (`cpp/src/ssr_scorer.cpp`, E3)
+Shortest substring ranking, as in Clarke & Smucker ("Boolean queries are all you need?", arXiv 2607.11362). In
+each document the engine finds every shortest stretch of words that satisfies the query (a stretch that contains
+no shorter one that does). Each stretch adds 1 / (42 + its length) to the document's score, so documents where the
+query's parts occur close together, and often, come first. It uses no global statistics. Per operator: a word is
+each of its positions; a phrase each exact occurrence; OR the stretches of all its parts without those that contain
+another; AND the shortest stretches holding one stretch of every part; NOT works per document, as in the engine.
+`boolean_cli ... ssr` uses it; E3 ranks E1's sets with it, and the agent's searches are ranked with it.
+`cpp/tests/test_ssr.cpp` checks it on cases worked out by hand.
+
+### 9.7 The search agent (`api/agent.py`, E4)
+The paper's agent, adapted to SciFact (hypotheses.md, clarification of 2026-11-24). The model (Luna) gets the
+request and an append-only transcript and answers every step with one JSON action: run a new Boolean query, see
+more results of an earlier query, read a whole abstract, or stop. Each search shows the next 5 abstracts it has not
+graded, as their first 60 words, ranked by SSR. The model grades every abstract it is shown from 0 to 3 with a short
+reason; the final ranking is the graded abstracts by grade, then by the order they were found. At most 10 calls and
+30 graded abstracts per request; it is not told how many calls are left, so one run at 10 calls also gives the
+results at budgets 3 and 5 (H8). The relevance judgments are never shown to the model. Its prompt went through two
+development versions on train (`results/agent_dev_log.tsv`); version 2 tells it to start broad and narrow only
+when a search has many results.
+
+### 9.8 Exploratory analyses (not pre-registered tests, never in Holm)
+- `api/combine_e4_not.py`: the agent's ranking minus every abstract that matches what E2's query excluded (the
+  model's own NOT), with and without reranking.
+- `api/leakage_probe.py`: asks the model, without search, for the title of each claim's evidence paper, to see how
+  much of SciFact it already knows; then scores every system on known and unknown claims separately.
+- Model checks: Sol instead of Luna for E2 and for the agent, on development claims.
+
+### 9.9 Not done
+H5 (needs a second annotator), H6 (answer faithfulness, stretch), TREC-COVID (a larger dataset, stretch), B4 and
+B5 (no hypothesis uses them).
 
 ---
 
-## 10. How one experiment will run, end to end (example: H3)
+## 10. How one experiment runs, end to end (example: H3)
 
 1. Each system (E2, B1, B3) runs on the targeted set and writes a run file.
 2. Each run is cut to its top N; the reranker reorders those N; the reranked lists are written as new run files.
 3. `harness.compare --a E2_reranked.tsv --b B1_reranked.tsv` gives, for nDCG@10, the per-query differences,
    the 95% interval and the p-value, separately for the exclusion queries and the identifier queries,
    for both empty-result analyses.
-4. The p-values of all confirmatory tests (H1 to H5, H7) go into `stats.holm` together.
+4. `harness.final_analysis` puts the p-values of all confirmatory tests into `stats.holm` together (section 6.11).
 5. H3 counts as supported only if at least one category stays significant after Holm. The result is compared
-   with your prediction and with the reference estimate, and both are reported.
+   with the prediction and with the reference estimate, and both are reported. (It was not: H3 is falsified.)
 
 ---
 
 ## 11. Status at a glance
 
-| Part | Status |
+| Part | Status (2026-11-27) |
 |---|---|
 | Engine + Pyserini check | done |
-| Data, train/test qrels | done |
-| Harness: scoring (nDCG@10, R@30, R@100), statistics, empty results | done, 36 self-tests pass |
-| Harness: precision, categories, final Holm script | not built (waiting, see 6.10) |
-| Pre-registration (`hypotheses.md`) | committed, but predictions still blank |
-| Baselines B1, B2, B3 on train | next (after the predictions) |
-| Targeted query set | before the planner |
-| Planner, relaxation (E1, E2) | after the targeted set |
-| Reranker, `why-not`, ablations, error analysis | after that |
-| Stretch items, thesis text | last; deadline June 2027 |
+| Data, train/test qrels, targeted set | done (targeted set frozen 2026-10-27) |
+| Harness: scoring, statistics, precision, groups, final analysis with Holm | done, all self-tests pass |
+| Pre-registration (`hypotheses.md`) | committed 2026-10-27, clarifications added before the runs they concern |
+| Baselines B1, B2, B3, E0 | done (train, targeted, test) |
+| E1, E2, E3, E4 with Luna | done (targeted, test) |
+| Reranking with MedCPT | done (targeted, test) |
+| H1, H2, H3, H4, H7, H8, H9 | done: see `results/analysis/confirmatory.md` |
+| `why-not`, exploratory analyses (agent + NOT, leakage probe, Sol checks) | done |
+| H5 (second annotator), H6 (stretch), TREC-COVID (stretch) | not done |
+| Thesis text | next; deadline June 2027 |
 
 ---
 
@@ -497,4 +591,9 @@ end-to-end answers and their faithfulness (H6).
 | **zero-result rate** | The share of queries for which a Boolean system returned nothing. |
 | **relaxation** | Loosening a Boolean query that matched nothing until it matches something. |
 | **temperature 0** | LLM setting that makes the answers as repeatable as possible. |
-| **pinned model version** | Naming an exact model snapshot, so the LLM cannot change during the project. |
+| **pinned model version** | Naming an exact model version, so the LLM cannot change during the project. For OpenAI's GPT-6 models, which have no dated snapshot, the id plus OpenAI's creation time, checked before every run. |
+| **planner** | The LLM that writes the Boolean query (E1, E2); here GPT-6 Luna. |
+| **agent** | E4: the LLM searches several times, reads and grades results, and rewrites its queries. |
+| **SSR** | Shortest substring ranking: documents score higher the shorter and more numerous their matching stretches are. |
+| **exploratory** | A result that was not a pre-registered test (for example decided after seeing data); reported, never in Holm. |
+| **knowledge leakage** | The risk that the LLM already saw the benchmark during training and recalls answers instead of searching. |
