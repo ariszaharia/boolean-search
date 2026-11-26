@@ -394,6 +394,17 @@ test runs NOT made yet, they come at the end with the final runs):
         [+0.079, +0.139] on test, +0.092 on targeted, i.e. no precision cost as measured: in this comparison an E1
         query with an empty set has precision 0, so recovering it raises both recall and precision. The predicted
         cost (3 to 8 points) does not appear.
+      - E4 (agent v2, Luna) on test: 1,555 calls, $0.301, 5.2 calls per request (stopped by itself in 261 of 300).
+        nDCG@10 / R@100, not reranked: budget 3 0.637 / 0.683, budget 5 0.694 / 0.760, budget 10 0.725 / 0.808
+        (E2 0.581 / 0.685). E4 (10 calls) minus B1 +0.042 [+0.004, +0.080] p 0.031; minus B3 +0.083 [+0.038,
+        +0.128] p 0.0003; minus E2 +0.144 [+0.101, +0.187] p 0.0001. These are reported, not tests (H8 compares
+        E2 with E4); the agent is the best system on the standard test claims, above BM25 and dense, before
+        reranking.
+      - H8 (E2's nDCG@10 divided by E4's, test, not reranked; primary budget 10): 0.913 at 3 calls, 0.837 at 5,
+        0.802 at 10. Falsified if below 0.80: at 0.802 H8 HOLDS, by the narrowest margin (prediction about 0.90).
+        Bootstrap 95% interval of the ratio at 10 calls (paired, 10,000 resamples, seed 20261015): [0.746, 0.857];
+        46% of resamples fall below 0.80, so the verdict is a coin flip and is reported as such. nDCG@10 keeps
+        rising with the budget (0.637 -> 0.694 -> 0.725), but more slowly.
    g. SSR ranking (E3, H9) and the search agent (E4, H8), built 2026-11-14:
       - cpp/src/ssr_scorer.cpp: shortest substring ranking (Clarke & Smucker 2026, arXiv 2607.11362, section 3):
         per document the shortest stretches satisfying the query, score = sum of 1 / (42 + q - p). NOT works per
